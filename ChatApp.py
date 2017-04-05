@@ -14,6 +14,11 @@ from kivy.uix.carousel import Carousel
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
+#####################################
+
+from ClientSocket import *
+from Contact import *
+
 #from kivy.core.window import Window
 #Window.size = (350, 600)
 
@@ -313,67 +318,6 @@ class ScreenSlider(Carousel):
 
 #########################################################
 
-class Contact:
-    def __init__(self, name, status, id):
-        self.__name = name
-        self.__status = status
-        self.__id = id
-
-    def getName(self):
-        return self.__name
-
-    def getStatus(self):
-        return self.__status
-
-    def getID(self):
-        return self.__id
-
-class ClientSocket(threading.Thread):
-    def __init__(self, ip, port, name="Name", **kwargs):
-        threading.Thread.__init__(self)
-        self.tLock = threading.Lock()
-        self.shutdown = False
-
-        self.clientName = name
-        self.clientMessage = ""
-
-        self.ip = ip
-        self.port = port
-        self.targetServer = (ip, port)
-
-    def connect(self):
-        self.soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.soc.connect(self.targetServer)
-        self.soc.setblocking(0)
-
-        ### Create a receiving thread
-        self.recvThread = threading.Thread(target=self.receving, args=("RecvThread",self.soc))
-        self.recvThread.start()
-
-    def setText(self, message):
-        self.clientMessage = message
-
-    def receving(self, name, sock):
-        while not self.shutdown:
-            try:
-                self.tLock.acquire()
-                while True:
-                    data, addr = sock.recvfrom(1024)
-                    print(str(data))
-            except:
-                pass
-            finally:
-                self.tLock.release()
-
-    def run(self):
-        while self.clientMessage != "q":
-            string = self.clientName + ": " + self.clientMessage
-            if self.clientMessage != "":
-                self.soc.sendto(string.encode("utf-8"), self.targetServer)
-            self.tLock.acquire()
-            self.tLock.release()
-            self.clientMessage = ""
-            time.sleep(0.1)
 
 
 class WIChat(ScreenManager):
