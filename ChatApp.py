@@ -14,6 +14,16 @@ from kivy.uix.carousel import Carousel
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
+from kivy.properties import *
+
+#####################################
+global WIApp
+
+from ServerSocket import *
+from ClientSocket import *
+from Contact import *
+
+
 #from kivy.core.window import Window
 #Window.size = (350, 600)
 
@@ -134,6 +144,7 @@ Builder.load_string('''
     Button:
         text: 'Setting'
         id: settingButton
+        on_release: app.root.mainUIScreen.test()
 
 
 <ContactComponent@BoxLayout>:
@@ -244,7 +255,7 @@ Builder.load_string('''
                 id: sendButton
                 text: "SEND"
                 size_hint: .3, 1
-                on_release: app.root.mainUIScreen.clientSocket.setText(messageInput.text)
+                on_release: app.root.clientSocket.setText(messageInput.text)
 
 ''')
 
@@ -253,6 +264,8 @@ class StartupScreen(Screen):
         super(StartupScreen, self).__init__(**kwargs)
 
     def openHostPopup(self):
+        global WIApp
+
         notification = BoxLayout(orientation = "vertical")
         label = Label(text="Please turn on Hotspot before start hosting.")
         closeButton = Button(text="Close")
@@ -269,11 +282,7 @@ class StartupScreen(Screen):
         popup.open()
 
         closeButton.bind(on_press = popup.dismiss)
-        startHostButton.bind(on_press = self.startHosting)
-
-    def startHosting(self, instance):
-        pass
-
+        startHostButton.bind(on_press = WIApp.startHosting)
 
 class MainUIScreen(Screen):
     def __init__(self, **kwargs):
@@ -282,19 +291,23 @@ class MainUIScreen(Screen):
         self.listofScreen = ["contact", "history"]
         self.curIndxScreen = 0
 
-    def startClient(self, ip, port, username):
-        self.clientSocket = ClientSocket(ip, int(port), username)  ## Start client socket loop
-        self.clientSocket.connect()
-        self.clientSocket.start()
-
     def changeScreen(self, name):
         target_idx = self.listofScreen.index(name)
         self.screenSlider.load_slide(self.screenSlider.slides[target_idx])
+
+    def test(self):
+        pass
 
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
         super(ChatroomScreen, self).__init__(**kwargs)
+
+    def sendMessage1To1(self, thisClient, targetClient):
+        pass
+
+    def sendMessage1ToGroup(self, thisClient, groupID):
+        pass
 
 class ProfileArea(BoxLayout):
     pass
@@ -313,88 +326,45 @@ class ScreenSlider(Carousel):
 
 #########################################################
 
-class Contact:
-    def __init__(self, name, status, id):
-        self.__name = name
-        self.__status = status
-        self.__id = id
-
-    def getName(self):
-        return self.__name
-
-    def getStatus(self):
-        return self.__status
-
-    def getID(self):
-        return self.__id
-
-class ClientSocket(threading.Thread):
-    def __init__(self, ip, port, name="Name", **kwargs):
-        threading.Thread.__init__(self)
-        self.tLock = threading.Lock()
-        self.shutdown = False
-
-        self.clientName = name
-        self.clientMessage = ""
-
-        self.ip = ip
-        self.port = port
-        self.targetServer = (ip, port)
-
-    def connect(self):
-        self.soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.soc.connect(self.targetServer)
-        self.soc.setblocking(0)
-
-        ### Create a receiving thread
-        self.recvThread = threading.Thread(target=self.receving, args=("RecvThread",self.soc))
-        self.recvThread.start()
-
-    def setText(self, message):
-        self.clientMessage = message
-
-    def receving(self, name, sock):
-        while not self.shutdown:
-            try:
-                self.tLock.acquire()
-                while True:
-                    data, addr = sock.recvfrom(1024)
-                    print(str(data))
-            except:
-                pass
-            finally:
-                self.tLock.release()
-
-    def run(self):
-        while self.clientMessage != "q":
-            string = self.clientName + ": " + self.clientMessage
-            if self.clientMessage != "":
-                self.soc.sendto(string.encode("utf-8"), self.targetServer)
-            self.tLock.acquire()
-            self.tLock.release()
-            self.clientMessage = ""
-            time.sleep(0.1)
-
-
 class WIChat(ScreenManager):
+    username = StringProperty()
+    ip = StringProperty()
+    port = NumericProperty()
+
     def __init__(self, **kwargs):
         super(WIChat, self).__init__(**kwargs)
         self.startupScreen = self.startupScreen
         self.mainUIScreen = self.mainUIScreen
         self.chatroomScreen = self.chatroomScreen
+        self.tLock = threading.Lock()
 
-    def login(self):
+    def getInputStartup(self):
         self.username = self.startupScreen.nameInput.text
         self.ip = self.startupScreen.ipInput.text
         self.port = int(self.startupScreen.portInput.text)
 
+    def login(self):
+        self.getInputStartup()
         self.current = "MainUIScreen"
-        self.mainUIScreen.startClient(self.ip, self.port, self.username)
+        self.startClient(self.ip, self.port, self.username)
         self.mainUIScreen.profileArea.nameButton.text = self.username
+
+    def startHosting(self, instance):
+        self.getInputStartup()
+        self.serverSocket = ServerSocket(self.ip, self.port)
+        self.serverSocket.start()
+
+    def startClient(self, ip, port, username):
+        self.clientSocket = ClientSocket(ip, int(port), username)  ## Start client socket loop
+        self.clientSocket.connect()
+        self.clientSocket.start()
 
 class WIChatApp(App):
     def build(self):
-        return WIChat()
+        global WIApp
+        WIApp = WIChat()
+
+        return WIApp
 
     def on_pause(self):
         return True

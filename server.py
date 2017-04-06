@@ -1,7 +1,8 @@
 import socket
 import time
+import pickle
 
-host = "192.168.43.128"
+host = "127.0.0.1"
 port = 5000
 
 clients = []
@@ -22,11 +23,15 @@ while not quitting:
 
         if addr not in clients:
             clients.append(addr)
+            print(clients)
 
         print(time.ctime(time.time()) + str(addr) + ": :" + str(data))
 
         for client in clients:
-            s.sendto(data.decode("utf-8"), client)
+            s.sendto("Hello world".encode("utf-8"), client)
+
+
+
 
     except:
         pass
