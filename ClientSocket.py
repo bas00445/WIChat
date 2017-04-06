@@ -17,7 +17,7 @@ class ClientSocket(threading.Thread):
         self.targetServer = (ip, port)
 
     def connect(self):
-        self.soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.soc.connect(self.targetServer)
         self.soc.setblocking(1)
 

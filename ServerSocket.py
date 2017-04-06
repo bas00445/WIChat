@@ -16,9 +16,9 @@ class ServerSocket(threading.Thread):
         self.clientCollector = ClientCollector()
 
     def run(self):
-        self.start()
+        self.startServer()
 
-    def start(self):
+    def startServer(self):
         try:
             self.socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socketServer.bind(self.server)
