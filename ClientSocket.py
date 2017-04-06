@@ -17,13 +17,24 @@ class ClientSocket(threading.Thread):
         self.targetServer = (ip, port)
 
     def connect(self):
-        self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.soc.connect(self.targetServer)
-        self.soc.setblocking(0)
+        self.soc.setblocking(1)
+
+    def receving(self, name, sock):
+        while not self.shutdown:
+            self.tLock.acquire()
+            try:
+                data, addr = sock.recvfrom(1024)
+                if data != "":
+                    print(data)
+            except:
+                pass
+            finally:
+                self.tLock.release()
 
     def setText(self, message):
         self.clientMessage = message
-
 
     def run(self):
         while self.clientMessage != "q":

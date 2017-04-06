@@ -30,6 +30,9 @@ while not quitting:
         for client in clients:
             s.sendto("Hello world".encode("utf-8"), client)
 
+
+
+
     except:
         pass
 
