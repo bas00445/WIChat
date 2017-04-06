@@ -359,6 +359,15 @@ class WIChat(ScreenManager):
         self.clientSocket.connect()
         self.clientSocket.start()
 
+class TestThread(threading.Thread):
+    def __init__(self, **kwargs):
+        threading.Thread.__init__(self, **kwargs)
+
+    def run(self):
+        print("Output from TestThread:")
+        for i in range(10000):
+            print(i)
+
 class WIChatApp(App):
     def build(self):
         global WIApp
