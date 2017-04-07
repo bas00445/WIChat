@@ -1,6 +1,6 @@
 
 class ClientCollector:
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.socketList = []
         self.addressList = []
         self.groupIDList = []

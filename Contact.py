@@ -1,5 +1,5 @@
 class Contact:
-    def __init__(self, name, status, id):
+    def __init__(self, name, status, id, **kwargs):
         self.name = name
         self.status = status
         self.id = id

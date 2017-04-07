@@ -5,15 +5,17 @@ import time
 from Handler import *
 from ClientCollector import ClientCollector
 
+global clientCollector
+clientCollector = ClientCollector()
+
 class ServerSocket(threading.Thread):
     def __init__(self, ip, port, maximumClient = 10, **kwargs):
-        threading.Thread.__init__(self, **kwargs)
+        threading.Thread.__init__(self)
 
         self.ip = ip
         self.port = port
         self.server = ((ip, port))
         self.maximumClient = maximumClient
-        self.clientCollector = ClientCollector()
 
     def run(self):
         self.startServer()
@@ -35,15 +37,15 @@ class ServerSocket(threading.Thread):
                 clientSocket, addr = self.socketServer.accept()
 
                 ### Add an new address of the client
-                if clientSocket not in self.clientCollector.getSocketList():
-                    self.clientCollector.addAddress(addr)
-                    self.clientCollector.addSocket(clientSocket)
+                if clientSocket not in clientCollector.getSocketList():
+                    clientCollector.addAddress(addr)
+                    clientCollector.addSocket(clientSocket)
                     print("Append a new connection:", str(addr))
 
-                handler = Handler(clientSocket, addr, self.clientCollector)
+                handler = Handler(clientSocket, addr)
                 handler.start()
 
-                self.clientCollector.addHandler(handler)
+                clientCollector.addHandler(handler)
 
         except OSError:
             print("Server Down.")
