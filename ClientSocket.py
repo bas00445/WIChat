@@ -9,7 +9,6 @@ from ClientInformation import *
 class ClientSocket(threading.Thread):
     def __init__(self, ip, port, name="Name", **kwargs):
         threading.Thread.__init__(self)
-        self.tLock = threading.Lock()
         self.shutdown = False
         self.pauseMsg = True
 
@@ -20,28 +19,36 @@ class ClientSocket(threading.Thread):
         self.port = port
         self.targetServer = (ip, port)
 
+        self.dataIncome = None
+
     def connect(self):
         self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.soc.connect(self.targetServer)
         self.soc.setblocking(1)
 
-        self.recvThread = threading.Thread(target=self.receving, args=("RecvThread", self.soc))  ## Receiving Thread
+        self.recvThread = threading.Thread(target=self.receving)  ## Receiving Thread
         self.recvThread.start()
 
     def getAddr(self):
         return self.soc.getsockname()
 
-    def receving(self, name, sock):
+    def getDataIncome(self):
+        return self.dataIncome
+
+    def receving(self):
         while not self.shutdown:
-            self.tLock.acquire()
             try:
-                data, addr = sock.recvfrom(1024)
-                if data != "":
-                    print(data)
-            except:
-                pass
+                data, addr = self.soc.recvfrom(4096)
+                self.dataIncome = pickle.loads(data)
+                print("Data from Handler:")
+                for i in self.dataIncome:
+                    print(i)
+
+            except Exception as e:
+                print(e)
+                print("Error")
             finally:
-                self.tLock.release()
+                pass
 
     def setText(self, message):
         self.clientMessage = message

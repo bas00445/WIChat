@@ -42,7 +42,7 @@ class ServerSocket(threading.Thread):
                 self.clientCollector.addHandler(handler)
 
                 time.sleep(0.5) ## Wait a bit for updating value in a Handler object
-                print(self.clientCollector.getAllClientInfo())
+                print("From Server: Address list ",self.clientCollector.getAddrList())
 
 
         except OSError:

@@ -108,6 +108,7 @@
         text: 'Contact'
         id: contactButton
         on_release: app.root.mainUIScreen.changeScreen('contact')
+        on_release: app.root.updateContact()
 
     Button:
         text: 'History'
@@ -120,51 +121,33 @@
 
 
 
-<ContactComponent@BoxLayout>:
+<ContactComponent>:
     orientation: 'horizontal'
     size_hint: 1, None
+    nameButton: nameButton
+    statusButton: statusButton
     Button:
         size_hint: .3, 1
         text: 'Pic'
     BoxLayout:
         orientation: 'vertical'
         Button:
-            text: 'Name'
+            id: nameButton
         Button:
-            text: 'Status'
+            id: statusButton
 
 <ContactScreen>:
     orientation: 'vertical'
+    contactScrollView: contactScrollView
     ScrollView:
         size: self.parent.width, self.parent.height
         GridLayout:
-            canvas.before:
-                Color:
-                    rgba: 0.027,0.412, 0.7, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+            id: contactScrollView
             cols: 1
             padding: 10
             spacing: 10
             size_hint: 1,None
             height: self.minimum_height
-
-            BoxLayout:
-                orientation: 'horizontal'
-                size_hint: 1, None
-                Button:
-                    size_hint: .3, 1
-                    text: 'Pic'
-                BoxLayout:
-                    orientation: 'vertical'
-
-                    Button:
-                        text: 'Sivut'
-                        on_release: app.root.current = "ChatroomScreen"
-
-                    Button:
-                        text: 'Status'
 
 
 
@@ -176,8 +159,13 @@
 <ScreenSlider>:
     anim_move_duration: .3
     anim_cancel_duration: .5
+    contactScreen: contactScreen
+    historyScreen: historyScreen
+
     ContactScreen:
+        id: contactScreen
     HistoryScreen:
+        id: historyScreen
 
 <MainUIScreen>:
     name: "MainUIScreen"

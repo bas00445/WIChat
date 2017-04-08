@@ -20,6 +20,9 @@ class ClientCollector:
     def addHandler(self, clientHandler):
         self.handlerList.append(clientHandler)
 
+    def removeClientInfo(self, clientInfo):
+        self.clientInfoList.remove(clientInfo)
+
     def getClientInfoList(self):
         return self.clientInfoList
 

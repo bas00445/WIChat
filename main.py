@@ -96,6 +96,11 @@ class HistoryScreen(BoxLayout):
 class ScreenSlider(Carousel):
     pass
 
+class ContactComponent(BoxLayout):
+    def __init__(self, **kwargs):
+        super(BoxLayout, self).__init__(**kwargs)
+
+
 #########################################################
 
 class WIChat(ScreenManager):
@@ -109,6 +114,8 @@ class WIChat(ScreenManager):
         self.mainUIScreen = self.mainUIScreen
         self.chatroomScreen = self.chatroomScreen
         self.tLock = threading.Lock()
+        self.contactList = []
+        self.groupList = []
 
     def getInputStartup(self):
         self.username = self.startupScreen.nameInput.text
@@ -135,6 +142,19 @@ class WIChat(ScreenManager):
         clientInfo = ClientInformation(username, self.status, self.clientSocket.getAddr(), None)
 
         self.clientSocket.sendClientInformation(clientInfo)
+
+    def updateContact(self):
+        contactScrollView = self.mainUIScreen.screenSlider.contactScreen.contactScrollView
+        contactScrollView.clear_widgets()
+
+        print("Update Contact:" , self.clientSocket.getDataIncome())
+        #self.clientSocket.receving()
+
+        for client in self.clientSocket.getDataIncome():
+            c = ContactComponent()
+            c.nameButton.text = client.getName()
+            contactScrollView.add_widget(c)
+
 
 
 class WIChatApp(App):
