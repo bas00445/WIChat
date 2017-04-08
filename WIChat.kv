@@ -1,0 +1,245 @@
+
+<WIChat>:
+    startupScreen: StartupScreen
+    mainUIScreen: MainUIScreen
+    chatroomScreen: ChatroomScreen
+
+    StartupScreen:
+        id: StartupScreen
+    MainUIScreen:
+        id: MainUIScreen
+    ChatroomScreen:
+        id: ChatroomScreen
+
+<StartupScreen>:
+    name: "StartupScreen"
+
+    nameInput: nameInput
+    ipInput: ipInput
+    portInput: portInput
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 5
+        Button:
+            id: StartupLabel
+            text: "Start Up"
+            size_hint: 1, .2
+
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: "NAME"
+                size_hint_x: .3
+            TextInput:
+                id: nameInput
+                text: "Untitiled"
+                multiline: False
+                size_hint_x: .7
+
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: "HOST IP"
+                size_hint_x: .3
+            TextInput:
+                id: ipInput
+                text: "127.0.0.1"
+                multiline: False
+                size_hint_x: .7
+
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: "PORT"
+                size_hint_x: .3
+            TextInput:
+                id: portInput
+                text: "5000"
+                multiline: False
+                size_hint_x: .7
+
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, .3
+            Button:
+                id: loginButton
+                text: "LOG IN AS CLIENT"
+                on_release: app.root.login()
+
+            Button:
+                id: loginButton
+                text: "BECOME A HOST"
+                on_release: root.openHostPopup()
+
+<ProfileArea>:
+
+    orientation: 'horizontal'
+    profileButton: profileButton
+    nameButton: nameButton
+    statusButton: statusButton
+
+    size_hint: (1, .2)
+    Button:
+        id: profileButton
+        text: "Profile"
+        size_hint_x: .3
+
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            id: nameButton
+            text: "Name"
+            size_hint_y: .2
+        Button:
+            id: statusButton
+            text: "Status"
+            size_hint_y: .2
+
+<MenuBar>:
+    orientation: 'horizontal'
+    contactButton: contactButton
+    historyButton: historyButton
+    settingButton: settingButton
+    size_hint: (1, .1)
+
+    Button:
+        text: 'Contact'
+        id: contactButton
+        on_release: app.root.mainUIScreen.changeScreen('contact')
+
+    Button:
+        text: 'History'
+        id: historyButton
+        on_release: app.root.mainUIScreen.changeScreen('history')
+
+    Button:
+        text: 'Setting'
+        id: settingButton
+
+
+
+<ContactComponent@BoxLayout>:
+    orientation: 'horizontal'
+    size_hint: 1, None
+    Button:
+        size_hint: .3, 1
+        text: 'Pic'
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            text: 'Name'
+        Button:
+            text: 'Status'
+
+<ContactScreen>:
+    orientation: 'vertical'
+    ScrollView:
+        size: self.parent.width, self.parent.height
+        GridLayout:
+            canvas.before:
+                Color:
+                    rgba: 0.027,0.412, 0.7, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            cols: 1
+            padding: 10
+            spacing: 10
+            size_hint: 1,None
+            height: self.minimum_height
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint: 1, None
+                Button:
+                    size_hint: .3, 1
+                    text: 'Pic'
+                BoxLayout:
+                    orientation: 'vertical'
+
+                    Button:
+                        text: 'Sivut'
+                        on_release: app.root.current = "ChatroomScreen"
+
+                    Button:
+                        text: 'Status'
+
+
+
+<HistoryScreen>:
+    Label:
+        text: 'HistoryScreen'
+        font_size: 50
+
+<ScreenSlider>:
+    anim_move_duration: .3
+    anim_cancel_duration: .5
+    ContactScreen:
+    HistoryScreen:
+
+<MainUIScreen>:
+    name: "MainUIScreen"
+    profileArea: profileArea
+    menuBar: menuBar
+    screenSlider: screenSlider
+
+    BoxLayout:
+        orientation: 'vertical'
+        ProfileArea:
+            id: profileArea
+        MenuBar:
+            id: menuBar
+        ScreenSlider:
+            id: screenSlider
+
+<ChatroomScreen>:
+    name: "ChatroomScreen"
+    scrollView_chat: scrollView_chat
+    chatContainer: chatContainer
+    messageInput: messageInput
+
+
+    BoxLayout:
+        orientation: 'vertical'
+        messageInput: messageInput
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, .1
+
+            Button:
+                text: "Sivut Chatroom"
+                size_hint_x: .8
+
+            Button:
+                text: "Back"
+                size_hint_x: .2
+                on_release: app.root.current = "MainUIScreen"
+
+        ScrollView:
+            id: scrollView_chat
+            size: self.parent.width, self.parent.height
+            GridLayout:
+                id: chatContainer
+                cols: 1
+                padding: 10
+                spacing: 10
+                size_hint: 1,None
+                height: self.minimum_height
+
+
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, .1
+            TextInput:
+                id: messageInput
+                size_hint: .8, 1
+            Button:
+                id: sendButton
+                text: "SEND"
+                size_hint: .2, 1
+                on_release: app.root.clientSocket.setText(messageInput.text)
+                on_release: root.sendMessage()

@@ -1,32 +1,41 @@
 
 class ClientCollector:
     def __init__(self, **kwargs):
-        self.socketList = []
+        self.clientInfoList = []
         self.addressList = []
-        self.groupIDList = []
+        self.groupChatList = []
         self.handlerList = []
 
-    def addSocket(self, client):
-        self.socketList.append(client)
-        print("All Clients: ", self.getAddressList())
+    def addClientInfo(self, clientInfo):
+        self.clientInfoList.append(clientInfo)
+        self.addressList.append(clientInfo.getAddress())
 
-    def addAddress(self, clientAddr):
-        self.addressList.append(clientAddr)
+    def showAllClients(self):
+        for eachClientInfo in self.clientInfoList:
+            print(eachClientInfo)
 
-    def addGroupIDList(self, groupID):
-        self.groupIDList.append(groupID)
+    def addGroupChat(self, group):
+        self.groupChatList.append(group)
 
     def addHandler(self, clientHandler):
         self.handlerList.append(clientHandler)
 
-    def getSocketList(self):
-        return self.socketList
+    def getClientInfoList(self):
+        return self.clientInfoList
 
-    def getAddressList(self):
-        return self.addressList
-
-    def getGroupIDList(self):
-        return self.groupIDList
+    def getGroupChat(self):
+        return self.groupChatList
 
     def getHandlerList(self):
         return self.handlerList
+
+    def getAddrList(self):
+        return self.addressList
+
+    def getAllClientInfo(self):
+        s = "All Client Informations:" + "\n"
+        for client in self.clientInfoList:
+            s += "\t" + str(client) + "\n"
+
+        return s
+

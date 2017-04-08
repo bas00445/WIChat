@@ -1,13 +1,17 @@
 import threading
 import socket
 import time
+import pickle
 
+from Task import *
+from ClientInformation import *
 
 class ClientSocket(threading.Thread):
     def __init__(self, ip, port, name="Name", **kwargs):
         threading.Thread.__init__(self)
         self.tLock = threading.Lock()
         self.shutdown = False
+        self.pauseMsg = True
 
         self.clientName = name
         self.clientMessage = ""
@@ -20,6 +24,12 @@ class ClientSocket(threading.Thread):
         self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.soc.connect(self.targetServer)
         self.soc.setblocking(1)
+
+        self.recvThread = threading.Thread(target=self.receving, args=("RecvThread", self.soc))  ## Receiving Thread
+        self.recvThread.start()
+
+    def getAddr(self):
+        return self.soc.getsockname()
 
     def receving(self, name, sock):
         while not self.shutdown:
@@ -36,13 +46,25 @@ class ClientSocket(threading.Thread):
     def setText(self, message):
         self.clientMessage = message
 
-    def run(self):
-        while self.clientMessage != "q":
-            string = self.clientName + ": " + self.clientMessage
+    def startMessaging(self):
+        self.pauseMsg = False
+
+    def pauseMessaging(self):
+        self.pauseMsg = True
+
+    def sendClientInformation(self, clientInfo):
+        obj = pickle.dumps(clientInfo)
+        self.soc.sendto(obj, self.targetServer)
+
+    def sendMessage(self):
+        if not self.pauseMsg:
             if self.clientMessage != "":
+                string = self.clientName + ": " + self.clientMessage
                 self.soc.sendto(string.encode("utf-8"), self.targetServer)
-            self.tLock.acquire()
-            self.tLock.release()
+
+    def run(self):
+        while True:
+            self.sendMessage() ## Turn on sending messages function
             self.clientMessage = ""
             time.sleep(0.2)
 
@@ -50,3 +72,5 @@ class ClientSocket(threading.Thread):
         self.shutdown = True
         self.recvThread.join()
         self.soc.close()
+
+
