@@ -35,7 +35,7 @@ class StartupScreen(Screen):
         global WIApp
 
         notification = BoxLayout(orientation = "vertical")
-        label = Label(text="Please turn on Hotspot before start hosting.")
+        label = Label(text="Please turn on Hotspot before start hosting.", font_size = "20dp")
         closeButton = Button(text="Close")
         startHostButton = Button(text="Start Hosting")
 
@@ -45,7 +45,7 @@ class StartupScreen(Screen):
         notification.add_widget(startHostButton)
         notification.add_widget(closeButton)
 
-        popup = Popup(title='Caution', content=notification,
+        popup = Popup(title='Caution', content=notification, size_hint=(.6, .5),
                       auto_dismiss=True)
         popup.open()
 
@@ -147,13 +147,15 @@ class WIChat(ScreenManager):
         contactScrollView = self.mainUIScreen.screenSlider.contactScreen.contactScrollView
         contactScrollView.clear_widgets()
 
-        print("Update Contact:" , self.clientSocket.getDataIncome())
-        #self.clientSocket.receving()
 
-        for client in self.clientSocket.getDataIncome():
-            c = ContactComponent()
-            c.nameButton.text = client.getName()
-            contactScrollView.add_widget(c)
+        data = self.clientSocket.getDataIncome()
+        print("Update Contact:", data)
+
+        if data != None:
+            for client in self.clientSocket.getDataIncome():
+                c = ContactComponent()
+                c.nameButton.text = client.getName()
+                contactScrollView.add_widget(c)
 
 
 

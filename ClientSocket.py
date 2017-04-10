@@ -50,6 +50,8 @@ class ClientSocket(threading.Thread):
             finally:
                 pass
 
+
+
     def setText(self, message):
         self.clientMessage = message
 

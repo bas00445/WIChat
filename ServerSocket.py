@@ -27,8 +27,8 @@ class ServerSocket(threading.Thread):
             self.socketServer.setblocking(1)
             print("Server is ready for connection.")
             self.listen()
-        except OSError:
-            print("Server Down.")
+        except OSError as e:
+            print("Server Down: ", e)
 
     def listen(self):
         print("Get server socket name: ", self.socketServer.getsockname())
@@ -38,13 +38,13 @@ class ServerSocket(threading.Thread):
 
                 handler = Handler(clientSocket, addr, self.clientCollector)
                 handler.start()
-
-                self.clientCollector.addHandler(handler)
+                handler.clientCollector.addSocket(clientSocket)
+                handler.clientCollector.addHandler(handler)
 
                 time.sleep(0.5) ## Wait a bit for updating value in a Handler object
-                print("From Server: Address list ",self.clientCollector.getAddrList())
+                print("From Server: Address list ",handler.clientCollector.getAddrList())
 
 
-        except OSError:
-            print("Server Down.")
+        except OSError as e:
+            print("Server Down: ", e)
 

@@ -5,6 +5,12 @@ class ClientCollector:
         self.addressList = []
         self.groupChatList = []
         self.handlerList = []
+        self.socketList = []
+
+
+    def addSocket(self, clientSocket):
+        self.socketList.append(clientSocket)
+
 
     def addClientInfo(self, clientInfo):
         self.clientInfoList.append(clientInfo)
@@ -25,6 +31,9 @@ class ClientCollector:
 
     def getClientInfoList(self):
         return self.clientInfoList
+
+    def getSocketList(self):
+        return self.socketList
 
     def getGroupChat(self):
         return self.groupChatList

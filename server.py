@@ -25,7 +25,7 @@ while not quitting:
             clients.append(addr)
             print(clients)
 
-        print(time.ctime(time.time()) + str(addr) + ": :" + str(data))
+        #print(time.ctime(time.time()) + str(addr) + ": :" + str(data))
 
         for client in clients:
             s.sendto("Hello world".encode("utf-8"), client)

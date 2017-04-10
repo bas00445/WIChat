@@ -3,21 +3,21 @@ import threading
 import time
 
 from ServerSocket import *
-
-from ClientInformation import *
-
-global clientCollector
+from ClientCollector import *
 
 ### เป็น server ย่อยๆ กระจายมาจาก server ###
 class Handler(threading.Thread):
+    clientCollector = ClientCollector()
+
     def __init__(self, clientSocket, addr, clientCollector, **kwargs):
         threading.Thread.__init__(self)
         self.clientSocket = clientSocket
+
         self.addr = addr
-        self.clientCollector = clientCollector
         self.exit = False
 
     def run(self):
+
         try:
             while not self.exit:
 
@@ -27,11 +27,12 @@ class Handler(threading.Thread):
                     print(">>Append a new connection:", str(clientInfo) + "\n")
                     self.clientCollector.addClientInfo(clientInfo)
 
-                for clientAddr in self.clientCollector.getAddrList():
-                    self.clientSocket.sendto(pickle.dumps(self.clientCollector.getClientInfoList()), clientAddr)
+                for clientSocket in self.clientCollector.getSocketList():
+                    clientSocket.send(pickle.dumps(self.clientCollector.getClientInfoList()))
 
         except ConnectionResetError:
             self.clientCollector.removeClientInfo(clientInfo)
+
             print(self.addr, " has been disconnected")
 
 

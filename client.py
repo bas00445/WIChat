@@ -24,7 +24,7 @@ port = 5000
 
 server = (host,5000)
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect((host, port))
 s.setblocking(0)
 
@@ -41,7 +41,7 @@ while message != "q":
     tLock.acquire()
     message = input(alias + "->")
     tLock.release()
-    time.sleep(0.2)
+    #time.sleep(0.2)
 
 shutdown = True
 rT.join()
