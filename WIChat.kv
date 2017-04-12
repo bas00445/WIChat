@@ -133,8 +133,29 @@
         orientation: 'vertical'
         Button:
             id: nameButton
+            on_release: app.root.current = "ChatroomScreen"
+            on_release: app.root.setClientTarget(nameButton.text)
+
         Button:
             id: statusButton
+
+
+<MessageBox>:
+    size_hint: 1, None
+    orientation: 'horizontal'
+    msgButton: msgButton
+    dateButton: dateButton
+
+    Button:
+        size_hint: .7, None
+        id: msgButton
+        text: "Message"
+
+    Button:
+        size_hint: .3, None
+        id: dateButton
+        text: "Date"
+
 
 <ContactScreen>:
     orientation: 'vertical'
@@ -198,8 +219,9 @@
             size_hint: 1, .1
 
             Button:
-                text: "Sivut Chatroom"
+                text: "Chatroom"
                 size_hint_x: .8
+                on_release: app.root.updateMessage()
 
             Button:
                 text: "Back"
@@ -217,8 +239,6 @@
                 size_hint: 1,None
                 height: self.minimum_height
 
-
-
         BoxLayout:
             orientation: 'horizontal'
             size_hint: 1, .1
@@ -230,4 +250,5 @@
                 text: "SEND"
                 size_hint: .2, 1
                 on_release: app.root.clientSocket.setText(messageInput.text)
-                on_release: root.sendMessage()
+                on_release: app.root.sendMessageTask()
+                on_release: root.updateMessageUI()

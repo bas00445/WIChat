@@ -5,6 +5,7 @@ import pickle
 
 from Task import *
 from ClientInformation import *
+from Message import *
 
 class ClientSocket(threading.Thread):
     def __init__(self, ip, port, name="Name", **kwargs):
@@ -38,19 +39,14 @@ class ClientSocket(threading.Thread):
     def receving(self):
         while not self.shutdown:
             try:
-                data, addr = self.soc.recvfrom(4096)
-                self.dataIncome = pickle.loads(data)
-                print("Data from Handler:")
-                for i in self.dataIncome:
-                    print(i)
+                task = pickle.loads(self.soc.recv(4096))
+                self.dataIncome = task
 
             except Exception as e:
                 print(e)
-                print("Error")
+
             finally:
                 pass
-
-
 
     def setText(self, message):
         self.clientMessage = message
@@ -61,19 +57,23 @@ class ClientSocket(threading.Thread):
     def pauseMessaging(self):
         self.pauseMsg = True
 
-    def sendClientInformation(self, clientInfo):
-        obj = pickle.dumps(clientInfo)
+    def sendTask(self, task):
+        obj = pickle.dumps(task)
         self.soc.sendto(obj, self.targetServer)
 
-    def sendMessage(self):
-        if not self.pauseMsg:
-            if self.clientMessage != "":
-                string = self.clientName + ": " + self.clientMessage
-                self.soc.sendto(string.encode("utf-8"), self.targetServer)
+    def setTargetAddress(self, newTargetAddr):
+        self.targetServer = newTargetAddr
 
     def run(self):
         while True:
-            self.sendMessage() ## Turn on sending messages function
+            if self.clientMessage != "":
+                text = self.clientName + ": " + self.clientMessage
+                msg = Message(text)
+                task_send_message = Task("Message", msg)
+                obj = pickle.dumps(task_send_message)
+
+                self.soc.sendto(obj, self.targetServer)
+
             self.clientMessage = ""
             time.sleep(0.2)
 
