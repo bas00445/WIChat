@@ -1,6 +1,6 @@
 
 class Task:
-    def __init__(self, taskName, data):
+    def __init__(self, taskName, data, **kwargs):
         self.taskName = taskName
         self.data = data
 

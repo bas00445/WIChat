@@ -6,7 +6,6 @@ from ServerSocket import *
 from ClientCollector import *
 from Task import *
 
-### เป็น server ย่อยๆ กระจายมาจาก server ###
 class Handler(threading.Thread):
 
     clientCollector = ClientCollector()

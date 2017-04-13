@@ -1,5 +1,5 @@
 class ClientInformation:
-    def __init__(self, name, status, address, profilePicture, task=""):
+    def __init__(self, name, status, address, profilePicture, task="", **kwargs):
         self.name = name
         self.status = status
         self.address = address

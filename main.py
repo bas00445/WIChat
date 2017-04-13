@@ -75,8 +75,8 @@ class StartupScreen(Screen):
         WIApp.clientSocket.start()
 
         ### Send the client information to the server ###
-        clientInfo = ClientInformation(username, WIApp.status, WIApp.clientSocket.getAddr(), None)
-        initialTask = Task("Submit ClientInfo", clientInfo)
+        WIApp.clientInfo = ClientInformation(username, WIApp.status, WIApp.clientSocket.getAddr(), None)
+        initialTask = Task("Submit ClientInfo", WIApp.clientInfo)
         WIApp.clientSocket.sendTask(initialTask)
 
 class MainUIScreen(Screen):
@@ -90,26 +90,13 @@ class MainUIScreen(Screen):
         target_idx = self.listofScreen.index(name)
         self.screenSlider.load_slide(self.screenSlider.slides[target_idx])
 
-    def setClientTarget(self, targetName):
-        for client in self.clientInfoList:
-            if client.getName() == targetName:
-                targetAddress = client.getAddress()
-
-        print("Target Name: ", targetName)
-        print("Target Address: ", targetAddress)
-
-        self.clientSocket.setTargetAddress(targetAddress)
-
     def updateContact(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
         contactScrollView.clear_widgets()
 
         task = Task("Request ClientInfo", None)
-
         WIApp.clientSocket.sendTask(task)
-
         time.sleep(0.05)
-
         task = WIApp.clientSocket.getDataIncome() ### Can have multiple types of task -> Use if-else
 
         if task.getName() == "Request ClientInfo":
@@ -134,6 +121,7 @@ class MainUIScreen(Screen):
         print("Target Address: ", WIApp.clientTargetAddress)
 
         WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
+        WIApp.chatroomScreen.roomName.text = targetName.upper() + "'s chatroom"
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
@@ -205,6 +193,8 @@ class MessageBox(BoxLayout):
 
 #########################################################
 
+
+
 class WIChat(ScreenManager):
     def __init__(self, **kwargs):
         super(WIChat, self).__init__(**kwargs)
@@ -214,11 +204,12 @@ class WIChat(ScreenManager):
         self.startupScreen = self.startupScreen
         self.mainUIScreen = self.mainUIScreen
         self.chatroomScreen = self.chatroomScreen
-        self.clientInfoList = None
+        self.clientInfoList = None ## Friend list
         self.groupList = None
         self.serverSocket = None
         self.clientSocket = None
         self.clientTargetAddress = None
+        self.clientInfo = None
 
 class WIChatApp(App):
 

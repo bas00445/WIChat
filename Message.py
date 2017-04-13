@@ -1,7 +1,7 @@
 import time
 
 class Message:
-    def __init__(self, text, receiverAddr):
+    def __init__(self, text, receiverAddr, **kwargs):
         self.text = text
         self.receiverAddr = receiverAddr
 

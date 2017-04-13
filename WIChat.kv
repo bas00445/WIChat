@@ -208,6 +208,7 @@
     scrollView_chat: scrollView_chat
     chatContainer: chatContainer
     messageInput: messageInput
+    roomName: roomName
 
 
     BoxLayout:
@@ -219,6 +220,7 @@
             size_hint: 1, .1
 
             Button:
+                id: roomName
                 text: "Chatroom"
                 size_hint_x: .8
                 on_release: root.updateMessage()
