@@ -41,6 +41,8 @@ class ClientSocket(threading.Thread):
             try:
                 task = pickle.loads(self.soc.recv(4096))
                 self.dataIncome = task
+                if task.getName() == "Message":
+                    print("Got Message", task.getData())
 
             except Exception as e:
                 print(e)
@@ -64,15 +66,18 @@ class ClientSocket(threading.Thread):
     def setTargetAddress(self, newTargetAddr):
         self.targetServer = newTargetAddr
 
+    def clearData(self):
+        self.dataIncome = None
+
     def run(self):
         while True:
             if self.clientMessage != "":
                 text = self.clientName + ": " + self.clientMessage
-                msg = Message(text)
+                msg = Message(text, self.targetServer)
                 task_send_message = Task("Message", msg)
                 obj = pickle.dumps(task_send_message)
 
-                self.soc.sendto(obj, self.targetServer)
+                self.soc.send(obj)
 
             self.clientMessage = ""
             time.sleep(0.2)

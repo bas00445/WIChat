@@ -34,7 +34,6 @@ class StartupScreen(Screen):
         super(StartupScreen, self).__init__(**kwargs)
 
     def openHostPopup(self):
-
         notification = BoxLayout(orientation = "vertical")
         label = Label(text="Please turn on Hotspot before start hosting.", font_size = "20dp")
         closeButton = Button(text="Close")
@@ -42,16 +41,43 @@ class StartupScreen(Screen):
 
         closeButton.size_hint = 1, .3
         startHostButton.size_hint = 1, .3
+
         notification.add_widget(label)
         notification.add_widget(startHostButton)
         notification.add_widget(closeButton)
 
-        popup = Popup(title='Caution', content=notification, size_hint=(.6, .5),
-                      auto_dismiss=True)
+        popup = Popup(title='Caution', content=notification, size_hint=(.6, .5), auto_dismiss=True)
         popup.open()
 
         closeButton.bind(on_press = popup.dismiss)
-        startHostButton.bind(on_press = WIApp.startHosting)
+        startHostButton.bind(on_press = self.startHosting)
+
+    def getInputStartup(self):
+        WIApp.username = self.nameInput.text
+        WIApp.status = ""
+        WIApp.ip = self.ipInput.text
+        WIApp.port = int(self.portInput.text)
+
+    def login(self):
+        self.getInputStartup()
+        self.startClient(WIApp.ip, WIApp.port, WIApp.username)
+        WIApp.current = "MainUIScreen"
+        WIApp.mainUIScreen.profileArea.nameButton.text = WIApp.username
+
+    def startHosting(self, instance):
+        self.getInputStartup()
+        WIApp.serverSocket = ServerSocket(WIApp.ip, WIApp.port)
+        WIApp.serverSocket.start()
+
+    def startClient(self, ip, port, username):
+        WIApp.clientSocket = ClientSocket(ip, int(port), username)  ## Start client socket loop
+        WIApp.clientSocket.connect()
+        WIApp.clientSocket.start()
+
+        ### Send the client information to the server ###
+        clientInfo = ClientInformation(username, WIApp.status, WIApp.clientSocket.getAddr(), None)
+        initialTask = Task("Submit ClientInfo", clientInfo)
+        WIApp.clientSocket.sendTask(initialTask)
 
 class MainUIScreen(Screen):
     def __init__(self, **kwargs):
@@ -64,6 +90,50 @@ class MainUIScreen(Screen):
         target_idx = self.listofScreen.index(name)
         self.screenSlider.load_slide(self.screenSlider.slides[target_idx])
 
+    def setClientTarget(self, targetName):
+        for client in self.clientInfoList:
+            if client.getName() == targetName:
+                targetAddress = client.getAddress()
+
+        print("Target Name: ", targetName)
+        print("Target Address: ", targetAddress)
+
+        self.clientSocket.setTargetAddress(targetAddress)
+
+    def updateContact(self):
+        contactScrollView = self.screenSlider.contactScreen.contactScrollView
+        contactScrollView.clear_widgets()
+
+        task = Task("Request ClientInfo", None)
+
+        WIApp.clientSocket.sendTask(task)
+
+        time.sleep(0.05)
+
+        task = WIApp.clientSocket.getDataIncome() ### Can have multiple types of task -> Use if-else
+
+        if task.getName() == "Request ClientInfo":
+            print("Update Contact:", task.getData())
+            if task.getData() != None:
+                for client in task.getData():
+                    if client.getName() != WIApp.username:
+                        c = ContactComponent()
+                        c.nameButton.text = client.getName()
+                        contactScrollView.add_widget(c)
+
+                WIApp.clientInfoList = task.getData()
+
+        WIApp.clientSocket.clearData()
+
+    def setClientTarget(self, targetName):
+        for client in WIApp.clientInfoList:
+            if client.getName() == targetName:
+                WIApp.clientTargetAddress = client.getAddress()
+
+        print("Target Name: ", targetName)
+        print("Target Address: ", WIApp.clientTargetAddress)
+
+        WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
@@ -85,7 +155,28 @@ class ChatroomScreen(Screen):
             #
             messageBox = Label(text = self.messageInput.text + "\n" + str(time.ctime(time.time())), size_hint = (1, None))
             self.chatContainer.add_widget(messageBox)
-            #self.messageInput.text = ""
+
+    def sendMessageTask(self):
+        msgObject = Message(self.messageInput.text, WIApp.clientTargetAddress)
+        task = Task("Message", msgObject)
+        WIApp.clientSocket.sendTask(task)
+
+        self.messageInput.text = "" ## Clear Message Input
+
+    def updateMessage(self):
+        chatContainer = self.chatContainer
+        task = WIApp.clientSocket.getDataIncome()
+
+        if task != None:
+            print("updateMessage -> Task Name: ", task.getName())
+
+            if task.getName() == "Message":
+                data = task.getData()
+                string = data.getText() + "\n" + data.getCurrentTime()
+                messageBox = Label(text = string, size_hint=(1, None))
+                chatContainer.add_widget(messageBox)
+
+            WIApp.clientSocket.clearData()
 
 
 class ProfileArea(BoxLayout):
@@ -115,7 +206,6 @@ class MessageBox(BoxLayout):
 #########################################################
 
 class WIChat(ScreenManager):
-
     def __init__(self, **kwargs):
         super(WIChat, self).__init__(**kwargs)
         self.username = ""
@@ -124,93 +214,14 @@ class WIChat(ScreenManager):
         self.startupScreen = self.startupScreen
         self.mainUIScreen = self.mainUIScreen
         self.chatroomScreen = self.chatroomScreen
-        self.tLock = threading.Lock()
-        self.clientInfoList = []
-        self.groupList = []
-
-    def getInputStartup(self):
-        self.username = self.startupScreen.nameInput.text
-        self.status = ""
-        self.ip = self.startupScreen.ipInput.text
-        self.port = int(self.startupScreen.portInput.text)
-
-    def login(self):
-        self.getInputStartup()
-        self.current = "MainUIScreen"
-        self.startClient(self.ip, self.port, self.username)
-        self.mainUIScreen.profileArea.nameButton.text = self.username
-
-    def startHosting(self, instance):
-        self.getInputStartup()
-        self.serverSocket = ServerSocket(self.ip, self.port)
-        self.serverSocket.start()
-
-    def startClient(self, ip, port, username):
-        self.clientSocket = ClientSocket(ip, int(port), username)  ## Start client socket loop
-        self.clientSocket.connect()
-        self.clientSocket.start()
-
-        ### Send the client information to the server ###
-        clientInfo = ClientInformation(username, self.status, self.clientSocket.getAddr(), None)
-        initialTask = Task("ClientInfo", clientInfo)
-        self.clientSocket.sendTask(initialTask)
-
-    def updateContact(self):
-        contactScrollView = self.mainUIScreen.screenSlider.contactScreen.contactScrollView
-        contactScrollView.clear_widgets()
-
-        task = self.clientSocket.getDataIncome() ### Can have multiple types of task -> Use if-else
-
-        if task.getName() == "ClientInfo":
-            print("Update Contact:", task.getData())
-            if task.getData() != None:
-                for client in task.getData():
-                    c = ContactComponent()
-                    c.nameButton.text = client.getName()
-                    contactScrollView.add_widget(c)
-
-                self.clientInfoList = task.getData()
-
-    def updateReceivedMsg(self):
-        chatContainer = self.chatroomScreen.chatContainer
-
-        task = self.clientSocket.getDataIncome()
-
-        if task.getName() == "Message":
-            print("Update Message In Chatroom: ", task.getData())
-            if task.getData() != None:
-                msgLabel = Label(text = "")
-
-    def setClientTarget(self, targetName):
-        for client in self.clientInfoList:
-            if client.getName() == targetName:
-                targetAddress = client.getAddress()
-
-        print("Target Name: ", targetName)
-        print("Target Address: ", targetAddress)
-
-        self.clientSocket.setTargetAddress(targetAddress)
-
-    def sendMessageTask(self):
-        msgObject = Message(self.chatroomScreen.messageInput.text)
-        task = Task("Message", msgObject)
-        self.clientSocket.sendTask(task)
-
-    def updateMessage(self):
-        chatContainer = self.chatroomScreen.chatContainer
-        task = self.clientSocket.getDataIncome()
-
-        print("updateMessage -> Task Name: ", task.getName())
-
-        if task.getName() == "Message":
-
-            data = task.getData()
-            string = data.getText() + "\n" + data.getCurrentTime()
-            messageBox = Label(text = string, size_hint=(1, None))
-            chatContainer.add_widget(messageBox)
-
+        self.clientInfoList = None
+        self.groupList = None
+        self.serverSocket = None
+        self.clientSocket = None
+        self.clientTargetAddress = None
 
 class WIChatApp(App):
+
     def build(self):
         global WIApp
         WIApp = WIChat()

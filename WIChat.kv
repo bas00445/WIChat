@@ -66,7 +66,7 @@
             Button:
                 id: loginButton
                 text: "LOG IN AS CLIENT"
-                on_release: app.root.login()
+                on_release: root.login()
 
             Button:
                 id: loginButton
@@ -108,7 +108,7 @@
         text: 'Contact'
         id: contactButton
         on_release: app.root.mainUIScreen.changeScreen('contact')
-        on_release: app.root.updateContact()
+        on_release: app.root.mainUIScreen.updateContact()
 
     Button:
         text: 'History'
@@ -134,7 +134,7 @@
         Button:
             id: nameButton
             on_release: app.root.current = "ChatroomScreen"
-            on_release: app.root.setClientTarget(nameButton.text)
+            on_release: app.root.mainUIScreen.setClientTarget(nameButton.text)
 
         Button:
             id: statusButton
@@ -221,7 +221,7 @@
             Button:
                 text: "Chatroom"
                 size_hint_x: .8
-                on_release: app.root.updateMessage()
+                on_release: root.updateMessage()
 
             Button:
                 text: "Back"
@@ -250,5 +250,5 @@
                 text: "SEND"
                 size_hint: .2, 1
                 on_release: app.root.clientSocket.setText(messageInput.text)
-                on_release: app.root.sendMessageTask()
+                on_release: root.sendMessageTask()
                 on_release: root.updateMessageUI()
