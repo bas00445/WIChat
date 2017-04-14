@@ -10,6 +10,7 @@ from Message import *
 class ClientSocket(threading.Thread):
     def __init__(self, ip, port, name="Name", **kwargs):
         threading.Thread.__init__(self)
+        self.tLock = threading.Lock()
         self.shutdown = False
         self.pauseMsg = True
 
@@ -39,6 +40,7 @@ class ClientSocket(threading.Thread):
     def receving(self):
         while not self.shutdown:
             try:
+                self.tLock.acquire()
                 task = pickle.loads(self.soc.recv(4096))
                 self.dataIncome = task
                 if task.getName() == "Message":
@@ -48,7 +50,7 @@ class ClientSocket(threading.Thread):
                 print(e)
 
             finally:
-                pass
+                self.tLock.release()
 
     def setText(self, message):
         self.clientMessage = message

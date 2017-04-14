@@ -22,9 +22,10 @@ global WIApp
 
 from ServerSocket import *
 from ClientSocket import *
-from Contact import *
 from ClientInformation import *
 from Task import *
+from Chatroom import *
+from ChatroomCollector import *
 
 #from kivy.core.window import Window
 #Window.size = (350, 600)
@@ -117,42 +118,57 @@ class MainUIScreen(Screen):
             if client.getName() == targetName:
                 WIApp.clientTargetAddress = client.getAddress()
 
-        print("Target Name: ", targetName)
-        print("Target Address: ", WIApp.clientTargetAddress)
+        if (WIApp.chatroomCollector.getRoomByMember([WIApp.username, targetName])
+            not in WIApp.chatroomCollector.getChatroomList()):
+            WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
+            WIApp.chatroomScreen.roomName.text = WIApp.username + ":" + targetName + " Chatroom"
 
-        WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
-        WIApp.chatroomScreen.roomName.text = targetName.upper() + "'s chatroom"
+            roomName = WIApp.username + ":" + targetName
+            newChatroom = Chatroom(WIApp.username + ":" + targetName)
+            newChatroom.addMember(WIApp.username)
+            newChatroom.addMember(targetName)
+
+            WIApp.chatroomCollector.addNewChatroom(newChatroom)
+            print("<<<Add a new chatroom>>>")
+            WIApp.chatroomCollector.listAllChatroom()
+
+        ### Choose the current chatroom to load and save the history chat
+        WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMember([WIApp.username, targetName])
+
+        print("SetClientTarger->>")
+        print(WIApp.currentChatroom )
+
+        WIApp.chatroomScreen.loadDataChatroom()
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
         super(ChatroomScreen, self).__init__(**kwargs)
         self.buttonColor = (1,.5,.5,1)
         self.buttonColor2 = (1,.7,.7,1)
+        self.messageList = None
 
-    def sendMessage1To1(self, thisClient, targetClient):
-        pass
+    def loadDataChatroom(self):
+        self.messageList = WIApp.currentChatroom.getMsgCollector()
+        self.chatContainer.clear_widgets()
 
-    def sendMessage1ToGroup(self, thisClient, groupID):
-        pass
-
-    def updateMessageUI(self):
-        if self.messageInput.text != "":
-            # messageBox = MessageBox()
-            # messageBox.msgButton.text = self.messageInput.text
-            # messageBox.dateButton.text = str(time.ctime(time.time()))
-            #
-            messageBox = Label(text = self.messageInput.text + "\n" + str(time.ctime(time.time())), size_hint = (1, None))
+        for msg in self.messageList:
+            messageBox = Label(text=str(msg), size_hint=(1, None))
             self.chatContainer.add_widget(messageBox)
 
     def sendMessageTask(self):
-        msgObject = Message(self.messageInput.text, WIApp.clientTargetAddress)
+        msgObject = Message(self.messageInput.text, [WIApp.clientTargetAddress])
         task = Task("Message", msgObject)
         WIApp.clientSocket.sendTask(task)
+        WIApp.currentChatroom.addMessage(msgObject)
 
         self.messageInput.text = "" ## Clear Message Input
 
+    def updateMessageUI(self):
+        if self.messageInput.text != "":
+            messageBox = Label(text = self.messageInput.text + "\n" + str(time.ctime(time.time())), size_hint = (1, None))
+            self.chatContainer.add_widget(messageBox)
+
     def updateMessage(self):
-        chatContainer = self.chatContainer
         task = WIApp.clientSocket.getDataIncome()
 
         if task != None:
@@ -161,8 +177,9 @@ class ChatroomScreen(Screen):
             if task.getName() == "Message":
                 data = task.getData()
                 string = data.getText() + "\n" + data.getCurrentTime()
+
                 messageBox = Label(text = string, size_hint=(1, None))
-                chatContainer.add_widget(messageBox)
+                self.chatContainer.add_widget(messageBox)
 
             WIApp.clientSocket.clearData()
 
@@ -193,8 +210,6 @@ class MessageBox(BoxLayout):
 
 #########################################################
 
-
-
 class WIChat(ScreenManager):
     def __init__(self, **kwargs):
         super(WIChat, self).__init__(**kwargs)
@@ -204,12 +219,14 @@ class WIChat(ScreenManager):
         self.startupScreen = self.startupScreen
         self.mainUIScreen = self.mainUIScreen
         self.chatroomScreen = self.chatroomScreen
-        self.clientInfoList = None ## Friend list
-        self.groupList = None
+        self.clientInfoList = None # Friend list
+        self.historyInfoList = None
+        self.chatroomCollector = ChatroomCollector()
         self.serverSocket = None
         self.clientSocket = None
         self.clientTargetAddress = None
         self.clientInfo = None
+        self.currentChatroom = None
 
 class WIChatApp(App):
 

@@ -1,9 +1,10 @@
 import time
 
 class Message:
-    def __init__(self, text, receiverAddr, **kwargs):
+    def __init__(self, text, receiverAddrList, **kwargs):
         self.text = text
-        self.receiverAddr = receiverAddr
+        self.receiverAddr = receiverAddrList
+        self.currentTime = self.getCurrentTime()
 
     def getText(self):
         return self.text
@@ -15,4 +16,4 @@ class Message:
         return str(time.ctime(time.time()))
 
     def __str__(self):
-        return "Text: " + self.text + "\n" + "\t" + self.getCurrentTime()
+        return self.text + "\n" + self.currentTime

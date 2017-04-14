@@ -46,10 +46,13 @@ class Handler(threading.Thread):
                     print("Handler -> Message Object:\n ", msgObject)
 
                     for soc in self.clientCollector.getSocketList():
-                        if self.soc != soc and soc.getpeername() == msgObject.getReceiverAddr():
-                            messageTask = Task("Message", msgObject)
-                            obj = pickle.dumps(messageTask)
-                            soc.send(obj)
+                        receiverAddrList = msgObject.getReceiverAddr()
+
+                        for addr in receiverAddrList:
+                            if self.soc != soc and soc.getpeername() == addr:
+                                messageTask = Task("Message", msgObject)
+                                obj = pickle.dumps(messageTask)
+                                soc.send(obj)
 
 
         except ConnectionResetError:
