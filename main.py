@@ -15,8 +15,6 @@ from kivy.uix.carousel import Carousel
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
-from kivy.properties import *
-
 #####################################
 global WIApp
 
@@ -64,6 +62,7 @@ class StartupScreen(Screen):
         self.startClient(WIApp.ip, WIApp.port, WIApp.username)
         WIApp.current = "MainUIScreen"
         WIApp.mainUIScreen.profileArea.nameButton.text = WIApp.username
+        WIApp.chatroomScreen.updateMsg_thread.start()
 
     def startHosting(self, instance):
         self.getInputStartup()
@@ -100,7 +99,8 @@ class MainUIScreen(Screen):
         time.sleep(0.05)
         task = WIApp.clientSocket.getDataIncome() ### Can have multiple types of task -> Use if-else
 
-        if task.getName() == "Request ClientInfo":
+
+        if task != None and task.getName() == "Request ClientInfo":
             print("Update Contact:", task.getData())
             if task.getData() != None:
                 for client in task.getData():
@@ -118,13 +118,14 @@ class MainUIScreen(Screen):
             if client.getName() == targetName:
                 WIApp.clientTargetAddress = client.getAddress()
 
+        WIApp.chatroomScreen.roomName.text = WIApp.username + ":" + targetName + " Chatroom"
+
         if (WIApp.chatroomCollector.getRoomByMember([WIApp.username, targetName])
             not in WIApp.chatroomCollector.getChatroomList()):
             WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
-            WIApp.chatroomScreen.roomName.text = WIApp.username + ":" + targetName + " Chatroom"
 
             roomName = WIApp.username + ":" + targetName
-            newChatroom = Chatroom(WIApp.username + ":" + targetName)
+            newChatroom = Chatroom(roomName)
             newChatroom.addMember(WIApp.username)
             newChatroom.addMember(targetName)
 
@@ -146,6 +147,17 @@ class ChatroomScreen(Screen):
         self.buttonColor = (1,.5,.5,1)
         self.buttonColor2 = (1,.7,.7,1)
         self.messageList = None
+
+        self.updateMsg_thread = threading.Thread(target=self.receiverThread)
+
+
+    def receiverThread(self):
+        time.sleep(1)
+        while True:
+            self.updateMessage()
+            time.sleep(0.5)
+
+
 
     def loadDataChatroom(self):
         self.messageList = WIApp.currentChatroom.getMsgCollector()
@@ -175,8 +187,10 @@ class ChatroomScreen(Screen):
             print("updateMessage -> Task Name: ", task.getName())
 
             if task.getName() == "Message":
-                data = task.getData()
-                string = data.getText() + "\n" + data.getCurrentTime()
+                msgObject = task.getData()
+                string = msgObject.getText() + "\n" + msgObject.getCurrentTime()
+
+                WIApp.currentChatroom.addMessage(msgObject)
 
                 messageBox = Label(text = string, size_hint=(1, None))
                 self.chatContainer.add_widget(messageBox)
