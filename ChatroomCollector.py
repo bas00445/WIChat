@@ -21,3 +21,11 @@ class ChatroomCollector:
     def listAllChatroom(self):
         for room in self.chatroomList:
             print(room)
+
+    def __len__(self):
+        return len(self.chatroomList)
+
+    def isEmpty(self):
+        if len(self.chatroomList) == 0:
+            return True
+        return False

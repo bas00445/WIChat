@@ -66,21 +66,14 @@ class ClientSocket(threading.Thread):
         self.soc.sendto(obj, self.targetServer)
 
     def setTargetAddress(self, newTargetAddr):
-        self.targetServer = newTargetAddr
+        if newTargetAddr != None:
+            self.targetServer = newTargetAddr
 
     def clearData(self):
         self.dataIncome = None
 
     def run(self):
         while True:
-            if self.clientMessage != "":
-                text = self.clientName + ": " + self.clientMessage
-                msg = Message(text, self.targetServer)
-                task_send_message = Task("Message", msg)
-                obj = pickle.dumps(task_send_message)
-
-                self.soc.send(obj)
-
             self.clientMessage = ""
             time.sleep(0.2)
 

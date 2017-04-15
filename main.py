@@ -25,8 +25,8 @@ from Task import *
 from Chatroom import *
 from ChatroomCollector import *
 
-#from kivy.core.window import Window
-#Window.size = (350, 600)
+from kivy.core.window import Window
+Window.size = (350, 600)
 
 class StartupScreen(Screen):
     def __init__(self, **kwargs):
@@ -113,15 +113,20 @@ class MainUIScreen(Screen):
 
         WIApp.clientSocket.clearData()
 
-    def setClientTarget(self, targetName):
+    def searchAddrByName(self, targetName):
         for client in WIApp.clientInfoList:
             if client.getName() == targetName:
-                WIApp.clientTargetAddress = client.getAddress()
+                return client.getAddress()
+
+    def setClientTarget(self, targetName):
+        WIApp.clientTargetName = targetName
+        WIApp.clientTargetAddress = self.searchAddrByName(targetName)
 
         WIApp.chatroomScreen.roomName.text = WIApp.username + ":" + targetName + " Chatroom"
+        currentRoom = WIApp.chatroomCollector.getRoomByMember([WIApp.username, targetName])
 
-        if (WIApp.chatroomCollector.getRoomByMember([WIApp.username, targetName])
-            not in WIApp.chatroomCollector.getChatroomList()):
+        if currentRoom not in WIApp.chatroomCollector.getChatroomList():
+
             WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
 
             roomName = WIApp.username + ":" + targetName
@@ -131,14 +136,9 @@ class MainUIScreen(Screen):
 
             WIApp.chatroomCollector.addNewChatroom(newChatroom)
             print("<<<Add a new chatroom>>>")
-            WIApp.chatroomCollector.listAllChatroom()
 
         ### Choose the current chatroom to load and save the history chat
         WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMember([WIApp.username, targetName])
-
-        print("SetClientTarger->>")
-        print(WIApp.currentChatroom )
-
         WIApp.chatroomScreen.loadDataChatroom()
 
 class ChatroomScreen(Screen):
@@ -150,14 +150,11 @@ class ChatroomScreen(Screen):
 
         self.updateMsg_thread = threading.Thread(target=self.receiverThread)
 
-
     def receiverThread(self):
         time.sleep(1)
         while True:
             self.updateMessage()
-            time.sleep(0.5)
-
-
+            time.sleep(0.1)
 
     def loadDataChatroom(self):
         self.messageList = WIApp.currentChatroom.getMsgCollector()
@@ -168,10 +165,12 @@ class ChatroomScreen(Screen):
             self.chatContainer.add_widget(messageBox)
 
     def sendMessageTask(self):
-        msgObject = Message(self.messageInput.text, [WIApp.clientTargetAddress])
+        msgObject = Message(self.messageInput.text, [WIApp.clientTargetAddress], [WIApp.username, WIApp.clientTargetName])
         task = Task("Message", msgObject)
         WIApp.clientSocket.sendTask(task)
-        WIApp.currentChatroom.addMessage(msgObject)
+
+        if WIApp.currentChatroom != None:
+            WIApp.currentChatroom.addMessage(msgObject)
 
         self.messageInput.text = "" ## Clear Message Input
 
@@ -182,18 +181,29 @@ class ChatroomScreen(Screen):
 
     def updateMessage(self):
         task = WIApp.clientSocket.getDataIncome()
-
         if task != None:
-            print("updateMessage -> Task Name: ", task.getName())
-
             if task.getName() == "Message":
-                msgObject = task.getData()
+                msgObject = task.getData()### มี address ของคนที่อ่านข้อความได้
                 string = msgObject.getText() + "\n" + msgObject.getCurrentTime()
 
-                WIApp.currentChatroom.addMessage(msgObject)
+                if WIApp.chatroomCollector.isEmpty():
+                    ### สร้างห้องใหม่
 
-                messageBox = Label(text = string, size_hint=(1, None))
-                self.chatContainer.add_widget(messageBox)
+                    targetName = msgObject.getMember()[0]
+                    roomName = WIApp.username + ":" + targetName
+                    newChatroom = Chatroom(roomName)
+                    newChatroom.addMember(WIApp.username)
+                    newChatroom.addMember(targetName)
+
+                    WIApp.chatroomCollector.addNewChatroom(newChatroom)
+                    print("<<<Add a new chatroom>>>")
+
+
+                for room in WIApp.chatroomCollector.getChatroomList():
+                    if set(room.getMemberList()) == set(msgObject.getMember()):
+                        room.addMessage(msgObject)
+                        messageBox = Label(text=string, size_hint=(1, None))
+                        WIApp.chatroomScreen.chatContainer.add_widget(messageBox)
 
             WIApp.clientSocket.clearData()
 
@@ -241,6 +251,7 @@ class WIChat(ScreenManager):
         self.clientTargetAddress = None
         self.clientInfo = None
         self.currentChatroom = None
+        self.clientTargetName = None
 
 class WIChatApp(App):
 

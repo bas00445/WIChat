@@ -43,8 +43,6 @@ class Handler(threading.Thread):
 
                 elif task.getName() == "Message":
                     msgObject = task.getData()
-                    print("Handler -> Message Object:\n ", msgObject)
-
                     for soc in self.clientCollector.getSocketList():
                         receiverAddrList = msgObject.getReceiverAddr()
 
