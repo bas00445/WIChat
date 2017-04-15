@@ -79,23 +79,41 @@
     profileButton: profileButton
     nameButton: nameButton
     statusButton: statusButton
-
     size_hint: (1, .2)
+    padding: 8
+
+    canvas.before:
+        Color:
+            rgba: 0.027, 0.412, 0.698, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
     Button:
         id: profileButton
         text: "Profile"
         size_hint_x: .3
+        background_normal: ''
+        background_color: 50/255, 169/255, 233/255,  1
+
 
     BoxLayout:
+        padding: 8
+        spacing: 4
         orientation: 'vertical'
         Button:
             id: nameButton
             text: "Name"
             size_hint_y: .2
+            background_normal: ''
+            background_color: 50/255, 169/255, 233/255,  1
+
         Button:
             id: statusButton
             text: "Status"
             size_hint_y: .2
+            background_normal: ''
+            background_color: 50/255, 169/255, 233/255,  1
 
 <MenuBar>:
     orientation: 'horizontal'
@@ -107,37 +125,54 @@
     Button:
         text: 'Contact'
         id: contactButton
+        background_normal: ''
+        background_color: 0/255, 168/255, 236/255,  1
+
         on_release: app.root.mainUIScreen.changeScreen('contact')
         on_release: app.root.mainUIScreen.updateContact()
 
     Button:
         text: 'History'
         id: historyButton
+        background_normal: ''
+        background_color: 0/255, 112/255, 158/255,  1
+
         on_release: app.root.mainUIScreen.changeScreen('history')
 
     Button:
         text: 'Setting'
         id: settingButton
+        background_normal: ''
+        background_color: 2/255, 68/255, 118/255,  1
 
 
 
 <ContactComponent>:
+
     orientation: 'horizontal'
     size_hint: 1, None
     nameButton: nameButton
     statusButton: statusButton
     Button:
+        background_normal: ''
+        background_color: 50/255, 169/255, 233/255,  1
         size_hint: .3, 1
         text: 'Pic'
+
+
     BoxLayout:
         orientation: 'vertical'
         Button:
+            background_normal: ''
+            background_color: 94/255, 139/255, 198/255,  1
+
             id: nameButton
             on_release: app.root.current = "ChatroomScreen"
             on_release: app.root.mainUIScreen.setClientTarget(nameButton.text)
 
-
         Button:
+            background_normal: ''
+            background_color: 94/255, 139/255, 198/255,  1
             id: statusButton
 
 
@@ -181,6 +216,14 @@
 <ScreenSlider>:
     anim_move_duration: .3
     anim_cancel_duration: .5
+
+    canvas.before:
+        Color:
+            rgba: 205/255, 205/255, 205/255, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
     contactScreen: contactScreen
     historyScreen: historyScreen
 
@@ -221,12 +264,18 @@
             size_hint: 1, .1
 
             Button:
+                background_normal: ''
+                background_color: 94/255, 139/255, 198/255,  1
+
                 id: roomName
                 text: "Chatroom"
                 size_hint_x: .8
                 on_release: root.updateMessage()
 
             Button:
+                background_normal: ''
+                background_color: 2/255, 68/255, 118/255,  1
+
                 text: "Back"
                 size_hint_x: .2
                 on_release: app.root.current = "MainUIScreen"
@@ -234,6 +283,13 @@
         ScrollView:
             id: scrollView_chat
             size: self.parent.width, self.parent.height
+            canvas.before:
+                Color:
+                    rgba: 205/255, 205/255, 205/255, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
             GridLayout:
                 id: chatContainer
                 cols: 1
@@ -243,12 +299,23 @@
                 height: self.minimum_height
 
         BoxLayout:
+            canvas.before:
+                Color:
+                    rgba: 144/255, 169/255, 214/255, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            padding: 6
             orientation: 'horizontal'
             size_hint: 1, .1
             TextInput:
                 id: messageInput
                 size_hint: .8, 1
             Button:
+                background_normal: ''
+                background_color: 18/255, 102/255, 214/255,  1
+
                 id: sendButton
                 text: "SEND"
                 size_hint: .2, 1

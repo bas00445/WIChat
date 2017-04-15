@@ -34,7 +34,7 @@ class StartupScreen(Screen):
 
     def openHostPopup(self):
         notification = BoxLayout(orientation = "vertical")
-        label = Label(text="Please turn on Hotspot before start hosting.", font_size = "20dp")
+        label = Label(text="Please turn on Hotspot\n    before start hosting", font_size = "20dp")
         closeButton = Button(text="Close")
         startHostButton = Button(text="Start Hosting")
 
@@ -45,7 +45,7 @@ class StartupScreen(Screen):
         notification.add_widget(startHostButton)
         notification.add_widget(closeButton)
 
-        popup = Popup(title='Caution', content=notification, size_hint=(.6, .5), auto_dismiss=True)
+        popup = Popup(title='Caution', content=notification, size_hint=(.8, .5), auto_dismiss=True)
         popup.open()
 
         closeButton.bind(on_press = popup.dismiss)
@@ -155,7 +155,7 @@ class ChatroomScreen(Screen):
         self.chatContainer.clear_widgets()
 
         for msg in self.messageList:
-            messageBox = Label(text=str(msg), size_hint=(1, None))
+            messageBox = Label(text='[color=000000]' + str(msg) + '[/color]', size_hint=(1, None), markup = True)
             self.chatContainer.add_widget(messageBox)
 
     def sendMessageTask(self):
@@ -169,7 +169,7 @@ class ChatroomScreen(Screen):
             WIApp.currentChatroom.addMessage(msgObject)
 
         if self.messageInput.text != "":
-            messageBox = Label(text = string , size_hint = (1, None))
+            messageBox = Label(text = '[color=000000]' + string + '[/color]', size_hint = (1, None), markup = True)
             self.chatContainer.add_widget(messageBox)
 
         self.messageInput.text = ""  ## Clear Message Input
@@ -200,7 +200,7 @@ class ChatroomScreen(Screen):
                     if set(room.getMemberList()) == set(msgObject.getMember()) :
                         room.addMessage(msgObject)
                         if set(room.getMemberList()) == set(WIApp.currentChatroom.getMemberList()):
-                            messageBox = Label(text=str(msgObject), size_hint=(1, None))
+                            messageBox = Label(text='[color=000000]'+str(msgObject) + '[/color]', size_hint=(1, None), markup = True)
                             self.chatContainer.add_widget(messageBox)
 
             WIApp.clientSocket.clearData()
