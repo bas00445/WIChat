@@ -31,7 +31,6 @@ class ServerSocket(threading.Thread):
             print("Server Down: ", e)
 
     def listen(self):
-        print("Get server socket name: ", self.socketServer.getsockname())
         try:
             while True:
                 clientSocket, addr = self.socketServer.accept()
@@ -42,8 +41,6 @@ class ServerSocket(threading.Thread):
                 handler.clientCollector.addHandler(handler)
 
                 time.sleep(0.5) ## Wait a bit for updating value in a Handler object
-                print("From Server: Address list ",handler.clientCollector.getAddrList())
-
 
         except OSError as e:
             print("Server Down: ", e)

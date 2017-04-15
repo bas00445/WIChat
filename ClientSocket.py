@@ -43,8 +43,6 @@ class ClientSocket(threading.Thread):
                 self.tLock.acquire()
                 task = pickle.loads(self.soc.recv(4096))
                 self.dataIncome = task
-                if task.getName() == "Message":
-                    print("Got Message", task.getData())
 
             except Exception as e:
                 print(e)
@@ -75,7 +73,7 @@ class ClientSocket(threading.Thread):
     def run(self):
         while True:
             self.clientMessage = ""
-            time.sleep(0.2)
+            time.sleep(0.1)
 
     def close(self):
         self.shutdown = True

@@ -25,7 +25,6 @@ class Handler(threading.Thread):
                     clientInfo = task.getData()
 
                     if clientInfo.getAddress() not in self.clientCollector.getAddrList():
-                        print(">>Append a new connection:", str(clientInfo) + "\n")
                         self.clientCollector.addClientInfo(clientInfo)
 
                     ### Update contact list to all clients in the server
