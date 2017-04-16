@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 class Message:
     def __init__(self, text, receiverAddrList, memberToSeeMessage, ownerName, **kwargs):
@@ -18,10 +19,10 @@ class Message:
         return self.receiverAddr
 
     def getCurrentTime(self):
-        return str(time.ctime(time.time()))
+        s = str(datetime.now())
+        s = s[0:len(s)-7]
+        return s
 
     def getMember(self):
         return self.memberToSeeMessage
 
-    def __str__(self):
-        return self.text + "\n" + self.currentTime + "\nFrom: " + self.ownerName

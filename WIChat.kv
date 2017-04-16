@@ -159,7 +159,6 @@
 <ContactComponent>:
     orientation: 'horizontal'
     size_hint: 1, None
-
     idButton: idButton
     nameButton: nameButton
     statusButton: statusButton
@@ -186,7 +185,7 @@
 
             id: nameButton
             on_release: app.root.current = "ChatroomScreen"
-            on_release: app.root.mainUIScreen.setClientTarget(nameButton.text)
+            on_release: app.root.mainUIScreen.setClientTarget(idButton.text, nameButton.text)
 
         Button:
             background_normal: ''
@@ -195,28 +194,12 @@
             text: "None"
 
 
-<MessageBox>:
-    size_hint: 1, None
-    orientation: 'horizontal'
-    msgButton: msgButton
-    dateButton: dateButton
-
-    Button:
-        size_hint: .7, None
-        id: msgButton
-        text: "Message"
-
-    Button:
-        size_hint: .3, None
-        id: dateButton
-        text: "Date"
-
-
 <ContactScreen>:
     orientation: 'vertical'
     contactScrollView: contactScrollView
     ScrollView:
         size: self.parent.width, self.parent.height
+        do_scroll_x: False
         GridLayout:
             id: contactScrollView
             cols: 1
@@ -226,11 +209,20 @@
             height: self.minimum_height
 
 
-
 <HistoryScreen>:
-    Label:
-        text: 'HistoryScreen'
-        font_size: 50
+    orientation: 'vertical'
+    historyScrollView: historyScrollView
+    ScrollView:
+        size: self.parent.width, self.parent.height
+        GridLayout:
+            id: historyScrollView
+            cols: 1
+            padding: 10
+            spacing: 10
+            size_hint: 1,None
+            height: self.minimum_height
+
+
 
 <ScreenSlider>:
     anim_move_duration: .3
@@ -265,6 +257,49 @@
             id: menuBar
         ScreenSlider:
             id: screenSlider
+
+<MessageBox>:
+    orientation: 'horizontal'
+    senderName: senderName
+    message: message
+    sendTime: sendTime
+    size_hint: 1, None
+
+    Label:
+        id: senderName
+
+        canvas.before:
+            Color:
+                rgba: 0.804, 0.804, 0.804, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            id: message
+
+            canvas.before:
+                Color:
+                    rgba: 0.804, 0.804, 0.804, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        Label:
+            id: sendTime
+
+            canvas.before:
+                Color:
+                    rgba: 0.804, 0.804, 0.804, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+
+
+
 
 <ChatroomScreen>:
     name: "ChatroomScreen"
@@ -301,6 +336,8 @@
         ScrollView:
             id: scrollView_chat
             size: self.parent.width, self.parent.height
+            do_scroll_x: False
+
             canvas.before:
                 Color:
                     rgba: 0.804, 0.804, 0.804, 1
