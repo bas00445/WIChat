@@ -1,5 +1,6 @@
 class ClientInformation:
     def __init__(self, name, status, address, profilePicture, task="", **kwargs):
+        self.id = address[1]
         self.name = name
         self.status = status
         self.address = address
@@ -18,6 +19,9 @@ class ClientInformation:
 
     def setProfilePic(self, newPic):
         self.profilePicture = newPic
+
+    def getID(self):
+        return str(self.id)
 
     def getTask(self):
         return self.task

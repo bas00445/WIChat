@@ -32,6 +32,13 @@ class ClientCollector:
     def getClientInfoList(self):
         return self.clientInfoList
 
+    def getClientNameList(self):
+        lst = []
+        for client in self.clientInfoList:
+            lst.append(client.getName())
+
+        return lst
+
     def getSocketList(self):
         return self.socketList
 

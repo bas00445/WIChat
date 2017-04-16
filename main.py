@@ -61,6 +61,7 @@ class StartupScreen(Screen):
         self.getInputStartup()
         self.startClient(WIApp.ip, WIApp.port, WIApp.username)
         WIApp.current = "MainUIScreen"
+        WIApp.mainUIScreen.profileArea.idButton.text = WIApp.clientInfo.getID()
         WIApp.mainUIScreen.profileArea.nameButton.text = WIApp.username
         WIApp.chatroomScreen.updateMsg_thread.start()
 
@@ -91,7 +92,6 @@ class MainUIScreen(Screen):
 
     def updateContact(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
-        contactScrollView.clear_widgets()
 
         task = Task("Request ClientInfo", None)
         WIApp.clientSocket.sendTask(task)
@@ -100,15 +100,21 @@ class MainUIScreen(Screen):
 
         if task != None and task.getName() == "Request ClientInfo":
             if task.getData() != None:
+                WIApp.clientInfoList = task.getData()
+
+                widgetNameList = []
+                for child in contactScrollView.children:
+                    widgetNameList.append(child.nameButton.text)
+
                 for client in task.getData():
-                    if client.getName() != WIApp.username:
+                    if client.getName() != WIApp.username and client.getName() not in widgetNameList:
                         c = ContactComponent()
+                        c.idButton.text = "ID: " + client.getID()
                         c.nameButton.text = client.getName()
                         contactScrollView.add_widget(c)
 
-                WIApp.clientInfoList = task.getData()
 
-        WIApp.clientSocket.clearData()
+                WIApp.clientSocket.clearData()
 
     def searchAddrByName(self, targetName):
         for client in WIApp.clientInfoList:
@@ -179,7 +185,7 @@ class ChatroomScreen(Screen):
         if task != None:
 
             if task.getName() == "Message":
-                msgObject = task.getData() # มี address ของคนที่อ่านข้อความได้
+                msgObject = task.getData()
                 targetName = msgObject.getMember()[0]
 
                 currentRoom = WIApp.chatroomCollector.getRoomByMember([WIApp.username, targetName])

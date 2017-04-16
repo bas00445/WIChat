@@ -1,4 +1,3 @@
-
 <WIChat>:
     startupScreen: StartupScreen
     mainUIScreen: MainUIScreen
@@ -77,6 +76,8 @@
 
     orientation: 'horizontal'
     profileButton: profileButton
+
+    idButton: idButton
     nameButton: nameButton
     statusButton: statusButton
     size_hint: (1, .2)
@@ -93,27 +94,35 @@
         id: profileButton
         text: "Profile"
         size_hint_x: .3
-        background_normal: ''
-        background_color: 50/255, 169/255, 233/255,  1
-
+        background_normal: 'backgroundPic.png'
+        background_color: 0.196, 0.663, 0.914,  1
+        border: 30,30,30,30
 
     BoxLayout:
         padding: 8
         spacing: 4
         orientation: 'vertical'
+
+        Button:
+            id: idButton
+            text: "ID"
+            size_hint_y: .2
+            background_normal: ''
+            background_color: 0.196, 0.663, 0.914,  1
+
         Button:
             id: nameButton
             text: "Name"
             size_hint_y: .2
             background_normal: ''
-            background_color: 50/255, 169/255, 233/255,  1
+            background_color: 0.196, 0.663, 0.914,  1
 
         Button:
             id: statusButton
             text: "Status"
             size_hint_y: .2
             background_normal: ''
-            background_color: 50/255, 169/255, 233/255,  1
+            background_color: 0.196, 0.663, 0.914,  1
 
 <MenuBar>:
     orientation: 'horizontal'
@@ -126,7 +135,7 @@
         text: 'Contact'
         id: contactButton
         background_normal: ''
-        background_color: 0/255, 168/255, 236/255,  1
+        background_color: 0, 0.659, 0.925,  1
 
         on_release: app.root.mainUIScreen.changeScreen('contact')
         on_release: app.root.mainUIScreen.updateContact()
@@ -135,7 +144,7 @@
         text: 'History'
         id: historyButton
         background_normal: ''
-        background_color: 0/255, 112/255, 158/255,  1
+        background_color: 0, 0.439, 0.620,  1
 
         on_release: app.root.mainUIScreen.changeScreen('history')
 
@@ -143,28 +152,37 @@
         text: 'Setting'
         id: settingButton
         background_normal: ''
-        background_color: 2/255, 68/255, 118/255,  1
+        background_color: 0.008, 0.267, 0.463,  1
 
 
 
 <ContactComponent>:
-
     orientation: 'horizontal'
     size_hint: 1, None
+
+    idButton: idButton
     nameButton: nameButton
     statusButton: statusButton
+
     Button:
         background_normal: ''
-        background_color: 50/255, 169/255, 233/255,  1
+        background_color: 0.196, 0.663, 0.914,  1
         size_hint: .3, 1
         text: 'Pic'
 
-
     BoxLayout:
         orientation: 'vertical'
+
         Button:
             background_normal: ''
-            background_color: 94/255, 139/255, 198/255,  1
+            background_color: 0.369, 0.545, 0.776, 1
+
+            id: idButton
+
+
+        Button:
+            background_normal: ''
+            background_color: 0.369, 0.545, 0.776, 1
 
             id: nameButton
             on_release: app.root.current = "ChatroomScreen"
@@ -172,8 +190,9 @@
 
         Button:
             background_normal: ''
-            background_color: 94/255, 139/255, 198/255,  1
+            background_color: 0.369, 0.545, 0.776, 1
             id: statusButton
+            text: "None"
 
 
 <MessageBox>:
@@ -219,7 +238,7 @@
 
     canvas.before:
         Color:
-            rgba: 205/255, 205/255, 205/255, 1
+            rgba: 0.804, 0.804, 0.804, 1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -265,7 +284,7 @@
 
             Button:
                 background_normal: ''
-                background_color: 94/255, 139/255, 198/255,  1
+                background_color: 0.369, 0.545, 0.776, 1
 
                 id: roomName
                 text: "Chatroom"
@@ -274,8 +293,7 @@
 
             Button:
                 background_normal: ''
-                background_color: 2/255, 68/255, 118/255,  1
-
+                background_color: 0.008, 0.267, 0.463, 1
                 text: "Back"
                 size_hint_x: .2
                 on_release: app.root.current = "MainUIScreen"
@@ -285,7 +303,7 @@
             size: self.parent.width, self.parent.height
             canvas.before:
                 Color:
-                    rgba: 205/255, 205/255, 205/255, 1
+                    rgba: 0.804, 0.804, 0.804, 1
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -301,7 +319,7 @@
         BoxLayout:
             canvas.before:
                 Color:
-                    rgba: 144/255, 169/255, 214/255, 1
+                    rgba: 0.565, 0.663, 0.840, 1
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -314,10 +332,11 @@
                 size_hint: .8, 1
             Button:
                 background_normal: ''
-                background_color: 18/255, 102/255, 214/255,  1
+                background_color: 0.071, 0.4, 0.840, 1
 
                 id: sendButton
                 text: "SEND"
                 size_hint: .2, 1
                 on_release: app.root.clientSocket.setText(messageInput.text)
                 on_release: root.sendMessageTask()
+
