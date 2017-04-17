@@ -28,13 +28,15 @@
         BoxLayout:
             orientation: 'horizontal'
             Label:
-                text: "NAME"
+                text: "NICKNAME\n(Max length = 8)"
                 size_hint_x: .3
+                halign: 'center'
             TextInput:
                 id: nameInput
                 text: "Untitiled"
                 multiline: False
                 size_hint_x: .7
+                input_filter: lambda text, from_undo: text[:8 - len(self.text)]
 
         BoxLayout:
             orientation: 'horizontal'
@@ -197,23 +199,38 @@
 <ContactScreen>:
     orientation: 'vertical'
     contactScrollView: contactScrollView
-    ScrollView:
-        size: self.parent.width, self.parent.height
-        do_scroll_x: False
-        GridLayout:
-            id: contactScrollView
-            cols: 1
-            padding: 10
-            spacing: 10
-            size_hint: 1,None
-            height: self.minimum_height
+
+    Accordion:
+        orientation: 'vertical'
+
+        AccordionItem:
+            title: 'Available Groups'
+            Button:
+                text: 'Group Layout'
+
+        AccordionItem:
+            title: 'Available Contacts'
+
+            ScrollView:
+                size: self.parent.width, self.parent.height
+                GridLayout:
+                    id: contactScrollView
+                    cols: 1
+                    padding: 10
+                    spacing: 10
+                    size_hint: 1,None
+                    height: self.minimum_height
+
+
 
 
 <HistoryScreen>:
     orientation: 'vertical'
     historyScrollView: historyScrollView
+
     ScrollView:
         size: self.parent.width, self.parent.height
+        size_hint: 1, None
         GridLayout:
             id: historyScrollView
             cols: 1
@@ -221,6 +238,43 @@
             spacing: 10
             size_hint: 1,None
             height: self.minimum_height
+
+<HistoryComponent>:
+    orientation: 'horizontal'
+    size_hint: 1, None
+    idButton: idButton
+    nameButton: nameButton
+    lastestMessage: lastestMessage
+
+    Button:
+        background_normal: ''
+        background_color: 0.196, 0.663, 0.914,  1
+        size_hint: .3, 1
+        text: 'Pic'
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        Button:
+            background_normal: ''
+            background_color: 0.369, 0.545, 0.776, 1
+
+            id: idButton
+
+
+        Button:
+            background_normal: ''
+            background_color: 0.369, 0.545, 0.776, 1
+
+            id: nameButton
+            on_release: app.root.current = "ChatroomScreen"
+            on_release: app.root.mainUIScreen.setClientTarget(idButton.text, nameButton.text)
+
+        Button:
+            background_normal: ''
+            background_color: 0.369, 0.545, 0.776, 1
+            id: lastestMessage
+            text: "None"
 
 
 
@@ -296,9 +350,6 @@
                 Rectangle:
                     pos: self.pos
                     size: self.size
-
-
-
 
 
 <ChatroomScreen>:
