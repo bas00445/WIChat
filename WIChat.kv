@@ -388,6 +388,8 @@
             id: scrollView_chat
             size: self.parent.width, self.parent.height
             do_scroll_x: False
+            bar_width: 10
+            bar_color: (0.000, 0.643, 0.616, 1)
 
             canvas.before:
                 Color:
@@ -415,9 +417,14 @@
             padding: 6
             orientation: 'horizontal'
             size_hint: 1, .1
+
             TextInput:
                 id: messageInput
                 size_hint: .8, 1
+                input_filter: lambda text, from_undo: text[:28 - len(self.text)]
+                multiline: False
+
+
             Button:
                 background_normal: ''
                 background_color: 0.071, 0.4, 0.840, 1
@@ -427,4 +434,6 @@
                 size_hint: .2, 1
                 on_release: app.root.clientSocket.setText(messageInput.text)
                 on_release: root.sendMessageTask()
+                on_release: root.messageInput.focus = True
+
 

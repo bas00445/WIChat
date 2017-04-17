@@ -7,9 +7,14 @@ class ChatroomCollector:
             if room.getRoomName() == roomName:
                 return room
 
-    def getRoomByMember(self, memberList):
+    def getRoomByMemberName(self, memberNameList):
         for room in self.chatroomList:
-            if set(room.getMemberList()) == set(memberList):
+            if set(room.getMemberNameList()) == set(memberNameList):
+                return room
+
+    def getRoomByMemberID(self, memberIDList):
+        for room in self.chatroomList:
+            if set(room.getMemberIDList()) == set(memberIDList):
                 return room
 
     def getChatroomList(self):

@@ -3,7 +3,9 @@ class Chatroom:
         self.roomName = roomName
         self.msgCollector = [] ## Message obj
         self.fileCollector = []  ## File obj
-        self.memberList = [] ## ClientName
+        self.memberNameList = [] ## ClientName
+        self.memberIDList = []  ## ClientName
+
 
     def getRoomName(self):
         return self.roomName
@@ -14,8 +16,11 @@ class Chatroom:
     def getFileCollector(self):
         return self.fileCollector
 
-    def getMemberList(self):
-        return self.memberList
+    def getMemberNameList(self):
+        return self.memberNameList
+
+    def getMemberIDList(self):
+        return self.memberIDList
 
     def setRoomName(self, name):
         self.roomName = name
@@ -26,8 +31,11 @@ class Chatroom:
     def addFile(self, fileObject):
         self.fileCollector.append(fileObject)
 
-    def addMember(self, newMember):
-        self.memberList.append(newMember)
+    def addMemberName(self, newMemberName):
+        self.memberNameList.append(newMemberName)
+
+    def addMemberID(self, newMemberID):
+        self.memberIDList.append(newMemberID)
 
     def __str__(self):
         s = "Room name: " + self.roomName + "\n"
