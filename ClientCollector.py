@@ -52,7 +52,7 @@ class ClientCollector:
         return self.addressList
 
     def getAllClientInfo(self):
-        s = ""
+        s = "\n"
 
         for client in self.clientInfoList:
             s += "\t" + str(client) + "\n"

@@ -55,7 +55,6 @@ class Handler(threading.Thread):
         except ConnectionResetError:
             self.exit = True
             self.soc.close()
-            self.clientCollector.removeClientInfo(clientInfo)
             print(self.addr, " has been disconnected")
 
 

@@ -102,12 +102,14 @@
 
     BoxLayout:
         padding: 8
-        spacing: 4
+        spacing: 1
         orientation: 'vertical'
 
         Button:
             id: idButton
             text: "ID"
+            pos_hint: {'x': .125}
+            size_hint_x: .8
             size_hint_y: .2
             background_normal: ''
             background_color: 0.196, 0.663, 0.914,  1
@@ -115,6 +117,8 @@
         Button:
             id: nameButton
             text: "Name"
+            pos_hint: {'x': .125}
+            size_hint_x: .8
             size_hint_y: .2
             background_normal: ''
             background_color: 0.196, 0.663, 0.914,  1
@@ -122,6 +126,8 @@
         Button:
             id: statusButton
             text: "Status"
+            pos_hint: {'x': .125}
+            size_hint_x: .8
             size_hint_y: .2
             background_normal: ''
             background_color: 0.196, 0.663, 0.914,  1
@@ -140,7 +146,6 @@
         background_color: 0, 0.659, 0.925,  1
 
         on_release: app.root.mainUIScreen.changeScreen('contact')
-        on_release: app.root.mainUIScreen.updateContact()
 
     Button:
         text: 'History'

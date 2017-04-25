@@ -67,6 +67,7 @@ class StartupScreen(Screen):
         WIApp.mainUIScreen.profileArea.idButton.text = WIApp.clientInfo.getID()
         WIApp.mainUIScreen.profileArea.nameButton.text = WIApp.username
         WIApp.chatroomScreen.updateMsg_thread.start()
+        WIApp.mainUIScreen.updateContact_thread.start()
 
     def startHosting(self, instance):
         self.getInputStartup()
@@ -89,6 +90,8 @@ class MainUIScreen(Screen):
         super(MainUIScreen, self).__init__(**kwargs)
         self.listofScreen = ["contact", "history"]
         self.curIndxScreen = 0
+        self.updateContact_thread = threading.Thread(target = self.updateContact)
+        self.tLock = threading.Lock()
 
     def changeScreen(self, name):
         target_idx = self.listofScreen.index(name)
@@ -96,22 +99,24 @@ class MainUIScreen(Screen):
 
     def updateContact(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
-        contactScrollView.clear_widgets()
+        while True:
+            task = WIApp.clientSocket.getDataIncome()
 
-        task = Task("Request ClientInfo", None)
-        WIApp.clientSocket.sendTask(task)
-        time.sleep(0.03)
-        task = WIApp.clientSocket.getDataIncome()  ### Can have multiple types of task -> Use if-else
+            if task != None and task.getName() == "ClientInfo":
+                if task.getData() != None:
+                    WIApp.clientInfoList = task.getData()
+                    contactScrollView.clear_widgets()
+                    print("Cleared contact!")
+                    for client in task.getData():
+                        if client.getName() != WIApp.username:
+                            c = ContactComponent(client.getID(), client.getName())
+                            contactScrollView.add_widget(c)
+                            print(c)
 
-        if task != None and task.getName() == "Request ClientInfo":
-            if task.getData() != None:
-                WIApp.clientInfoList = task.getData()
-                for client in task.getData():
-                    if client.getName() != WIApp.username:
-                        c = ContactComponent(client.getID(), client.getName())
-                        contactScrollView.add_widget(c)
+                    WIApp.clientSocket.clearData()
 
-                WIApp.clientSocket.clearData()
+            time.sleep(0.1)
+
 
     def searchAddrByName(self, targetName):
         for client in WIApp.clientInfoList:
@@ -194,24 +199,33 @@ class ChatroomScreen(Screen):
             self.chatContainer.add_widget(messageBox)
             historyScrollView = WIApp.mainUIScreen.screenSlider.historyScreen.historyScrollView
 
+            print("Inside sendMessageTask->: ")
             for child in historyScrollView.children:
+                print("ID: ", child.idButton.text)
+
                 if child.idButton.text == WIApp.clientTargetID:
+                    print("Remove Child with: ", child.idButton.text)
                     historyScrollView.remove_widget(child)
 
             historyScrollView.add_widget(
                 HistoryComponent(WIApp.clientTargetAddress[1], WIApp.clientTargetName, self.messageInput.text))
             historyScrollView.children = historyScrollView.children[::-1]
 
+            print("After update: ")
+
+            for child in historyScrollView.children:
+                print("ID: ", child.idButton.text)
+
         self.messageInput.text = ""  ## Clear Message Input
 
 
     def createMessageBox_partner(self, msg, colorOwner, colorMsg, fontSize):
-        messageBox = BoxLayout(size_hint=(1, None), orientation="horizontal")
+        messageBox = BoxLayout(size_hint=(1, None), orientation="horizontal", height = 150)
         senderButton = Button(text='[color=' + str(self.colorPartnerText) + ']' + msg.getOwnerName() + '[/color]', size_hint=(0.3, 1), markup=True, background_normal='', background_color=colorOwner, font_size=fontSize)
         messageBox.add_widget(senderButton)
         temp = BoxLayout(orientation="vertical")
-        textButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getText() + '[/color]', markup=True, background_normal='', background_color=colorMsg, font_size=fontSize)
-        timeButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getCurrentTime() + '[/color]', markup=True, background_normal='', background_color=colorMsg, font_size=fontSize)
+        textButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getText() + '[/color]', markup=True, background_normal='', background_color=colorMsg, font_size=fontSize, size_hint_y = 0.8)
+        timeButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getCurrentTime() + '[/color]', markup=True, background_normal='', background_color=colorMsg, font_size=fontSize/1.5, size_hint_y = 0.2)
         temp.add_widget(textButton)
         temp.add_widget(timeButton)
         messageBox.add_widget(temp)
@@ -219,10 +233,10 @@ class ChatroomScreen(Screen):
         return messageBox
 
     def createMessageBox_owner(self, msg, colorOwner, colorMsg, fontSize):
-        messageBox = BoxLayout(size_hint=(1, None), orientation="horizontal")
+        messageBox = BoxLayout(size_hint=(1, None), orientation="horizontal", height = 150)
         temp = BoxLayout(orientation="vertical")
-        textButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getText() + '[/color]', markup=True, background_normal='', background_color=colorMsg, font_size=fontSize)
-        timeButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getCurrentTime() + '[/color]', markup=True, background_normal='', background_color=colorMsg, font_size=fontSize)
+        textButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getText() + '[/color]', markup=True, background_normal='', background_color=colorMsg, font_size=fontSize, size_hint_y = 0.8)
+        timeButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getCurrentTime() + '[/color]', markup=True, background_normal='', background_color=colorMsg, font_size=fontSize/1.5, size_hint_y = 0.2)
         temp.add_widget(textButton)
         temp.add_widget(timeButton)
         messageBox.add_widget(temp)
@@ -274,8 +288,13 @@ class ChatroomScreen(Screen):
 
                             self.chatContainer.add_widget(messageBox)
 
+                        print("Inside updateMessage-> ")
+
                         for child in historyScrollView.children:
+                            print("ID: ", child.idButton.text)
+
                             if child.idButton.text == msg.getOwnerID():
+                                print("Remove Child with: ", child.idButton.text)
                                 historyScrollView.remove_widget(child)
 
                         historyScrollView.add_widget(
@@ -284,7 +303,9 @@ class ChatroomScreen(Screen):
 
                         historyScrollView.children = historyScrollView.children[::-1]
 
-            WIApp.clientSocket.clearData()
+
+
+                WIApp.clientSocket.clearData()
 
 
 class ProfileArea(BoxLayout):
