@@ -15,6 +15,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.carousel import Carousel
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.properties import *
 
 #####################################
 global WIApp
@@ -84,7 +85,6 @@ class StartupScreen(Screen):
         initialTask = Task("Submit ClientInfo", WIApp.clientInfo)
         WIApp.clientSocket.sendTask(initialTask)
 
-
 class MainUIScreen(Screen):
     def __init__(self, **kwargs):
         super(MainUIScreen, self).__init__(**kwargs)
@@ -99,21 +99,29 @@ class MainUIScreen(Screen):
 
     def updateContact(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
+
         while True:
             task = WIApp.clientSocket.getDataIncome()
 
-            if task != None and task.getName() == "ClientInfo":
-                if task.getData() != None:
+            if task != None :
+                ## Receive all contacts at the first time of logging in
+                if task.getName() == "All ClientInfo":
                     WIApp.clientInfoList = task.getData()
                     contactScrollView.clear_widgets()
-                    print("Cleared contact!")
+
+                    idx = 0 #Index of contact
                     for client in task.getData():
                         if client.getName() != WIApp.username:
-                            c = ContactComponent(client.getID(), client.getName())
-                            contactScrollView.add_widget(c)
-                            print(c)
+                            c = ContactComponent()
+                            c.idButton.text = str(client.getID())
+                            c.nameButton.text = client.getName()
+                            contactScrollView.add_widget(c, idx)
+                            idx += 1
 
                     WIApp.clientSocket.clearData()
+
+                if task.getName() == "AllClientInfo":
+                    pass
 
             time.sleep(0.1)
 
@@ -266,7 +274,6 @@ class ChatroomScreen(Screen):
                     newChatroom.addMemberID(targetID)
                     WIApp.chatroomCollector.addNewChatroom(newChatroom)
 
-
                 if WIApp.currentChatroom == None:
                     WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
 
@@ -333,10 +340,8 @@ class ScreenSlider(Carousel):
 
 
 class ContactComponent(BoxLayout):
-    def __init__(self, id, name, **kwargs):
+    def __init__(self, **kwargs):
         super(BoxLayout, self).__init__(**kwargs)
-        self.idButton.text = str(id)
-        self.nameButton.text = name
 
 
 class HistoryComponent(BoxLayout):

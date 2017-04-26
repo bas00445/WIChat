@@ -19,6 +19,7 @@ class Handler(threading.Thread):
     def run(self):
         try:
             while not self.exit:
+
                 task = pickle.loads(self.soc.recv(4096))
 
                 if task.getName() == "Submit ClientInfo":
@@ -29,9 +30,10 @@ class Handler(threading.Thread):
 
                     ### Update contact list to all clients in the server
                     for soc in self.clientCollector.getSocketList():
-                        task_update_client = Task("ClientInfo", self.clientCollector.getClientInfoList())
+                        task_update_client = Task("All ClientInfo", self.clientCollector.getClientInfoList())
                         obj = pickle.dumps(task_update_client)
                         soc.send(obj)
+
 
                 elif task.getName() == "Request ClientInfo":
                     for soc in self.clientCollector.getSocketList():
@@ -56,7 +58,6 @@ class Handler(threading.Thread):
             self.exit = True
             self.soc.close()
             print(self.addr, " has been disconnected")
-
 
 
 

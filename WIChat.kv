@@ -162,10 +162,10 @@
         background_color: 0.008, 0.267, 0.463,  1
 
 
-
 <ContactComponent>:
     orientation: 'horizontal'
-    size_hint: 1, None
+    size_hint: None, None
+    width: app.root.mainUIScreen.width
     idButton: idButton
     nameButton: nameButton
     statusButton: statusButton
@@ -218,15 +218,13 @@
 
             ScrollView:
                 size: self.parent.width, self.parent.height
+                size_hint: None,None
                 GridLayout:
                     id: contactScrollView
                     cols: 1
-                    padding: 10
-                    spacing: 10
-                    size_hint: 1,None
+                    spacing: 5
+                    size_hint: None,None
                     height: self.minimum_height
-
-
 
 
 <HistoryScreen>:
