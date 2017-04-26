@@ -149,6 +149,8 @@ class MainUIScreen(Screen):
 
         ### Choose the current chatroom to load and save the history chat
         WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
+
+        print("Type: ", WIApp.currentChatroom)
         WIApp.chatroomScreen.loadDataChatroom(WIApp.currentChatroom)
 
 
@@ -164,6 +166,10 @@ class ChatroomScreen(Screen):
         self.colorMsgBackground = (0.894, 0.910, 0.922, 1)
         self.colorOwnerBackground = (0.192, 0.263, 0.592, 1)
         self.colorPartnerBackground = (0.745, 0.945, 0.549, 1)
+
+        self.lengthOfHistoryChat = 0
+
+
 
     def on_enter(self, *args):
         WIApp.clientSocket.setText(self.messageInput.text)
@@ -207,22 +213,16 @@ class ChatroomScreen(Screen):
             self.chatContainer.add_widget(messageBox)
             historyScrollView = WIApp.mainUIScreen.screenSlider.historyScreen.historyScrollView
 
-            print("Inside sendMessageTask->: ")
             for child in historyScrollView.children:
                 print("ID: ", child.idButton.text)
 
                 if child.idButton.text == WIApp.clientTargetID:
-                    print("Remove Child with: ", child.idButton.text)
                     historyScrollView.remove_widget(child)
 
-            historyScrollView.add_widget(
-                HistoryComponent(WIApp.clientTargetAddress[1], WIApp.clientTargetName, self.messageInput.text))
-            historyScrollView.children = historyScrollView.children[::-1]
 
-            print("After update: ")
-
-            for child in historyScrollView.children:
-                print("ID: ", child.idButton.text)
+            # historyScrollView.add_widget(
+            #     HistoryComponent(WIApp.clientTargetAddress[1], WIApp.clientTargetName, self.messageInput.text))
+            # historyScrollView.children = historyScrollView.children[::-1]
 
         self.messageInput.text = ""  ## Clear Message Input
 
@@ -253,7 +253,6 @@ class ChatroomScreen(Screen):
 
         return messageBox
 
-
     def updateMessage(self):
         task = WIApp.clientSocket.getDataIncome()
         if task != None:
@@ -261,7 +260,6 @@ class ChatroomScreen(Screen):
                 msg = task.getData()
                 targetName = msg.getOwnerName()
                 targetID = msg.getOwnerID()
-
 
                 currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
                 if currentRoom not in WIApp.chatroomCollector.getChatroomList():
@@ -284,6 +282,7 @@ class ChatroomScreen(Screen):
                     if set(room.getMemberIDList()) == set(msg.getMemberIDList()):
                         room.addMessage(msg)
 
+                        ## If got any message
                         if set(room.getMemberIDList()) == set(WIApp.currentChatroom.getMemberIDList()):
                             if msg.getOwnerID() != WIApp.clientInfo.getID():
                                 messageBox = self.createMessageBox_partner(msg, self.colorPartnerBackground,
@@ -295,21 +294,14 @@ class ChatroomScreen(Screen):
 
                             self.chatContainer.add_widget(messageBox)
 
-                        print("Inside updateMessage-> ")
-
+                        ## Add a history component to the history's scroll view
                         for child in historyScrollView.children:
-                            print("ID: ", child.idButton.text)
-
                             if child.idButton.text == msg.getOwnerID():
-                                print("Remove Child with: ", child.idButton.text)
                                 historyScrollView.remove_widget(child)
 
-                        historyScrollView.add_widget(
-                            HistoryComponent(msg.getOwnerID(), msg.getOwnerName(),
-                                             msg.getText()))
-
-                        historyScrollView.children = historyScrollView.children[::-1]
-
+                        historyComp = HistoryComponent(msg.getOwnerID(), msg.getOwnerName(), msg.getText())
+                        historyScrollView.add_widget(historyComp, self.lengthOfHistoryChat)
+                        self.lengthOfHistoryChat += 1
 
 
                 WIApp.clientSocket.clearData()

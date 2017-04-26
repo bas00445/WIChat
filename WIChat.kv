@@ -200,7 +200,6 @@
             id: statusButton
             text: "None"
 
-
 <ContactScreen>:
     orientation: 'vertical'
     contactScrollView: contactScrollView
@@ -233,18 +232,19 @@
 
     ScrollView:
         size: self.parent.width, self.parent.height
-        size_hint: 1, None
+        size_hint: None,None
         GridLayout:
             id: historyScrollView
             cols: 1
-            padding: 10
-            spacing: 10
-            size_hint: 1,None
+            spacing: 5
+            size_hint: None,None
             height: self.minimum_height
 
 <HistoryComponent>:
     orientation: 'horizontal'
-    size_hint: 1, None
+    size_hint: None, None
+    width: app.root.mainUIScreen.width
+
     idButton: idButton
     nameButton: nameButton
     lastestMessage: lastestMessage

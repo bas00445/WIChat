@@ -5,7 +5,10 @@ class Chatroom:
         self.fileCollector = []  ## File obj
         self.memberNameList = [] ## ClientName
         self.memberIDList = []  ## ClientName
+        self.lengthOfData = 0
 
+    def getLengthOfData(self):
+        return self.lengthOfData
 
     def getRoomName(self):
         return self.roomName
@@ -27,9 +30,11 @@ class Chatroom:
 
     def addMessage(self, msgObject):
         self.msgCollector.append(msgObject)
+        self.lengthOfData += 1
 
     def addFile(self, fileObject):
         self.fileCollector.append(fileObject)
+        self.lengthOfData += 1
 
     def addMemberName(self, newMemberName):
         self.memberNameList.append(newMemberName)
@@ -37,10 +42,15 @@ class Chatroom:
     def addMemberID(self, newMemberID):
         self.memberIDList.append(newMemberID)
 
+    def removeMsg(self, targetMsg):
+        for msg in self.msgCollector():
+            if msg.getText() == targetMsg.getText():
+                self.msgCollector.remove(msg)
+
     def __str__(self):
         s = "Room name: " + self.roomName + "\n"
         s += "Member: \n"
-        for member in self.memberList:
+        for member in self.memberNameList:
             s += "\t" + member + "\n"
 
         return s
