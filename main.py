@@ -97,6 +97,34 @@ class MainUIScreen(Screen):
         target_idx = self.listofScreen.index(name)
         self.screenSlider.load_slide(self.screenSlider.slides[target_idx])
 
+    def isNewHisComp(self, container, obj):
+        for element in container:
+            if element.idButton.text == obj.idButton.text:
+                return False
+
+        return True
+
+    def move_to_front(self, key, mylist):
+        mylist.remove(key)
+        mylist.insert(len(mylist), key)
+
+    def updateHistoryType_1(self, msg):
+        historyScrollView = self.screenSlider.historyScreen.historyScrollView
+        historyComp = HistoryComponent(WIApp.clientTargetID, WIApp.clientTargetName, msg.getText())
+
+        ## Add a new History component to its scroll view
+        if self.isNewHisComp(historyScrollView.children, historyComp) == True:
+            print("Add new History")
+            historyScrollView.add_widget(historyComp, len(historyScrollView.children))
+
+        ## If it already exist, rotate the lastest to the front
+        elif self.isNewHisComp(historyScrollView.children, historyComp) == False:
+            for i in range(len(historyScrollView.children)):
+                if historyScrollView.children[i].idButton.text == WIApp.clientTargetID:
+                    historyScrollView.children[i].lastestMessage.text = msg.getText()
+                    self.move_to_front(historyScrollView.children[i], historyScrollView.children)
+                    break
+
     def updateContact(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
 
@@ -149,8 +177,6 @@ class MainUIScreen(Screen):
 
         ### Choose the current chatroom to load and save the history chat
         WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
-
-        print("Type: ", WIApp.currentChatroom)
         WIApp.chatroomScreen.loadDataChatroom(WIApp.currentChatroom)
 
 
@@ -168,8 +194,6 @@ class ChatroomScreen(Screen):
         self.colorPartnerBackground = (0.745, 0.945, 0.549, 1)
 
         self.lengthOfHistoryChat = 0
-
-
 
     def on_enter(self, *args):
         WIApp.clientSocket.setText(self.messageInput.text)
@@ -196,6 +220,7 @@ class ChatroomScreen(Screen):
 
             self.chatContainer.add_widget(messageBox)
 
+
     def sendMessageTask(self):
         if self.messageInput.text == "":
             return None
@@ -211,18 +236,9 @@ class ChatroomScreen(Screen):
         if self.messageInput.text != "":
             messageBox = self.createMessageBox_owner(msg, self.colorOwnerBackground, self.colorMsgBackground, self.msgFontSize)
             self.chatContainer.add_widget(messageBox)
-            historyScrollView = WIApp.mainUIScreen.screenSlider.historyScreen.historyScrollView
 
-            for child in historyScrollView.children:
-                print("ID: ", child.idButton.text)
+            WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
 
-                if child.idButton.text == WIApp.clientTargetID:
-                    historyScrollView.remove_widget(child)
-
-
-            # historyScrollView.add_widget(
-            #     HistoryComponent(WIApp.clientTargetAddress[1], WIApp.clientTargetName, self.messageInput.text))
-            # historyScrollView.children = historyScrollView.children[::-1]
 
         self.messageInput.text = ""  ## Clear Message Input
 
@@ -300,9 +316,7 @@ class ChatroomScreen(Screen):
                                 historyScrollView.remove_widget(child)
 
                         historyComp = HistoryComponent(msg.getOwnerID(), msg.getOwnerName(), msg.getText())
-                        historyScrollView.add_widget(historyComp, self.lengthOfHistoryChat)
-                        self.lengthOfHistoryChat += 1
-
+                        historyScrollView.add_widget(historyComp, len(historyScrollView.children))
 
                 WIApp.clientSocket.clearData()
 
@@ -338,7 +352,7 @@ class ContactComponent(BoxLayout):
 
 class HistoryComponent(BoxLayout):
     def __init__(self, id, name, lastestMsg, **kwargs):
-        super(BoxLayout, self).__init__(**kwargs)
+        BoxLayout.__init__(self) ## This one must use syntax like this
         self.idButton.text = str(id)
         self.nameButton.text = name
         self.lastestMessage.text = lastestMsg
@@ -370,7 +384,6 @@ class WIChat(ScreenManager):
         self.currentChatroom = None
         self.clientTargetName = None
         self.clientTargetID = None
-
 
 class WIChatApp(App):
     def build(self):

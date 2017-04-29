@@ -20,7 +20,7 @@ class Handler(threading.Thread):
         try:
             while not self.exit:
 
-                task = pickle.loads(self.soc.recv(4096))
+                task = pickle.loads(self.soc.recv(16384))
 
                 if task.getName() == "Submit ClientInfo":
                     clientInfo = task.getData()
