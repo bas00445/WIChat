@@ -1,4 +1,7 @@
+#:import SwapTransition kivy.uix.screenmanager.SwapTransition
+
 <WIChat>:
+
     startupScreen: StartupScreen
     mainUIScreen: MainUIScreen
     chatroomScreen: ChatroomScreen
@@ -209,8 +212,13 @@
 
         AccordionItem:
             title: 'Available Groups'
-            Button:
-                text: 'Group Layout'
+
+            BoxLayout:
+                orientation: 'vertical'
+
+                Button:
+                    id: createGButton
+                    text: 'Group Layout'
 
         AccordionItem:
             title: 'Available Contacts'

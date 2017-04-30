@@ -6,6 +6,7 @@ import time
 from kivy.animation import Animation
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import SwapTransition
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
@@ -75,6 +76,8 @@ class StartupScreen(Screen):
         WIApp.serverSocket = ServerSocket(WIApp.ip, WIApp.port)
         WIApp.serverSocket.start()
 
+
+    ### For Single Chat ###
     def startClient(self, ip, port, username):
         WIApp.clientSocket = ClientSocket(ip, int(port), username)  ## Start client socket loop
         WIApp.clientSocket.connect()
@@ -123,7 +126,26 @@ class MainUIScreen(Screen):
                 if historyScrollView.children[i].idButton.text == WIApp.clientTargetID:
                     historyScrollView.children[i].lastestMessage.text = msg.getText()
                     self.move_to_front(historyScrollView.children[i], historyScrollView.children)
-                    break
+
+    ## When got incoming message
+    def updateHistoryType_2(self, msg):
+        historyScrollView = self.screenSlider.historyScreen.historyScrollView
+        historyComp = HistoryComponent(msg.getOwnerID(), msg.getOwnerName(), msg.getText())
+
+        ## Add a new History component to its scroll view
+        if self.isNewHisComp(historyScrollView.children, historyComp) == True:
+            print("Add new History")
+            historyScrollView.add_widget(historyComp, len(historyScrollView.children))
+
+        ## If it already exist, rotate the lastest to the front
+        elif self.isNewHisComp(historyScrollView.children, historyComp) == False:
+            for i in range(len(historyScrollView.children)):
+                if historyScrollView.children[i].idButton.text == msg.getOwnerID():
+                    historyScrollView.children[i].lastestMessage.text = msg.getText()
+                    self.move_to_front(historyScrollView.children[i], historyScrollView.children)
+
+    def createNewGroup(self):
+        groupScrollView = self.screenSlider.contactScreen.groupScrollView.add_widget(Button(text="Hello", size_hint=(1, None)))
 
     def updateContact(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
@@ -147,9 +169,6 @@ class MainUIScreen(Screen):
                             idx += 1
 
                     WIApp.clientSocket.clearData()
-
-                if task.getName() == "AllClientInfo":
-                    pass
 
             time.sleep(0.1)
 
@@ -195,13 +214,15 @@ class ChatroomScreen(Screen):
 
         self.lengthOfHistoryChat = 0
 
+        self.tLock = threading.Lock()
+
     def on_enter(self, *args):
         WIApp.clientSocket.setText(self.messageInput.text)
         self.sendMessageTask()
         self.messageInput.focus = True
 
     def receiverThread(self):
-        time.sleep(1)
+        time.sleep(2)
         while True:
             self.updateMessage()
             time.sleep(0.1)
@@ -291,12 +312,11 @@ class ChatroomScreen(Screen):
                 if WIApp.currentChatroom == None:
                     WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
 
-                historyScrollView = WIApp.mainUIScreen.screenSlider.historyScreen.historyScrollView
-
                 #### Got the message while talking to another chatroom #####
                 for room in WIApp.chatroomCollector.getChatroomList():
                     if set(room.getMemberIDList()) == set(msg.getMemberIDList()):
                         room.addMessage(msg)
+                        print("Got msg")
 
                         ## If got any message
                         if set(room.getMemberIDList()) == set(WIApp.currentChatroom.getMemberIDList()):
@@ -310,15 +330,11 @@ class ChatroomScreen(Screen):
 
                             self.chatContainer.add_widget(messageBox)
 
-                        ## Add a history component to the history's scroll view
-                        for child in historyScrollView.children:
-                            if child.idButton.text == msg.getOwnerID():
-                                historyScrollView.remove_widget(child)
+                        WIApp.mainUIScreen.updateHistoryType_2(msg)
 
-                        historyComp = HistoryComponent(msg.getOwnerID(), msg.getOwnerName(), msg.getText())
-                        historyScrollView.add_widget(historyComp, len(historyScrollView.children))
 
                 WIApp.clientSocket.clearData()
+
 
 
 class ProfileArea(BoxLayout):
@@ -347,7 +363,7 @@ class ScreenSlider(Carousel):
 
 class ContactComponent(BoxLayout):
     def __init__(self, **kwargs):
-        super(BoxLayout, self).__init__(**kwargs)
+        BoxLayout.__init__(self)
 
 
 class HistoryComponent(BoxLayout):
@@ -361,7 +377,6 @@ class HistoryComponent(BoxLayout):
 class MessageBox(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxLayout, self).__init__(**kwargs)
-
 
 #########################################################
 

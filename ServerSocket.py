@@ -15,6 +15,7 @@ class ServerSocket(threading.Thread):
         self.server = ((ip, port))
         self.maximumClient = maximumClient
         self.clientCollector = ClientCollector()
+        self.setDaemon(True)
 
     def run(self):
         self.startServer()

@@ -20,7 +20,7 @@ class Handler(threading.Thread):
         try:
             while not self.exit:
 
-                task = pickle.loads(self.soc.recv(16384))
+                task = pickle.loads(self.soc.recv(4096))
 
                 if task.getName() == "Submit ClientInfo":
                     clientInfo = task.getData()
@@ -34,15 +34,7 @@ class Handler(threading.Thread):
                         obj = pickle.dumps(task_update_client)
                         soc.send(obj)
 
-
-                elif task.getName() == "Request ClientInfo":
-                    for soc in self.clientCollector.getSocketList():
-                        task_update_client = Task("Request ClientInfo", self.clientCollector.getClientInfoList())
-                        obj = pickle.dumps(task_update_client)
-                        soc.send(obj)
-
-
-                elif task.getName() == "Message":
+                if task.getName() == "Message":
                     msgObject = task.getData()
                     for soc in self.clientCollector.getSocketList():
                         receiverAddrList = msgObject.getReceiverAddr()
