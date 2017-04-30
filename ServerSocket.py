@@ -29,7 +29,7 @@ class ServerSocket(threading.Thread):
             print("Server is ready for connection.")
             self.listen()
         except OSError as e:
-            print("Server Down: ", e)
+            print("\n<<< Server is already working >>>")
 
     def listen(self):
         try:
@@ -44,6 +44,6 @@ class ServerSocket(threading.Thread):
 
                 time.sleep(0.5) ## Wait a bit for updating value in a Handler object
 
-        except OSError as e:
-            print("Server Down: ", e)
+        except OSError:
+            print("The port is not available")
 

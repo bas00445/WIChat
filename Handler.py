@@ -16,6 +16,13 @@ class Handler(threading.Thread):
         self.addr = addr
         self.exit = False
 
+    def notifiyAll(self):
+        for soc in self.clientCollector.getSocketList():
+            task_update_client = Task("Some client disconnected", self.clientCollector.getClientInfoList())
+            obj = pickle.dumps(task_update_client)
+            soc.send(obj)
+
+
     def run(self):
         try:
             while not self.exit:
@@ -36,9 +43,9 @@ class Handler(threading.Thread):
 
                 if task.getName() == "Message":
                     msgObject = task.getData()
-                    for soc in self.clientCollector.getSocketList():
-                        receiverAddrList = msgObject.getReceiverAddr()
+                    receiverAddrList = msgObject.getReceiverAddr()
 
+                    for soc in self.clientCollector.getSocketList():
                         for addr in receiverAddrList:
                             if self.soc != soc and soc.getpeername() == addr:
                                 messageTask = Task("Message", msgObject)
@@ -48,8 +55,14 @@ class Handler(threading.Thread):
 
         except ConnectionResetError:
             self.exit = True
+            self.clientCollector.removeSocket(self.soc)
             self.soc.close()
+
+
+
             print(self.addr, " has been disconnected")
+
+
 
 
 

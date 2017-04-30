@@ -11,7 +11,6 @@ class ClientCollector:
     def addSocket(self, clientSocket):
         self.socketList.append(clientSocket)
 
-
     def addClientInfo(self, clientInfo):
         self.clientInfoList.append(clientInfo)
         self.addressList.append(clientInfo.getAddress())
@@ -28,6 +27,9 @@ class ClientCollector:
 
     def removeClientInfo(self, clientInfo):
         self.clientInfoList.remove(clientInfo)
+
+    def removeSocket(self, soc):
+        self.socketList.remove(soc)
 
     def getClientInfoList(self):
         return self.clientInfoList

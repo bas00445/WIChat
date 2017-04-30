@@ -68,16 +68,13 @@ class StartupScreen(Screen):
         WIApp.current = "MainUIScreen"
         WIApp.mainUIScreen.profileArea.idButton.text = WIApp.clientInfo.getID()
         WIApp.mainUIScreen.profileArea.nameButton.text = WIApp.username
-        WIApp.chatroomScreen.updateMsg_thread.start()
-        WIApp.mainUIScreen.updateContact_thread.start()
+        WIApp.mainUIScreen.receiveData_thread.start()
 
     def startHosting(self, instance):
         self.getInputStartup()
         WIApp.serverSocket = ServerSocket(WIApp.ip, WIApp.port)
         WIApp.serverSocket.start()
 
-
-    ### For Single Chat ###
     def startClient(self, ip, port, username):
         WIApp.clientSocket = ClientSocket(ip, int(port), username)  ## Start client socket loop
         WIApp.clientSocket.connect()
@@ -93,8 +90,7 @@ class MainUIScreen(Screen):
         super(MainUIScreen, self).__init__(**kwargs)
         self.listofScreen = ["contact", "history"]
         self.curIndxScreen = 0
-        self.updateContact_thread = threading.Thread(target = self.updateContact)
-        self.tLock = threading.Lock()
+        self.receiveData_thread = threading.Thread(target=self.receiveData)
 
     def changeScreen(self, name):
         target_idx = self.listofScreen.index(name)
@@ -104,7 +100,6 @@ class MainUIScreen(Screen):
         for element in container:
             if element.idButton.text == obj.idButton.text:
                 return False
-
         return True
 
     def move_to_front(self, key, mylist):
@@ -146,31 +141,34 @@ class MainUIScreen(Screen):
     def createNewGroup(self):
         groupScrollView = self.screenSlider.contactScreen.groupScrollView.add_widget(Button(text="Hello", size_hint=(1, None)))
 
-    def updateContact(self):
+    def receiveData(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
-
         while True:
             task = WIApp.clientSocket.getDataIncome()
+            if task != None:
+                if task .getName() == "All ClientInfo":
+                    self.updateContact(task, contactScrollView)
 
-            if task != None :
-                ## Receive all contacts at the first time of logging in
-                if task.getName() == "All ClientInfo":
-                    WIApp.clientInfoList = task.getData()
-                    contactScrollView.clear_widgets()
-
-                    idx = 0 #Index of contact
-                    for client in task.getData():
-                        if client.getName() != WIApp.username:
-                            c = ContactComponent()
-                            c.idButton.text = str(client.getID())
-                            c.nameButton.text = client.getName()
-                            contactScrollView.add_widget(c, idx)
-                            idx += 1
-
-                    WIApp.clientSocket.clearData()
+                if task.getName() == "Message":
+                    WIApp.chatroomScreen.updateMessage(task)
 
             time.sleep(0.1)
 
+
+    def updateContact(self, task,  container):
+        WIApp.clientInfoList = task.getData()
+        container.clear_widgets()
+
+        idx = 0  # Index of contact
+        for client in task.getData():
+            if client.getName() != WIApp.username:
+                c = ContactComponent()
+                c.idButton.text = str(client.getID())
+                c.nameButton.text = client.getName()
+                container.add_widget(c, idx)
+                idx += 1
+
+        WIApp.clientSocket.clearData()
 
     def searchAddrByName(self, targetName):
         for client in WIApp.clientInfoList:
@@ -201,7 +199,6 @@ class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
         super(ChatroomScreen, self).__init__(**kwargs)
         self.messageList = None
-        self.updateMsg_thread = threading.Thread(target=self.receiverThread)
         self.msgFontSize = 16
         self.colorMsgText = "000000"
         self.colorPartnerText = self.colorMsgText
@@ -209,21 +206,12 @@ class ChatroomScreen(Screen):
         self.colorMsgBackground = (0.894, 0.910, 0.922, 1)
         self.colorOwnerBackground = (0.192, 0.263, 0.592, 1)
         self.colorPartnerBackground = (0.745, 0.945, 0.549, 1)
-
         self.lengthOfHistoryChat = 0
-
-        self.tLock = threading.Lock()
 
     def on_enter(self, *args):
         WIApp.clientSocket.setText(self.messageInput.text)
         self.sendMessageTask()
         self.messageInput.focus = True
-
-    def receiverThread(self):
-        time.sleep(2)
-        while True:
-            self.updateMessage()
-            time.sleep(0.1)
 
     def loadDataChatroom(self, room):
         self.messageList = room.getMsgCollector()
@@ -287,46 +275,43 @@ class ChatroomScreen(Screen):
 
         return messageBox
 
-    def updateMessage(self):
-        task = WIApp.clientSocket.getDataIncome()
-        if task != None:
-            if task.getName() == "Message":
-                msg = task.getData()
-                targetName = msg.getOwnerName()
-                targetID = msg.getOwnerID()
+    def updateMessage(self, task):
+        msg = task.getData()
+        targetName = msg.getOwnerName()
+        targetID = msg.getOwnerID()
 
-                currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
-                if currentRoom not in WIApp.chatroomCollector.getChatroomList():
-                    WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
+        currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
+        if currentRoom not in WIApp.chatroomCollector.getChatroomList():
+            WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
 
-                    ### Create a new room
-                    roomName = WIApp.username + ":" + targetName
-                    newChatroom = Chatroom(roomName)
-                    newChatroom.addMemberID(WIApp.clientInfo.getID())
-                    newChatroom.addMemberID(targetID)
-                    WIApp.chatroomCollector.addNewChatroom(newChatroom)
+            ### Create a new room
+            roomName = WIApp.username + ":" + targetName
+            newChatroom = Chatroom(roomName)
+            newChatroom.addMemberID(WIApp.clientInfo.getID())
+            newChatroom.addMemberID(targetID)
+            WIApp.chatroomCollector.addNewChatroom(newChatroom)
 
-                if WIApp.currentChatroom == None:
-                    WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
+        if WIApp.currentChatroom == None:
+            WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
 
-                #### Got the message while talking to another chatroom #####
-                for room in WIApp.chatroomCollector.getChatroomList():
-                    if set(room.getMemberIDList()) == set(msg.getMemberIDList()):
-                        room.addMessage(msg)
+        #### Got the message while talking to another chatroom #####
+        for room in WIApp.chatroomCollector.getChatroomList():
+            if set(room.getMemberIDList()) == set(msg.getMemberIDList()):
+                room.addMessage(msg)
 
-                        ## If got any message
-                        if set(room.getMemberIDList()) == set(WIApp.currentChatroom.getMemberIDList()):
-                            if msg.getOwnerID() != WIApp.clientInfo.getID():
-                                messageBox = self.createMessageBox(msg, self.colorPartnerBackground,
-                                                                           self.colorMsgBackground, self.msgFontSize, "partner")
-                            elif msg.getOwnerID() == WIApp.clientInfo.getID():
-                                messageBox = self.createMessageBox(msg, self.colorOwnerBackground,
-                                                                         self.colorMsgBackground, self.msgFontSize, "you")
-                            self.chatContainer.add_widget(messageBox)
+                ## If got any message while talking in the selected chatroom
+                if set(room.getMemberIDList()) == set(WIApp.currentChatroom.getMemberIDList()):
+                    if msg.getOwnerID() != WIApp.clientInfo.getID():
+                        messageBox = self.createMessageBox(msg, self.colorPartnerBackground,
+                                                                   self.colorMsgBackground, self.msgFontSize, "partner")
+                    elif msg.getOwnerID() == WIApp.clientInfo.getID():
+                        messageBox = self.createMessageBox(msg, self.colorOwnerBackground,
+                                                                 self.colorMsgBackground, self.msgFontSize, "you")
+                    self.chatContainer.add_widget(messageBox)
 
-                        WIApp.mainUIScreen.updateHistoryType_2(msg)
+                WIApp.mainUIScreen.updateHistoryType_2(msg)
 
-                WIApp.clientSocket.clearData()
+        WIApp.clientSocket.clearData()
 
 class ProfileArea(BoxLayout):
     pass
