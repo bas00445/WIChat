@@ -5,10 +5,14 @@ class Chatroom:
         self.fileCollector = []  ## File obj
         self.memberNameList = [] ## ClientName
         self.memberIDList = []  ## ClientName
+        self.widgetCollector = [] ## All widget
         self.lengthOfData = 0
 
     def getLengthOfData(self):
         return self.lengthOfData
+
+    def getWidgetCollector(self):
+        return self.widgetCollector
 
     def getRoomName(self):
         return self.roomName
@@ -27,6 +31,9 @@ class Chatroom:
 
     def setRoomName(self, name):
         self.roomName = name
+
+    def addWidget(self, widget):
+        self.widgetCollector.append(widget)
 
     def addMessage(self, msgObject):
         self.msgCollector.append(msgObject)
