@@ -25,8 +25,11 @@ class ClientCollector:
     def addHandler(self, clientHandler):
         self.handlerList.append(clientHandler)
 
-    def removeClientInfo(self, clientInfo):
-        self.clientInfoList.remove(clientInfo)
+    def removeClientInfoByAddr(self, addr):
+        for clientInfo in self.clientInfoList:
+            if clientInfo.getAddress() == addr:
+                self.clientInfoList.remove(clientInfo)
+
 
     def removeSocket(self, soc):
         self.socketList.remove(soc)

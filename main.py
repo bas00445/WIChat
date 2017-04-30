@@ -32,7 +32,6 @@ from kivy.core.window import Window
 
 Window.size = (350, 600)
 
-
 class StartupScreen(Screen):
     def __init__(self, **kwargs):
         super(StartupScreen, self).__init__(**kwargs)
@@ -146,16 +145,27 @@ class MainUIScreen(Screen):
         while True:
             task = WIApp.clientSocket.getDataIncome()
             if task != None:
-                if task .getName() == "All ClientInfo":
-                    self.updateContact(task, contactScrollView)
+                if task .getName() == "New Client":
+                    self.appendNewContact(task, contactScrollView)
+
+                if task.getName() == "Remove Client":
+                    self.removeContact(task, contactScrollView)
 
                 if task.getName() == "Message":
                     WIApp.chatroomScreen.updateMessage(task)
 
+                WIApp.clientSocket.clearData()
+
             time.sleep(0.1)
 
+    def removeContact(self, task, container):
+        id = task.getData()
 
-    def updateContact(self, task,  container):
+        for child in container.children:
+            if child.idButton.text == str(id):
+                container.remove_widget(child)
+
+    def appendNewContact(self, task,  container):
         WIApp.clientInfoList = task.getData()
         container.clear_widgets()
 
@@ -167,8 +177,6 @@ class MainUIScreen(Screen):
                 c.nameButton.text = client.getName()
                 container.add_widget(c, idx)
                 idx += 1
-
-        WIApp.clientSocket.clearData()
 
     def searchAddrByName(self, targetName):
         for client in WIApp.clientInfoList:
@@ -310,8 +318,6 @@ class ChatroomScreen(Screen):
                     self.chatContainer.add_widget(messageBox)
 
                 WIApp.mainUIScreen.updateHistoryType_2(msg)
-
-        WIApp.clientSocket.clearData()
 
 class ProfileArea(BoxLayout):
     pass

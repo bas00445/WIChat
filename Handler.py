@@ -10,7 +10,7 @@ class Handler(threading.Thread):
 
     clientCollector = ClientCollector()
 
-    def __init__(self, soc, addr, clientCollector, **kwargs):
+    def __init__(self, soc, addr, **kwargs):
         threading.Thread.__init__(self)
         self.soc = soc
         self.addr = addr
@@ -18,15 +18,13 @@ class Handler(threading.Thread):
 
     def notifiyAll(self):
         for soc in self.clientCollector.getSocketList():
-            task_update_client = Task("Some client disconnected", self.clientCollector.getClientInfoList())
+            task_update_client = Task("Remove Client", self.soc.getpeername()[1])
             obj = pickle.dumps(task_update_client)
             soc.send(obj)
-
 
     def run(self):
         try:
             while not self.exit:
-
                 task = pickle.loads(self.soc.recv(4096))
 
                 if task.getName() == "Submit ClientInfo":
@@ -35,9 +33,9 @@ class Handler(threading.Thread):
                     if clientInfo.getAddress() not in self.clientCollector.getAddrList():
                         self.clientCollector.addClientInfo(clientInfo)
 
-                    ### Update contact list to all clients in the server
+                    ### Add a new contact
                     for soc in self.clientCollector.getSocketList():
-                        task_update_client = Task("All ClientInfo", self.clientCollector.getClientInfoList())
+                        task_update_client = Task("New Client", self.clientCollector.getClientInfoList())
                         obj = pickle.dumps(task_update_client)
                         soc.send(obj)
 
@@ -52,15 +50,16 @@ class Handler(threading.Thread):
                                 obj = pickle.dumps(messageTask)
                                 soc.send(obj)
 
-
         except ConnectionResetError:
+            print(self.addr, " has been disconnected")
             self.exit = True
             self.clientCollector.removeSocket(self.soc)
+            self.clientCollector.removeClientInfoByAddr(self.soc.getpeername())
+            self.notifiyAll()
             self.soc.close()
 
 
 
-            print(self.addr, " has been disconnected")
 
 
 

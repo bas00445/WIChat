@@ -36,7 +36,7 @@ class ServerSocket(threading.Thread):
             while True:
                 clientSocket, addr = self.socketServer.accept()
 
-                handler = Handler(clientSocket, addr, self.clientCollector)
+                handler = Handler(clientSocket, addr)
                 handler.setDaemon(True)
                 handler.start()
                 handler.clientCollector.addSocket(clientSocket)
