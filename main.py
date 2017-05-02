@@ -29,6 +29,7 @@ from ClientInformation import *
 from Task import *
 from Chatroom import *
 from ChatroomCollector import *
+from FileObject import *
 
 from kivy.core.window import Window
 
@@ -155,6 +156,9 @@ class MainUIScreen(Screen):
 
                 if task.getName() == "Message":
                     WIApp.chatroomScreen.updateMessage(task)
+
+                if task.getName() == "Send File":
+                    pass
 
                 WIApp.clientSocket.clearData()
 
@@ -327,7 +331,7 @@ class ChatroomScreen(Screen):
 
     def selectFile(self, path, filename):
         file = open(os.path.join(path, filename[0]), 'rb')
-        data = bytes() ## Data which will send to a server
+        data = bytes() ## Convert the file to bytes
         temp = file.read(1024)
         while temp:
             data += temp
@@ -335,7 +339,10 @@ class ChatroomScreen(Screen):
 
         file.close()
 
-    def sendFile(self, ):
+        fileObj = FileObject(data, WIApp.clientInfo.getID(), WIApp.clientTargetID)
+
+        sendFileTask = Task("Send File", fileObj)
+        WIApp.clientSocket.sendTask(sendFileTask)
 
 
 

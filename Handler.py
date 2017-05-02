@@ -41,8 +41,6 @@ class Handler(threading.Thread):
                         soc.send(obj)
 
                 if task.getName() == "Message":
-
-                    self.tLock.acquire()
                     msgObject = task.getData()
                     receiverAddrList = msgObject.getReceiverAddr()
                     for soc in self.clientCollector.getSocketList():
@@ -52,7 +50,15 @@ class Handler(threading.Thread):
                                 obj = pickle.dumps(messageTask)
                                 soc.send(obj)
 
-                    self.tLock.release()
+                if task.getName() == "Send File":
+                    fileObj = task.getData()
+                    receiverAddrList = fileObj.getReceiverAddr()
+                    for soc in self.clientCollector.getSocketList():
+                        for addr in receiverAddrList:
+                            if self.soc != soc and soc.getpeername() == addr:
+                                fileTask = Task("Send File", fileObj)
+                                obj = pickle.dumps(fileTask)
+                                soc.send(obj)
 
 
         except ConnectionResetError:
