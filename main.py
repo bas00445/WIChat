@@ -2,6 +2,7 @@ import kivy
 import socket
 import threading
 import time
+import os
 
 from kivy.animation import Animation
 from kivy.uix.boxlayout import BoxLayout
@@ -16,6 +17,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.carousel import Carousel
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.uix.filechooser import *
 from kivy.properties import *
 
 #####################################
@@ -215,6 +217,7 @@ class ChatroomScreen(Screen):
         self.colorOwnerBackground = (0.192, 0.263, 0.592, 1)
         self.colorPartnerBackground = (0.745, 0.945, 0.549, 1)
         self.lengthOfHistoryChat = 0
+        self.filePath = None
 
     def on_enter(self, *args):
         WIApp.clientSocket.setText(self.messageInput.text)
@@ -228,10 +231,10 @@ class ChatroomScreen(Screen):
 
         for msg in self.messageList:
             if msg.getOwnerID() != WIApp.clientInfo.getID():
-                messageBox = self.createMessageBox(msg, self.colorPartnerBackground, self.colorMsgBackground, self.msgFontSize, "partner")
+                messageBox = MessageBoxPartner(msg.getOwnerName(), msg.getText(), msg.getCurrentTime())
 
             elif msg.getOwnerID() == WIApp.clientInfo.getID():
-                messageBox = self.createMessageBox(msg, self.colorOwnerBackground, self.colorMsgBackground, self.msgFontSize, "you")
+                messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getCurrentTime())
 
             self.chatContainer.add_widget(messageBox)
 
@@ -248,19 +251,19 @@ class ChatroomScreen(Screen):
             WIApp.currentChatroom.addMessage(msg)
 
         if self.messageInput.text != "":
-            messageBox = self.createMessageBox(msg, self.colorOwnerBackground, self.colorMsgBackground, self.msgFontSize, "you")
+            messageBox = MessageBoxOwner("You", msg.getText(), msg.getCurrentTime())
             self.chatContainer.add_widget(messageBox)
 
             WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
 
         self.messageInput.text = ""  ## Clear Message Input
 
-    def createMessageBox(self, msg, colorOwner, colorMsg, fontSize, state):
+    def createMessageBox(self, msg, state):
         messageBox = BoxLayout(size_hint=(1, None), orientation="horizontal", height = 150)
         textButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getText() + '[/color]', markup=True,
-                            background_normal='', background_color=colorMsg, font_size=fontSize, size_hint_y=0.8)
+                            background_normal='', background_color=self.colorMsgBackground, font_size=self.msgFontSize, size_hint_y=0.8)
         timeButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getCurrentTime() + '[/color]',
-                            markup=True, background_normal='', background_color=colorMsg, font_size=fontSize / 1.5,
+                            markup=True, background_normal='', background_color=self.colorMsgBackground, font_size=self.msgFontSize / 1.5,
                             size_hint_y=0.2)
 
         temp = BoxLayout(orientation="vertical")
@@ -269,15 +272,15 @@ class ChatroomScreen(Screen):
 
         if state == "partner":
             senderButton = Button(text='[color=' + str(self.colorPartnerText) + ']' + msg.getOwnerName() + '[/color]',
-                                  size_hint=(0.3, 1), markup=True, background_normal='', background_color=colorOwner,
-                                  font_size=fontSize)
+                                  size_hint=(0.3, 1), markup=True, background_normal='', background_color=self.colorPartnerBackground,
+                                  font_size=self.msgFontSize)
             messageBox.add_widget(senderButton)
             messageBox.add_widget(temp)
 
         elif state == "you":
             senderButton = Button(text='[color=' + str(self.colorOwnerText) + ']' + "You" + '[/color]',
-                                  size_hint=(0.3, 1), markup=True, background_normal='', background_color=colorOwner,
-                                  font_size=fontSize)
+                                  size_hint=(0.3, 1), markup=True, background_normal='', background_color=self.colorOwnerBackground,
+                                  font_size=self.msgFontSize)
             messageBox.add_widget(temp)
             messageBox.add_widget(senderButton)
 
@@ -310,14 +313,35 @@ class ChatroomScreen(Screen):
                 ## If got any message while talking in the selected chatroom
                 if set(room.getMemberIDList()) == set(WIApp.currentChatroom.getMemberIDList()):
                     if msg.getOwnerID() != WIApp.clientInfo.getID():
-                        messageBox = self.createMessageBox(msg, self.colorPartnerBackground,
-                                                                   self.colorMsgBackground, self.msgFontSize, "partner")
+                        messageBox = MessageBoxPartner(msg.getOwnerName(), msg.getText(), msg.getCurrentTime())
                     elif msg.getOwnerID() == WIApp.clientInfo.getID():
-                        messageBox = self.createMessageBox(msg, self.colorOwnerBackground,
-                                                                 self.colorMsgBackground, self.msgFontSize, "you")
+                        messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getCurrentTime())
                     self.chatContainer.add_widget(messageBox)
 
                 WIApp.mainUIScreen.updateHistoryType_2(msg)
+
+    def openChooserDialog(self):
+        cd = FileChooserDialog()
+        popup = Popup(title="Choose a file to send", content=cd, size_hint=(.8, .8), auto_dismiss=True)
+        popup.open()
+
+    def selectFile(self, path, filename):
+        file = open(os.path.join(path, filename[0]), 'rb')
+        data = bytes() ## Data which will send to a server
+        temp = file.read(1024)
+        while temp:
+            data += temp
+            temp = file.read(1024)
+
+        file.close()
+
+    def sendFile(self, ):
+
+
+
+
+class FileChooserDialog(BoxLayout):
+    pass
 
 class ProfileArea(BoxLayout):
     pass
@@ -355,10 +379,20 @@ class HistoryComponent(BoxLayout):
         self.nameButton.text = name
         self.lastestMessage.text = lastestMsg
 
+class MessageBoxOwner(BoxLayout):
+    def __init__(self, name, text, time, **kwargs):
+        BoxLayout.__init__(self)
+        self.senderArea.text = name
+        self.textArea.text = text
+        self.timeArea.text = time
 
-class MessageBox(BoxLayout):
-    def __init__(self, **kwargs):
-        super(BoxLayout, self).__init__(**kwargs)
+
+class MessageBoxPartner(BoxLayout):
+    def __init__(self, name, text, time, **kwargs):
+        BoxLayout.__init__(self)
+        self.senderArea.text = name
+        self.textArea.text = text
+        self.timeArea.text = time
 
 #########################################################
 

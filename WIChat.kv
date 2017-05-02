@@ -362,6 +362,118 @@
                     pos: self.pos
                     size: self.size
 
+<MessageBoxOwner>:
+    textArea: textArea
+    timeArea: timeArea
+    senderArea: senderArea
+    size_hint: 1, None
+    orientation: 'horizontal'
+
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: 1, None
+
+        Label:
+            id: textArea
+            text: 'text message'
+            size_hint_y: 0.8
+            color: 0,0,0,1
+
+            canvas.before:
+                Color:
+                    rgba: 0.894, 0.910, 0.922, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        Label:
+            id: timeArea
+            text: 'time'
+            size_hint_y: 0.2
+            color: 0,0,0,1
+
+            canvas.before:
+                Color:
+                    rgba: 0.894, 0.910, 0.922, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+    Label:
+        id: senderArea
+        text: 'YOU'
+        size_hint: 0.3, None
+
+        canvas.before:
+            Color:
+                rgba: 0.192, 0.263, 0.592, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+<MessageBoxPartner>:
+    textArea: textArea
+    timeArea: timeArea
+    senderArea: senderArea
+    size_hint: 1, None
+    orientation: 'horizontal'
+
+    Label:
+        id: senderArea
+        text: 'Partner'
+        size_hint: 0.3, None
+
+        canvas.before:
+            Color:
+                rgba: 0.745, 0.945, 0.549, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: 1, None
+
+        Label:
+            id: textArea
+            text: 'text message'
+            size_hint_y: 0.8
+            color: 0,0,0,1
+
+            canvas.before:
+                Color:
+                    rgba: 0.894, 0.910, 0.922, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        Label:
+            id: timeArea
+            text: 'time'
+            size_hint_y: 0.2
+            color: 0,0,0,1
+
+            canvas.before:
+                Color:
+                    rgba: 0.894, 0.910, 0.922, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+<FileChooserDialog>:
+    orientation: 'vertical'
+    chooser: filechooser
+
+    FileChooserListView:
+        id: filechooser
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: 0.1
+
+        Button:
+            text: 'Select'
+            on_release: app.root.chatroomScreen.selectFile(root.chooser.path, root.chooser.selection)
 
 <ChatroomScreen>:
     name: "ChatroomScreen"
@@ -369,7 +481,6 @@
     chatContainer: chatContainer
     messageInput: messageInput
     roomName: roomName
-
 
     BoxLayout:
         orientation: 'vertical'
@@ -428,9 +539,16 @@
             orientation: 'horizontal'
             size_hint: 1, .1
 
+
+            Button:
+                id: cfButton
+                text: 'Choose File'
+                size_hint: .4, 1
+                on_release: root.openChooserDialog()
+
             TextInput:
                 id: messageInput
-                size_hint: .8, 1
+                size_hint: .4, 1
                 input_filter: lambda text, from_undo: text[:28 - len(self.text)]
                 multiline: False
 
