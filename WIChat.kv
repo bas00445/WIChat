@@ -179,29 +179,41 @@
         size_hint: .3, 1
         text: 'Pic'
 
+        on_release: app.root.current = "ChatroomScreen"
+        on_release: app.root.mainUIScreen.setClientTarget(idButton.text, nameButton.text)
+
+
     BoxLayout:
         orientation: 'vertical'
 
-        Button:
-            background_normal: ''
-            background_color: 0.369, 0.545, 0.776, 1
-
+        Label:
             id: idButton
+            canvas.before:
+                Color:
+                    rgba: 0.369, 0.545, 0.776, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
-
-        Button:
-            background_normal: ''
-            background_color: 0.369, 0.545, 0.776, 1
-
+        Label:
             id: nameButton
-            on_release: app.root.current = "ChatroomScreen"
-            on_release: app.root.mainUIScreen.setClientTarget(idButton.text, nameButton.text)
+            canvas.before:
+                Color:
+                    rgba: 0.369, 0.545, 0.776, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
-        Button:
-            background_normal: ''
-            background_color: 0.369, 0.545, 0.776, 1
+        Label:
             id: statusButton
             text: "None"
+
+            canvas.before:
+                Color:
+                    rgba: 0.369, 0.545, 0.776, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
 <ContactScreen>:
     orientation: 'vertical'
@@ -263,31 +275,38 @@
         size_hint: .3, 1
         text: 'Pic'
 
+        on_release: app.root.current = "ChatroomScreen"
+        on_release: app.root.mainUIScreen.setClientTarget(idButton.text, nameButton.text)
+
     BoxLayout:
         orientation: 'vertical'
-
-        Button:
-            background_normal: ''
-            background_color: 0.369, 0.545, 0.776, 1
-
+        Label:
             id: idButton
+            canvas.before:
+                Color:
+                    rgba: 0.369, 0.545, 0.776, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
-
-        Button:
-            background_normal: ''
-            background_color: 0.369, 0.545, 0.776, 1
-
+        Label:
             id: nameButton
-            on_release: app.root.current = "ChatroomScreen"
-            on_release: app.root.mainUIScreen.setClientTarget(idButton.text, nameButton.text)
+            canvas.before:
+                Color:
+                    rgba: 0.369, 0.545, 0.776, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
-        Button:
-            background_normal: ''
-            background_color: 0.369, 0.545, 0.776, 1
+        Label:
             id: lastestMessage
             text: "None"
-
-
+            canvas.before:
+                Color:
+                    rgba: 0.369, 0.545, 0.776, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
 <ScreenSlider>:
     anim_move_duration: .3
@@ -323,44 +342,6 @@
         ScreenSlider:
             id: screenSlider
 
-<MessageBox>:
-    orientation: 'horizontal'
-    senderName: senderName
-    message: message
-    sendTime: sendTime
-    size_hint: 1, None
-
-    Label:
-        id: senderName
-
-        canvas.before:
-            Color:
-                rgba: 0.804, 0.804, 0.804, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
-
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            id: message
-
-            canvas.before:
-                Color:
-                    rgba: 0.804, 0.804, 0.804, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-        Label:
-            id: sendTime
-
-            canvas.before:
-                Color:
-                    rgba: 0.804, 0.804, 0.804, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
 
 <MessageBoxOwner>:
     textArea: textArea
@@ -541,9 +522,12 @@
 
 
             Button:
+                background_normal: ''
+                background_color: 0.071, 0.4, 0.840, 1
+
                 id: cfButton
                 text: 'Choose File'
-                size_hint: .4, 1
+                size_hint: .25, 1
                 on_release: root.openChooserDialog()
 
             TextInput:

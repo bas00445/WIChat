@@ -329,11 +329,15 @@ class ChatroomScreen(Screen):
         if WIApp.currentChatroom == None:
             WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
 
+        isSelf = False
+        if WIApp.clientInfo.getID() == msg.getOwnerID():
+            isSelf = True
+
         #### Got the message while talking to another chatroom #####
         for room in WIApp.chatroomCollector.getChatroomList():
-            if set(room.getMemberIDList()) == set(msg.getMemberIDList()):
-                room.addMessage(msg)
 
+            if set(room.getMemberIDList()) == set(msg.getMemberIDList()) and not isSelf:
+                room.addMessage(msg)
                 ## If got any message while talking in the selected chatroom
                 if set(room.getMemberIDList()) == set(WIApp.currentChatroom.getMemberIDList()):
                     if msg.getOwnerID() != WIApp.clientInfo.getID():
@@ -358,7 +362,6 @@ class ChatroomScreen(Screen):
         obj = FileObject(fname, WIApp.clientInfo.getID(), [WIApp.clientTargetAddress])
         task = Task("Send File", obj)
         WIApp.clientSocket.sendTask(task)
-
 
         # data = file.read(4096)
         # while data:

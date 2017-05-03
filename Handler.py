@@ -44,11 +44,9 @@ class Handler(threading.Thread):
                     msgObject = task.getData()
                     receiverAddrList = msgObject.getReceiverAddr()
                     for soc in self.clientCollector.getSocketList():
-                        for addr in receiverAddrList:
-                            if self.soc != soc and soc.getpeername() == addr:
-                                messageTask = Task("Message", msgObject)
-                                obj = pickle.dumps(messageTask)
-                                soc.send(obj)
+                        messageTask = Task("Message", msgObject)
+                        obj = pickle.dumps(messageTask)
+                        soc.send(obj)
 
 
                 if task.getName() == "Send File":
