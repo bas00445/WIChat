@@ -93,6 +93,8 @@ class MainUIScreen(Screen):
         self.listofScreen = ["contact", "history"]
         self.curIndxScreen = 0
         self.receiveData_thread = threading.Thread(target=self.receiveData)
+        self.filename = None
+        self.tLock = threading.Lock()
 
     def changeScreen(self, name):
         target_idx = self.listofScreen.index(name)
@@ -145,6 +147,7 @@ class MainUIScreen(Screen):
 
     def receiveData(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
+
         while True:
             task = WIApp.clientSocket.getDataIncome()
             if task != None:
@@ -157,12 +160,29 @@ class MainUIScreen(Screen):
                 if task.getName() == "Message":
                     WIApp.chatroomScreen.updateMessage(task)
 
-                if task.getName() == "Send File":
+                if task.getName() == "Filename":
+                    self.filename = task.getData()
+                    print("Main filename: ", task.getData())
+
+                    WIApp.clientSocket.sendTask(Task("Got Filename", None))
+
+                if task.getName() == "Store file":
+                    # file = open(self.filename, 'wb')
+                    #
+                    # data = WIApp.clientSocket.soc.recv(4096)
+                    # while data:
+                    #     print("Receiving the data...")
+                    #     file.write(data)
+                    #     data = WIApp.clientSocket.soc.recv(4096)
+                    #
+                    # file.close()
+
                     pass
 
                 WIApp.clientSocket.clearData()
 
             time.sleep(0.1)
+
 
     def removeContact(self, task, container):
         id = task.getData()
@@ -331,20 +351,21 @@ class ChatroomScreen(Screen):
 
     def selectFile(self, path, filename):
         file = open(os.path.join(path, filename[0]), 'rb')
-        data = bytes() ## Convert the file to bytes
-        temp = file.read(1024)
-        while temp:
-            data += temp
-            temp = file.read(1024)
 
-        file.close()
+        fname = os.path.join(path, filename[0])
+        fname = fname.split('\\')[-1] ## Use the last index as a filename
 
-        fileObj = FileObject(data, WIApp.clientInfo.getID(), WIApp.clientTargetID)
-
-        sendFileTask = Task("Send File", fileObj)
-        WIApp.clientSocket.sendTask(sendFileTask)
+        obj = FileObject(fname, WIApp.clientInfo.getID(), [WIApp.clientTargetAddress])
+        task = Task("Send File", obj)
+        WIApp.clientSocket.sendTask(task)
 
 
+        # data = file.read(4096)
+        # while data:
+        #     WIApp.clientSocket.soc.send(data)
+        #     data = file.read(4096)
+        #
+        # file.close()
 
 
 class FileChooserDialog(BoxLayout):

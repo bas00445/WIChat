@@ -42,7 +42,7 @@ class ServerSocket(threading.Thread):
                 handler.clientCollector.addSocket(clientSocket)
                 handler.clientCollector.addHandler(handler)
 
-                time.sleep(0.5) ## Wait a bit for updating value in a Handler object
+                time.sleep(0.05) ## Wait a bit for updating value in a Handler object
 
         except OSError:
             print("The port is not available")
