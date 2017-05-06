@@ -6,8 +6,8 @@ import os
 
 from kivy.animation import Animation
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.screenmanager import SwapTransition
+
+from kivy.uix.screenmanager import *
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
@@ -99,6 +99,12 @@ class MainUIScreen(Screen):
     def changeScreen(self, name):
         target_idx = self.listofScreen.index(name)
         self.screenSlider.load_slide(self.screenSlider.slides[target_idx])
+
+    def moveto_chatroom(self, id, name):
+        WIApp.transition = SlideTransition(direction="up")
+        WIApp.current = "ChatroomScreen"
+        self.setClientTarget(id, name)
+
 
     def isNewHisComp(self, container, obj):
         for element in container:
@@ -244,9 +250,12 @@ class ChatroomScreen(Screen):
         self.filePath = None
 
     def on_enter(self, *args):
-        WIApp.clientSocket.setText(self.messageInput.text)
-        self.sendMessageTask()
-        self.messageInput.focus = True
+        self.hideSettingPanel()
+
+    def moveto_mainUI(self):
+        WIApp.transition = SlideTransition(direction="right")
+        WIApp.current = "MainUIScreen"
+
 
     def loadDataChatroom(self, room):
         self.messageList = room.getMsgCollector()
@@ -261,6 +270,14 @@ class ChatroomScreen(Screen):
                 messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getCurrentTime())
 
             self.chatContainer.add_widget(messageBox)
+
+    def showSettingPanel(self):
+        anim = Animation(pos=(0, 0), duration=.5)
+        anim.start(self.settingPanel)
+
+    def hideSettingPanel(self):
+        anim = Animation(pos=(-self.parent.width, 0), duration=.5)
+        anim.start(self.settingPanel)
 
     def sendMessageTask(self):
         if self.messageInput.text == "":
@@ -433,9 +450,6 @@ class WIChat(ScreenManager):
         self.username = ""
         self.ip = ""
         self.port = ""
-        self.startupScreen = self.startupScreen
-        self.mainUIScreen = self.mainUIScreen
-        self.chatroomScreen = self.chatroomScreen
         self.clientInfoList = None  # Friend list
         self.historyInfoList = None
         self.chatroomCollector = ChatroomCollector()

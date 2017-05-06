@@ -1,4 +1,6 @@
 #:import SwapTransition kivy.uix.screenmanager.SwapTransition
+#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+#:import SlideTransition kivy.uix.screenmanager.SlideTransition
 
 <WIChat>:
 
@@ -179,9 +181,7 @@
         size_hint: .3, 1
         text: 'Pic'
 
-        on_release: app.root.current = "ChatroomScreen"
-        on_release: app.root.mainUIScreen.setClientTarget(idButton.text, nameButton.text)
-
+        on_release: app.root.mainUIScreen.moveto_chatroom(idButton.text, nameButton.text)
 
     BoxLayout:
         orientation: 'vertical'
@@ -402,6 +402,7 @@
     Label:
         id: senderArea
         text: 'Partner'
+        color: 0, 0, 0, 1
         size_hint: 0.3, None
 
         canvas.before:
@@ -462,53 +463,115 @@
     chatContainer: chatContainer
     messageInput: messageInput
     roomName: roomName
+    settingPanel: settingPanel
 
-    BoxLayout:
-        orientation: 'vertical'
-        messageInput: messageInput
-
-        BoxLayout:
-            orientation: "horizontal"
-            size_hint: 1, .1
-
-            Button:
-                background_normal: ''
-                background_color: 0.369, 0.545, 0.776, 1
-
-                id: roomName
-                text: "Chatroom"
-                size_hint_x: .8
-
-            Button:
-                background_normal: ''
-                background_color: 0.008, 0.267, 0.463, 1
-                text: "Back"
-                size_hint_x: .2
-                on_release: app.root.current = "MainUIScreen"
-
-        ScrollView:
-            id: scrollView_chat
-            size: self.parent.width, self.parent.height
-            do_scroll_x: False
-            bar_width: 10
-            bar_color: (0.000, 0.643, 0.616, 1)
-
-            canvas.before:
-                Color:
-                    rgba: 0.804, 0.804, 0.804, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-            GridLayout:
-                id: chatContainer
-                cols: 1
-                padding: 10
-                spacing: 10
-                size_hint: 1,None
-                height: self.minimum_height
+    FloatLayout:
 
         BoxLayout:
+            BoxLayout:
+                orientation: 'vertical'
+                messageInput: messageInput
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1, .1
+
+                    Button:
+                        background_normal: ''
+                        background_color: 0.369, 0.545, 0.776, 1
+
+                        id: roomName
+                        text: "Chatroom"
+                        size_hint_x: .6
+
+                    Button:
+                        background_normal: ''
+                        background_color: 0.008, 0.267, 0.463, 1
+                        text: "Back"
+                        size_hint_x: .2
+                        on_release: app.root.chatroomScreen.moveto_mainUI()
+
+                    Button:
+                        background_normal: ''
+                        background_color: 0.008, 0.267, 0.463, 1
+                        text: "Setting"
+                        size_hint_x: .2
+                        on_release: root.showSettingPanel()
+
+                ScrollView:
+                    id: scrollView_chat
+                    size: self.parent.width, self.parent.height
+                    do_scroll_x: False
+                    bar_width: 10
+                    bar_color: (0.000, 0.643, 0.616, 1)
+
+                    canvas.before:
+                        Color:
+                            rgba: 0.804, 0.804, 0.804, 1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+                    GridLayout:
+                        id: chatContainer
+                        cols: 1
+                        padding: 10
+                        spacing: 10
+                        size_hint: 1,None
+                        height: self.minimum_height
+
+
+
+                BoxLayout:
+                    canvas.before:
+                        Color:
+                            rgba: 0.565, 0.663, 0.840, 1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+                    padding: 6
+                    orientation: 'horizontal'
+                    size_hint: 1, .1
+
+
+                    Button:
+                        background_normal: ''
+                        background_color: 0.071, 0.4, 0.840, 1
+
+                        id: cfButton
+                        text: 'Choose File'
+                        size_hint: .25, 1
+                        on_release: root.openChooserDialog()
+
+                    TextInput:
+                        id: messageInput
+                        size_hint: .4, 1
+                        input_filter: lambda text, from_undo: text[:28 - len(self.text)]
+                        multiline: False
+
+                        on_focus: root.hideSettingPanel()
+
+
+                    Button:
+                        background_normal: ''
+                        background_color: 0.071, 0.4, 0.840, 1
+
+                        id: sendButton
+                        text: "SEND"
+                        size_hint: .2, 1
+                        on_release: app.root.clientSocket.setText(messageInput.text)
+                        on_release: root.sendMessageTask()
+                        on_release: root.messageInput.focus = True
+
+        BoxLayout:
+            id: settingPanel
+            pos: -self.parent.width, 0
+            size_hint_x: 0.6
+
+            orientation: 'vertical'
+            spacing: 5
+
             canvas.before:
                 Color:
                     rgba: 0.565, 0.663, 0.840, 1
@@ -516,36 +579,55 @@
                     pos: self.pos
                     size: self.size
 
-            padding: 6
-            orientation: 'horizontal'
-            size_hint: 1, .1
-
+            Button:
+                size_hint: 1, 0.2
+                text: "Setting Panel"
 
             Button:
+                text: "Backup"
+                size_hint_y: 0.2
+
                 background_normal: ''
-                background_color: 0.071, 0.4, 0.840, 1
+                background_color: (0.000, 0.643, 0.616, 1)
 
-                id: cfButton
-                text: 'Choose File'
-                size_hint: .25, 1
-                on_release: root.openChooserDialog()
-
-            TextInput:
-                id: messageInput
-                size_hint: .4, 1
-                input_filter: lambda text, from_undo: text[:28 - len(self.text)]
-                multiline: False
-
+                on_release: root.hideSettingPanel()
 
             Button:
-                background_normal: ''
-                background_color: 0.071, 0.4, 0.840, 1
+                text: "Clear"
+                size_hint_y: 0.2
 
-                id: sendButton
-                text: "SEND"
-                size_hint: .2, 1
-                on_release: app.root.clientSocket.setText(messageInput.text)
-                on_release: root.sendMessageTask()
-                on_release: root.messageInput.focus = True
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_release: root.hideSettingPanel()
+
+            Button:
+                text: "Block"
+                size_hint_y: 0.2
+
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_release: root.hideSettingPanel()
+
+            Button:
+                text: "Block"
+                size_hint_y: 0.2
+
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_release: root.hideSettingPanel()
+
+            Button:
+                text: "Block"
+                size_hint_y: 0.2
+
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_release: root.hideSettingPanel()
+
+
 
 
