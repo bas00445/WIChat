@@ -448,6 +448,7 @@
 
     FileChooserListView:
         id: filechooser
+        path: "./"
 
     BoxLayout:
         orientation: 'horizontal'
@@ -540,7 +541,7 @@
                         background_color: 0.071, 0.4, 0.840, 1
 
                         id: cfButton
-                        text: 'Choose File'
+                        text: 'SEND FILE'
                         size_hint: .25, 1
                         on_release: root.openChooserDialog()
 

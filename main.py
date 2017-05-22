@@ -167,28 +167,24 @@ class MainUIScreen(Screen):
                     WIApp.chatroomScreen.updateMessage(task)
 
                 if task.getName() == "Filename":
-                    self.filename = task.getData()
-                    print("Main filename: ", task.getData())
-
-                    WIApp.clientSocket.sendTask(Task("Got Filename", None))
+                    pass
 
                 if task.getName() == "Store file":
-                    # file = open(self.filename, 'wb')
-                    #
-                    # data = WIApp.clientSocket.soc.recv(4096)
-                    # while data:
-                    #     print("Receiving the data...")
-                    #     file.write(data)
-                    #     data = WIApp.clientSocket.soc.recv(4096)
-                    #
-                    # file.close()
+                    file = open(self.filename, 'wb')
+
+                    data = WIApp.clientSocket.soc.recv(4096)
+                    while data:
+                        print("Receiving the data...")
+                        file.write(data)
+                        data = WIApp.clientSocket.soc.recv(4096)
+
+                    file.close()
 
                     pass
 
                 WIApp.clientSocket.clearData()
 
             time.sleep(0.1)
-
 
     def removeContact(self, task, container):
         id = task.getData()
@@ -256,7 +252,6 @@ class ChatroomScreen(Screen):
         WIApp.transition = SlideTransition(direction="right")
         WIApp.current = "MainUIScreen"
 
-
     def loadDataChatroom(self, room):
         self.messageList = room.getMsgCollector()
         self.chatContainer.clear_widgets()
@@ -299,33 +294,6 @@ class ChatroomScreen(Screen):
 
         self.messageInput.text = ""  ## Clear Message Input
 
-    def createMessageBox(self, msg, state):
-        messageBox = BoxLayout(size_hint=(1, None), orientation="horizontal", height = 150)
-        textButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getText() + '[/color]', markup=True,
-                            background_normal='', background_color=self.colorMsgBackground, font_size=self.msgFontSize, size_hint_y=0.8)
-        timeButton = Button(text='[color=' + str(self.colorMsgText) + ']' + msg.getCurrentTime() + '[/color]',
-                            markup=True, background_normal='', background_color=self.colorMsgBackground, font_size=self.msgFontSize / 1.5,
-                            size_hint_y=0.2)
-
-        temp = BoxLayout(orientation="vertical")
-        temp.add_widget(textButton)
-        temp.add_widget(timeButton)
-
-        if state == "partner":
-            senderButton = Button(text='[color=' + str(self.colorPartnerText) + ']' + msg.getOwnerName() + '[/color]',
-                                  size_hint=(0.3, 1), markup=True, background_normal='', background_color=self.colorPartnerBackground,
-                                  font_size=self.msgFontSize)
-            messageBox.add_widget(senderButton)
-            messageBox.add_widget(temp)
-
-        elif state == "you":
-            senderButton = Button(text='[color=' + str(self.colorOwnerText) + ']' + "You" + '[/color]',
-                                  size_hint=(0.3, 1), markup=True, background_normal='', background_color=self.colorOwnerBackground,
-                                  font_size=self.msgFontSize)
-            messageBox.add_widget(temp)
-            messageBox.add_widget(senderButton)
-
-        return messageBox
 
     def updateMessage(self, task):
         msg = task.getData()
@@ -374,18 +342,21 @@ class ChatroomScreen(Screen):
         file = open(os.path.join(path, filename[0]), 'rb')
 
         fname = os.path.join(path, filename[0])
+        fsize = os.path.getsize(fname)
         fname = fname.split('\\')[-1] ## Use the last index as a filename
 
-        obj = FileObject(fname, WIApp.clientInfo.getID(), [WIApp.clientTargetAddress])
+        obj = FileObject(fname, fsize, WIApp.clientInfo.getID(), [WIApp.clientTargetAddress])
         task = Task("Send File", obj)
         WIApp.clientSocket.sendTask(task)
 
-        # data = file.read(4096)
-        # while data:
-        #     WIApp.clientSocket.soc.send(data)
-        #     data = file.read(4096)
-        #
-        # file.close()
+        data = file.read(4096)
+        while data:
+            print(">>Sending a file<<")
+            WIApp.clientSocket.soc.send(data)
+            data = file.read(4096)
+
+        print("Completed sending file!")
+        file.close()
 
 
 class FileChooserDialog(BoxLayout):
@@ -394,10 +365,8 @@ class FileChooserDialog(BoxLayout):
 class ProfileArea(BoxLayout):
     pass
 
-
 class MenuBar(BoxLayout):
     pass
-
 
 class ContactScreen(BoxLayout):
     pass
@@ -409,7 +378,6 @@ class HistoryScreen(BoxLayout):
 
     def updateOrderChatList(self):
         pass
-
 
 class ScreenSlider(Carousel):
     pass
