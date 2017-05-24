@@ -155,34 +155,55 @@ class MainUIScreen(Screen):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
 
         while True:
-            task = WIApp.clientSocket.getDataIncome()
-            if task != None:
-                if task .getName() == "New Client":
-                    self.appendNewContact(task, contactScrollView)
+            data = WIApp.clientSocket.getDataIncome()
 
-                if task.getName() == "Remove Client":
-                    self.removeContact(task, contactScrollView)
+            if data != None:
+                try:
+                    task = pickle.loads(data)
+                    print("Eiei: ", task.getName())
+                    if task.getName() == "New Client":
+                        self.appendNewContact(task, contactScrollView)
 
-                if task.getName() == "Message":
-                    WIApp.chatroomScreen.updateMessage(task)
+                    if task.getName() == "Remove Client":
+                        self.removeContact(task, contactScrollView)
 
-                if task.getName() == "Filename":
+                    if task.getName() == "Message":
+                        WIApp.chatroomScreen.updateMessage(task)
+
+                    if task.getName() == "StoreFile":
+                        print("StoreFile")
+                        fileObj = task.getData()
+                        file = open("download/" + fileObj.getFilename(), 'wb')
+
+                        data = WIApp.clientSocket.getDataIncome()
+                        while data:
+                            file.write(data)
+                            print("Storing a file.")
+                            data = WIApp.clientSocket.getDataIncome()
+
+                        file.close()
+                        print("New file is created.")
+
+                        #
+                        # data = WIApp.clientSocket.soc.recv(1024)
+                        # while data:
+                        #     print("Receiving the data...")
+                        #     file.write(data)
+                        #     data = WIApp.clientSocket.soc.recv(1024)
+                        #
+                        # file.close()
+                        #
+                        # pass
+
+
+                    WIApp.clientSocket.clearData()
+
+                except pickle.UnpicklingError:
                     pass
-
-                if task.getName() == "Store file":
-                    file = open(self.filename, 'wb')
-
-                    data = WIApp.clientSocket.soc.recv(4096)
-                    while data:
-                        print("Receiving the data...")
-                        file.write(data)
-                        data = WIApp.clientSocket.soc.recv(4096)
-
-                    file.close()
-
+                except pickle.PicklingError:
                     pass
-
-                WIApp.clientSocket.clearData()
+                except pickle.PickleError:
+                    pass
 
             time.sleep(0.1)
 
@@ -349,11 +370,11 @@ class ChatroomScreen(Screen):
         task = Task("Send File", obj)
         WIApp.clientSocket.sendTask(task)
 
-        data = file.read(4096)
+        data = file.read(1024)
         while data:
             print(">>Sending a file<<")
             WIApp.clientSocket.soc.send(data)
-            data = file.read(4096)
+            data = file.read(1024)
 
         print("Completed sending file!")
         file.close()

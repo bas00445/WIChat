@@ -41,8 +41,8 @@ class ClientSocket(threading.Thread):
         while not self.shutdown:
             try:
                 self.tLock.acquire()
-                task = pickle.loads(self.soc.recv(4096))
-                self.dataIncome = task
+                self.dataIncome = self.soc.recv(1024)
+
 
             except Exception as e:
                 print(e)

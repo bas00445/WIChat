@@ -6,6 +6,7 @@ import os
 from ServerSocket import *
 from ClientCollector import *
 from Task import *
+from FileObject import *
 
 class Handler(threading.Thread):
 
@@ -28,7 +29,7 @@ class Handler(threading.Thread):
         try:
             while not self.exit:
                 try:
-                    data = self.soc.recv(4096)
+                    data = self.soc.recv(1024)
                     if not data:
                         continue
 
@@ -51,9 +52,11 @@ class Handler(threading.Thread):
                         msgObject = task.getData()
                         receiverAddrList = msgObject.getReceiverAddr()
                         for soc in self.clientCollector.getSocketList():
-                            messageTask = Task("Message", msgObject)
-                            obj = pickle.dumps(messageTask)
-                            soc.send(obj)
+                            for addr in receiverAddrList:
+                                if self.soc != soc and soc.getpeername()[1] == addr[1]:
+                                    messageTask = Task("Message", msgObject)
+                                    obj = pickle.dumps(messageTask)
+                                    soc.send(obj)
 
                     if task.getName() == "Send File":
                         obj = task.getData()
@@ -64,27 +67,27 @@ class Handler(threading.Thread):
                                 if self.soc != soc and soc.getpeername()[1] == addr[1]:
                                     filename = obj.getFilename()
                                     filesize = obj.getFileSize()
+                                    file = open("download/" + filename, "wb")
+                                    #fileObj = FileObject(filename, filesize, obj.getOwnerID(), [addr])
 
-                        file = open(filename, 'wb')
+                                    data = self.soc.recv(1024)
+                                    targetSize = filesize
+                                    currentSize = 0
+                                    if filesize <= 1024:
+                                        file.write(data)
+                                    elif filesize > 1024:
+                                        while filesize >= 0:
+                                            print(">>Receiving a file : ", str(100*currentSize//targetSize) + " % <<")
+                                            file.write(data)
+                                            currentSize += 1024
+                                            filesize -= 1024
+                                            if filesize < 0:
+                                                break
+                                            data = self.soc.recv(1024)
 
-                        data = self.soc.recv(4096)
-                        targetSize = filesize
-                        currentSize = 0
-                        if filesize <= 4096:
-                            file.write(data)
-                        elif filesize > 4096:
-                            while filesize >= 0:
-                                print(">>Receiving a file : ", str(100*currentSize//targetSize) + " % <<")
-                                file.write(data)
-                                currentSize += 4096
-                                filesize -= 4096
-                                if filesize <= 0:
-                                    break
-                                data = self.soc.recv(4096)
-
-                        print("Transfer has been finished!!")
-                        print("Closed file")
-                        file.close()
+                                    file.close()
+                                    print("Transfer has been finished!!")
+                                    print("Closed file")
 
                 except OverflowError:
                     pass
