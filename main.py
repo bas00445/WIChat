@@ -6,17 +6,18 @@ import os
 
 from kivy.animation import Animation
 from kivy.uix.boxlayout import BoxLayout
-
 from kivy.uix.screenmanager import *
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.carousel import Carousel
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
 from kivy.uix.filechooser import *
 from kivy.properties import *
 
@@ -80,7 +81,6 @@ class StartupScreen(Screen):
     def startClient(self, ip, port, username):
         WIApp.clientSocket = ClientSocket(ip, int(port), username)  ## Start client socket loop
         WIApp.clientSocket.connect()
-        WIApp.clientSocket.start()
 
         ### Send the client information to the server ###
         WIApp.clientInfo = ClientInformation(username, WIApp.status, WIApp.clientSocket.getAddr(), None)
@@ -92,6 +92,7 @@ class MainUIScreen(Screen):
         super(MainUIScreen, self).__init__(**kwargs)
         self.listofScreen = ["contact", "history"]
         self.curIndxScreen = 0
+        self.groupIdx = 0
         self.receiveData_thread = threading.Thread(target=self.receiveData)
         self.filename = None
         self.tLock = threading.Lock()
@@ -149,7 +150,11 @@ class MainUIScreen(Screen):
                     self.move_to_front(historyScrollView.children[i], historyScrollView.children)
 
     def createNewGroup(self):
-        groupScrollView = self.screenSlider.contactScreen.groupScrollView.add_widget(Button(text="Hello", size_hint=(1, None)))
+        groupScrollView = self.screenSlider.contactScreen.groupScrollView
+        groupScrollView.add_widget(Button(text="Hello", size_hint=(1, None)))
+
+    def openInvitePopup(self):
+        pass
 
     def receiveData(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
@@ -172,25 +177,45 @@ class MainUIScreen(Screen):
                     if task.getName() == "StoreFile":
                         print("StoreFile")
                         fileObj = task.getData()
-                        file = open("received/" + fileObj.getFilename(), 'wb')
+                        filename = fileObj.getFilename()
+                        filesize = fileObj.getFileSize()
+                        directory = "received/" + filename
+                        file = open(directory, "wb")
+                        # data = WIApp.clientSocket.soc.recv(1024)
+                        # print("Size: ", filesize)
+                        # targetSize = filesize
+                        # currentSize = 0
+                        # if filesize <= 1024:
+                        #     file.write(data)
+                        # elif filesize > 1024:
+                        #     while filesize >= 0:
+                        #         print(">>Client: Receiving a file : ", str(100 * currentSize // targetSize) + " % <<")
+                        #         file.write(data)
+                        #         currentSize += 1024
+                        #         filesize -= 1024
+                        #         if filesize < 0:
+                        #             break
+                        #         data = WIApp.clientSocket.soc.recv(1024)
 
-                        print(fileObj.getFilename() + "xxxxxx")
-                        self.tLock.acquire()
-                        WIApp.clientSocket.clearData()
-                        data = WIApp.clientSocket.getDataIncome()
-
+                        data = WIApp.clientSocket.soc.recv(1024)
                         while data:
                             file.write(data)
-                            print("Storing a file.")
-                            data = WIApp.clientSocket.getDataIncome()
+                            data = WIApp.clientSocket.soc.recv(1024)
 
                         file.close()
-                        print("New file is created.")
-                        self.tLock.release()
-
+                        print("Got a new file.")
+                        print("Closed file.")
 
                     WIApp.clientSocket.clearData()
 
+                except OverflowError:
+                    pass
+                except ValueError:
+                    pass
+                except KeyError:
+                    pass
+                except EOFError:
+                    pass
                 except pickle.UnpicklingError:
                     pass
                 except pickle.PicklingError:
@@ -288,6 +313,7 @@ class ChatroomScreen(Screen):
         anim = Animation(pos=(-self.parent.width, 0), duration=.5)
         anim.start(self.settingPanel)
 
+
     def sendMessageTask(self):
         if self.messageInput.text == "":
             return None
@@ -306,7 +332,9 @@ class ChatroomScreen(Screen):
 
             WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
 
+        self.messageInput.focus = True
         self.messageInput.text = ""  ## Clear Message Input
+
 
 
     def updateMessage(self, task):
@@ -334,7 +362,6 @@ class ChatroomScreen(Screen):
 
         #### Got the message while talking to another chatroom #####
         for room in WIApp.chatroomCollector.getChatroomList():
-
             if set(room.getMemberIDList()) == set(msg.getMemberIDList()) and not isSelf:
                 room.addMessage(msg)
                 ## If got any message while talking in the selected chatroom
@@ -382,13 +409,14 @@ class ProfileArea(BoxLayout):
 class MenuBar(BoxLayout):
     pass
 
-class ContactScreen(BoxLayout):
-    pass
-
-
-class HistoryScreen(BoxLayout):
+class ContactScreen(Screen):
     def __init__(self, **kwargs):
-        super(BoxLayout, self).__init__(**kwargs)
+        super(Screen, self).__init__(**kwargs)
+
+
+class HistoryScreen(Screen):
+    def __init__(self, **kwargs):
+        super(Screen, self).__init__(**kwargs)
 
     def updateOrderChatList(self):
         pass
@@ -396,10 +424,11 @@ class HistoryScreen(BoxLayout):
 class ScreenSlider(Carousel):
     pass
 
-
-class ContactComponent(BoxLayout):
+class ContactComponent(GridLayout):
     def __init__(self, **kwargs):
-        BoxLayout.__init__(self)
+        super(GridLayout, self).__init__(**kwargs)
+        self.cols = 2
+        self.rows = 1
 
 
 class HistoryComponent(BoxLayout):

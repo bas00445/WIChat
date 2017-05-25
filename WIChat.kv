@@ -170,7 +170,7 @@
 <ContactComponent>:
     orientation: 'horizontal'
     size_hint: None, None
-    width: app.root.mainUIScreen.width
+    width: 400
     idButton: idButton
     nameButton: nameButton
     statusButton: statusButton
@@ -218,19 +218,31 @@
 <ContactScreen>:
     orientation: 'vertical'
     contactScrollView: contactScrollView
+    groupScrollView: groupScrollView
 
     Accordion:
         orientation: 'vertical'
 
         AccordionItem:
             title: 'Available Groups'
+            background_selected: 'accordionBG.png'
+            background_normal: 'accordionBG.png'
 
-            BoxLayout:
-                orientation: 'vertical'
+            ScrollView:
+                size: self.parent.width, self.parent.height
+                size_hint: None,None
+                GridLayout:
+                    id: groupScrollView
+                    cols: 1
+                    spacing: 5
+                    size_hint: 1,None
+                    height: self.minimum_height
 
-                Button:
-                    id: createGButton
-                    text: 'Group Layout'
+                    Button:
+                        text: "+ Create a new group"
+                        size_hint: 1, None
+                        on_release: app.root.mainUIScreen.openInvitePopup()
+
 
         AccordionItem:
             title: 'Available Contacts'
@@ -397,50 +409,54 @@
     timeArea: timeArea
     senderArea: senderArea
     size_hint: 1, None
-    orientation: 'horizontal'
-
-    Label:
-        id: senderArea
-        text: 'Partner'
-        color: 0, 0, 0, 1
-        size_hint: 0.3, None
-
-        canvas.before:
-            Color:
-                rgba: 0.745, 0.945, 0.549, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
 
     BoxLayout:
-        orientation: 'vertical'
-        size_hint: 1, None
+
+        orientation: 'horizontal'
+        height: 400
 
         Label:
-            id: textArea
-            text: 'text message'
-            size_hint_y: 0.8
-            color: 0,0,0,1
+            id: senderArea
+            text: 'Partner'
+            color: 0, 0, 0, 1
+            size_hint: 0.3, None
 
             canvas.before:
                 Color:
-                    rgba: 0.894, 0.910, 0.922, 1
+                    rgba: 0.745, 0.945, 0.549, 1
                 Rectangle:
                     pos: self.pos
                     size: self.size
 
-        Label:
-            id: timeArea
-            text: 'time'
-            size_hint_y: 0.2
-            color: 0,0,0,1
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: 1, None
 
-            canvas.before:
-                Color:
-                    rgba: 0.894, 0.910, 0.922, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+            Label:
+                id: textArea
+                text: 'text message'
+                size_hint_y: 0.8
+                color: 0,0,0,1
+
+                canvas.before:
+                    Color:
+                        rgba: 0.894, 0.910, 0.922, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            Label:
+                id: timeArea
+                text: 'time'
+                size_hint_y: 0.2
+                color: 0,0,0,1
+
+                canvas.before:
+                    Color:
+                        rgba: 0.894, 0.910, 0.922, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
 
 <FileChooserDialog>:
     orientation: 'vertical'
@@ -548,9 +564,8 @@
                     TextInput:
                         id: messageInput
                         size_hint: .4, 1
-                        input_filter: lambda text, from_undo: text[:28 - len(self.text)]
                         multiline: False
-
+                        input_filter: lambda text, from_undo: text[:60 - len(self.text)]
                         on_focus: root.hideSettingPanel()
 
 

@@ -7,9 +7,8 @@ from Task import *
 from ClientInformation import *
 from Message import *
 
-class ClientSocket(threading.Thread):
+class ClientSocket:
     def __init__(self, ip, port, name="Name", **kwargs):
-        threading.Thread.__init__(self)
         self.tLock = threading.Lock()
         self.shutdown = False
         self.pauseMsg = True
@@ -43,7 +42,6 @@ class ClientSocket(threading.Thread):
                 self.tLock.acquire()
                 self.dataIncome = self.soc.recv(1024)
 
-
             except Exception as e:
                 print(e)
 
@@ -72,11 +70,6 @@ class ClientSocket(threading.Thread):
 
     def clearData(self):
         self.dataIncome = None
-
-    def run(self):
-        while True:
-            self.clientMessage = ""
-            time.sleep(0.1)
 
     def close(self):
         self.shutdown = True

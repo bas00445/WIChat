@@ -30,17 +30,16 @@ class Handler(threading.Thread):
         file = open(directory, "rb")
         task = Task("StoreFile", fileObj)
         obj = pickle.dumps(task)
+
         soc.send(obj)
 
         data = file.read(1024)
         while data:
-            print("Sending file to client.", soc.getpeername())
             soc.send(data)
             data = file.read(1024)
 
         file.close()
-        print("Close file.")
-
+        print("TransferFile: Close file.")
 
     def run(self):
         try:
