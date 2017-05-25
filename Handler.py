@@ -25,6 +25,23 @@ class Handler(threading.Thread):
             obj = pickle.dumps(task_update_client)
             soc.send(obj)
 
+    def transferFile(self, soc, directory, fileObj):
+
+        file = open(directory, "rb")
+        task = Task("StoreFile", fileObj)
+        obj = pickle.dumps(task)
+        soc.send(obj)
+
+        data = file.read(1024)
+        while data:
+            print("Sending file to client.", soc.getpeername())
+            soc.send(data)
+            data = file.read(1024)
+
+        file.close()
+        print("Close file.")
+
+
     def run(self):
         try:
             while not self.exit:
@@ -63,13 +80,11 @@ class Handler(threading.Thread):
                         receiverAddrList = obj.getReceiverAddr()
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrList:
-                                print("Send file: ", soc.getpeername(), addr)
                                 if self.soc != soc and soc.getpeername()[1] == addr[1]:
                                     filename = obj.getFilename()
                                     filesize = obj.getFileSize()
-                                    file = open("download/" + filename, "wb")
-                                    #fileObj = FileObject(filename, filesize, obj.getOwnerID(), [addr])
-
+                                    directory = "download/" + filename
+                                    file = open(directory, "wb")
                                     data = self.soc.recv(1024)
                                     targetSize = filesize
                                     currentSize = 0
@@ -86,8 +101,10 @@ class Handler(threading.Thread):
                                             data = self.soc.recv(1024)
 
                                     file.close()
-                                    print("Transfer has been finished!!")
-                                    print("Closed file")
+                                    print("Server received a new file.")
+                                    print("Closed file.")
+
+                                    self.transferFile(soc, directory, obj)
 
                 except OverflowError:
                     pass

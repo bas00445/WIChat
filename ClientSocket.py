@@ -61,7 +61,10 @@ class ClientSocket(threading.Thread):
 
     def sendTask(self, task):
         obj = pickle.dumps(task)
-        self.soc.sendto(obj, self.targetServer)
+        self.soc.send(obj)
+
+    def sendData(self, data):
+        self.soc.send(data)
 
     def setTargetAddress(self, newTargetAddr):
         if newTargetAddr != None:

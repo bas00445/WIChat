@@ -160,7 +160,6 @@ class MainUIScreen(Screen):
             if data != None:
                 try:
                     task = pickle.loads(data)
-                    print("Eiei: ", task.getName())
                     if task.getName() == "New Client":
                         self.appendNewContact(task, contactScrollView)
 
@@ -173,9 +172,13 @@ class MainUIScreen(Screen):
                     if task.getName() == "StoreFile":
                         print("StoreFile")
                         fileObj = task.getData()
-                        file = open("download/" + fileObj.getFilename(), 'wb')
+                        file = open("received/" + fileObj.getFilename(), 'wb')
 
+                        print(fileObj.getFilename() + "xxxxxx")
+                        self.tLock.acquire()
+                        WIApp.clientSocket.clearData()
                         data = WIApp.clientSocket.getDataIncome()
+
                         while data:
                             file.write(data)
                             print("Storing a file.")
@@ -183,17 +186,7 @@ class MainUIScreen(Screen):
 
                         file.close()
                         print("New file is created.")
-
-                        #
-                        # data = WIApp.clientSocket.soc.recv(1024)
-                        # while data:
-                        #     print("Receiving the data...")
-                        #     file.write(data)
-                        #     data = WIApp.clientSocket.soc.recv(1024)
-                        #
-                        # file.close()
-                        #
-                        # pass
+                        self.tLock.release()
 
 
                     WIApp.clientSocket.clearData()
@@ -373,7 +366,7 @@ class ChatroomScreen(Screen):
         data = file.read(1024)
         while data:
             print(">>Sending a file<<")
-            WIApp.clientSocket.soc.send(data)
+            WIApp.clientSocket.sendData(data)
             data = file.read(1024)
 
         print("Completed sending file!")
