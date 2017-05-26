@@ -3,7 +3,6 @@
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
 
 <WIChat>:
-
     startupScreen: StartupScreen
     mainUIScreen: MainUIScreen
     chatroomScreen: ChatroomScreen
@@ -145,6 +144,7 @@
     orientation: 'horizontal'
     contactButton: contactButton
     historyButton: historyButton
+    requestButton: requestButton
     settingButton: settingButton
     size_hint: (1, .1)
 
@@ -152,7 +152,7 @@
         text: 'Contact'
         id: contactButton
         background_normal: ''
-        background_color: 0, 0.659, 0.925,  1
+        background_color: 0, 0, 0.400,  1
 
         on_release: app.root.mainUIScreen.changeScreen('contact')
 
@@ -160,15 +160,23 @@
         text: 'History'
         id: historyButton
         background_normal: ''
-        background_color: 0, 0.439, 0.620,  1
+        background_color: 0, 0, 0.600,  1
 
         on_release: app.root.mainUIScreen.changeScreen('history')
+
+    Button:
+        text: 'Requests'
+        id: requestButton
+        background_normal: ''
+        background_color: 0, 0, 0.800,  1
+
+        on_release: app.root.mainUIScreen.changeScreen('request')
 
     Button:
         text: 'Setting'
         id: settingButton
         background_normal: ''
-        background_color: 0.008, 0.267, 0.463,  1
+        background_color: 0.008, 0, 0.900,  1
 
 
 <ContactComponent>:
@@ -261,7 +269,6 @@
                     size_hint: None,None
                     height: self.minimum_height
 
-
 <HistoryScreen>:
     orientation: 'vertical'
     historyScrollView: historyScrollView
@@ -274,6 +281,21 @@
             cols: 1
             spacing: 5
             size_hint: None,None
+            height: self.minimum_height
+
+
+<RequestScreen>:
+    orientation: 'vertical'
+    requestContainer: requestContainer
+
+    ScrollView:
+        size: self.parent.width, self.parent.height
+        size_hint: None,None
+        GridLayout:
+            id: requestContainer
+            cols: 1
+            spacing: 10
+            size_hint: 1,None
             height: self.minimum_height
 
 <HistoryComponent>:
@@ -335,11 +357,14 @@
 
     contactScreen: contactScreen
     historyScreen: historyScreen
+    requestScreen: requestScreen
 
     ContactScreen:
         id: contactScreen
     HistoryScreen:
         id: historyScreen
+    RequestScreen:
+        id: requestScreen
 
 <InAppNotification>:
     orientation: 'horizontal'
@@ -369,6 +394,71 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+
+<RequestComponent>:
+    orientation: 'horizontal'
+    nameButton: nameButton
+    idButton: idButton
+    groupButton: groupButton
+    acceptButton: acceptButton
+    cancelButton: cancelButton
+    size_hint: 1, None
+
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: .6, 1
+
+        Label:
+            id: nameButton
+            color: 0,0,0,1
+            size_hint: 1,.4
+
+            canvas.before:
+                Color:
+                    rgba: 0.745, 0.945, 0.549, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        Label:
+            id: idButton
+            color: 0,0,0,1
+            size_hint: 1,.3
+
+            canvas.before:
+                Color:
+                    rgba: 0.894, 0.910, 0.922, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        Label:
+            id: groupButton
+            color: 0,0,0,1
+            size_hint: 1,.3
+
+            canvas.before:
+                Color:
+                    rgba: 0.894, 0.910, 0.922, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: .4, 1
+
+        Button:
+            id: acceptButton
+            size_hint: 1, 1
+            text: 'Accept'
+            on_release: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(idButton.text, "accept")
+
+        Button:
+            id: cancelButton
+            size_hint: 1, 1
+            text: 'Cancel'
+            on_release: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(idButton.text, "cancel")
 
 
 <MainUIScreen>:

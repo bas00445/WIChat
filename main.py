@@ -21,6 +21,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.filechooser import *
 from kivy.properties import *
 from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
 
 #####################################
 global WIApp
@@ -101,7 +102,7 @@ class InAppNotification(BoxLayout):
 class MainUIScreen(Screen):
     def __init__(self, **kwargs):
         super(MainUIScreen, self).__init__(**kwargs)
-        self.listofScreen = ["contact", "history"]
+        self.listofScreen = ["contact", "history", "request"]
         self.curIndxScreen = 0
         self.groupIdx = 0
         self.receiveData_thread = threading.Thread(target=self.receiveData)
@@ -204,6 +205,10 @@ class MainUIScreen(Screen):
                         title = "Invitation"
                         detail = inviteObj.getOwnerInfo().getName() + " invite to group: " + inviteObj.getGroupName()
                         self.showNotification(title, detail)
+                        requestContainer = self.screenSlider.requestScreen.requestContainer
+                        requestContainer.add_widget(RequestComponent(inviteObj.getOwnerInfo().getID(),
+                                                                     inviteObj.getOwnerInfo().getName(),
+                                                                     inviteObj.getGroupName()))
 
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
@@ -310,10 +315,17 @@ class MainUIScreen(Screen):
 
 class InviteComponent(BoxLayout):
     def __init__(self,**kwargs):
-        BoxLayout.__init__(self) ## This one must use syntax like this
+        BoxLayout.__init__(self)
 
     def isSelected(self):
         return self.selection.active
+
+class RequestComponent(BoxLayout):
+    def __init__(self, id, name, groupname, **kwargs):
+        BoxLayout.__init__(self)
+        self.idButton.text = str(id)
+        self.nameButton.text = name
+        self.groupButton.text = groupname
 
 class CreateGroupScreen(Screen):
     def __init__(self, **kwargs):
@@ -496,6 +508,19 @@ class HistoryScreen(Screen):
 
     def updateOrderChatList(self):
         pass
+
+class RequestScreen(Screen):
+    def __init__(self, **kwargs):
+        super(Screen, self).__init__(**kwargs)
+
+    def responseInvitation(self, id, answer):
+        inv = Invitation([id], WIApp.clientInfo, None, answer)
+
+        task = Task("Response Invitation", inv)
+        WIApp.clientSocket.sendTask(task)
+
+        print("Response to invitation")
+
 
 class ScreenSlider(Carousel):
     pass
