@@ -39,6 +39,7 @@ Window.size = (350, 600)
 class StartupScreen(Screen):
     def __init__(self, **kwargs):
         super(StartupScreen, self).__init__(**kwargs)
+        self.popup = None
 
     def openHostPopup(self):
         notification = BoxLayout(orientation="vertical")
@@ -53,10 +54,10 @@ class StartupScreen(Screen):
         notification.add_widget(startHostButton)
         notification.add_widget(closeButton)
 
-        popup = Popup(title='Caution', content=notification, size_hint=(.8, .5), auto_dismiss=True)
-        popup.open()
+        self.popup = Popup(title='Caution', content=notification, size_hint=(.8, .5), auto_dismiss=True)
+        self.popup.open()
 
-        closeButton.bind(on_press=popup.dismiss)
+        closeButton.bind(on_press=self.popup.dismiss)
         startHostButton.bind(on_press=self.startHosting)
 
     def getInputStartup(self):
@@ -77,6 +78,9 @@ class StartupScreen(Screen):
         self.getInputStartup()
         WIApp.serverSocket = ServerSocket(WIApp.ip, WIApp.port)
         WIApp.serverSocket.start()
+        self.popup.dismiss()
+        self.login()
+
 
     def startClient(self, ip, port, username):
         WIApp.clientSocket = ClientSocket(ip, int(port), username)  ## Start client socket loop
@@ -106,6 +110,10 @@ class MainUIScreen(Screen):
         WIApp.current = "ChatroomScreen"
         self.setClientTarget(id, name)
 
+    def moveto_createGroup(self):
+        WIApp.transition = SlideTransition(direction="up")
+        WIApp.current = "CreateGroupScreen"
+        WIApp.createGroupScreen.listAllContact()
 
     def isNewHisComp(self, container, obj):
         for element in container:
@@ -153,11 +161,9 @@ class MainUIScreen(Screen):
         groupScrollView = self.screenSlider.contactScreen.groupScrollView
         groupScrollView.add_widget(Button(text="Hello", size_hint=(1, None)))
 
-    def openInvitePopup(self):
-        pass
-
     def receiveData(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
+        inviteScrollView = WIApp.createGroupScreen.contactContainer
 
         while True:
             data = WIApp.clientSocket.getDataIncome()
@@ -169,7 +175,7 @@ class MainUIScreen(Screen):
                         self.appendNewContact(task, contactScrollView)
 
                     if task.getName() == "Remove Client":
-                        self.removeContact(task, contactScrollView)
+                        self.removeContact(task, contactScrollView, inviteScrollView)
 
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
@@ -225,23 +231,27 @@ class MainUIScreen(Screen):
 
             time.sleep(0.1)
 
-    def removeContact(self, task, container):
+    def removeContact(self, task, container1, container2):
         id = task.getData()
 
-        for child in container.children:
+        ## Remove ContactComponent
+        for child in container1.children:
             if child.idButton.text == str(id):
-                container.remove_widget(child)
+                container1.remove_widget(child)
+
+        ## Remove InviteComponent
+        for child in container2.children:
+            if child.idButton.text == str(id):
+                container2.remove_widget(child)
 
     def appendNewContact(self, task,  container):
         WIApp.clientInfoList = task.getData()
         container.clear_widgets()
 
         idx = 0  # Index of contact
-        for client in task.getData():
+        for client in WIApp.clientInfoList:
             if client.getName() != WIApp.username:
-                c = ContactComponent()
-                c.idButton.text = str(client.getID())
-                c.nameButton.text = client.getName()
+                c = ContactComponent(client.getID(), client.getName())
                 container.add_widget(c, idx)
                 idx += 1
 
@@ -269,6 +279,25 @@ class MainUIScreen(Screen):
         ### Choose the current chatroom to load and save the history chat
         WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
         WIApp.chatroomScreen.loadDataChatroom(WIApp.currentChatroom)
+
+class InviteComponent(BoxLayout):
+    def __init__(self,**kwargs):
+        BoxLayout.__init__(self) ## This one must use syntax like this
+
+class CreateGroupScreen(Screen):
+    def __init__(self, **kwargs):
+        super(CreateGroupScreen, self).__init__(**kwargs)
+
+    def listAllContact(self):
+        self.contactContainer.clear_widgets()
+        idx = 0
+        for client in WIApp.clientInfoList:
+            if client.getName() != WIApp.username:
+                ic = InviteComponent()
+                ic.idButton.text = str(client.getID())
+                ic.nameButton.text = client.getName()
+                self.contactContainer.add_widget(ic, idx)
+                idx += 1
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
@@ -424,11 +453,11 @@ class HistoryScreen(Screen):
 class ScreenSlider(Carousel):
     pass
 
-class ContactComponent(GridLayout):
-    def __init__(self, **kwargs):
-        super(GridLayout, self).__init__(**kwargs)
-        self.cols = 2
-        self.rows = 1
+class ContactComponent(BoxLayout):
+    def __init__(self, id, name, **kwargs):
+        BoxLayout.__init__(self)  ## This one must use syntax like this
+        self.idButton.text = str(id)
+        self.nameButton.text = name
 
 
 class HistoryComponent(BoxLayout):

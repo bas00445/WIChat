@@ -7,6 +7,7 @@
     startupScreen: StartupScreen
     mainUIScreen: MainUIScreen
     chatroomScreen: ChatroomScreen
+    createGroupScreen: CreateGroupScreen
 
     StartupScreen:
         id: StartupScreen
@@ -14,6 +15,9 @@
         id: MainUIScreen
     ChatroomScreen:
         id: ChatroomScreen
+    CreateGroupScreen:
+        id: CreateGroupScreen
+
 
 <StartupScreen>:
     name: "StartupScreen"
@@ -170,7 +174,7 @@
 <ContactComponent>:
     orientation: 'horizontal'
     size_hint: None, None
-    width: 400
+    width: app.root.mainUIScreen.width
     idButton: idButton
     nameButton: nameButton
     statusButton: statusButton
@@ -241,7 +245,7 @@
                     Button:
                         text: "+ Create a new group"
                         size_hint: 1, None
-                        on_release: app.root.mainUIScreen.openInvitePopup()
+                        on_release: app.root.mainUIScreen.moveto_createGroup()
 
 
         AccordionItem:
@@ -286,9 +290,7 @@
         background_color: 0.196, 0.663, 0.914,  1
         size_hint: .3, 1
         text: 'Pic'
-
-        on_release: app.root.current = "ChatroomScreen"
-        on_release: app.root.mainUIScreen.setClientTarget(idButton.text, nameButton.text)
+        on_release: app.root.mainUIScreen.moveto_chatroom(idButton.text, nameButton.text)
 
     BoxLayout:
         orientation: 'vertical'
@@ -474,9 +476,106 @@
             text: 'Select'
             on_release: app.root.chatroomScreen.selectFile(root.chooser.path, root.chooser.selection)
 
+<InviteComponent>:
+    orientation: 'horizontal'
+    size_hint: 1, None
+    selection: selection
+
+    idButton: idButton
+    nameButton: nameButton
+
+    CheckBox:
+        id: selection
+        size_hint: .1, None
+
+        canvas.before:
+            Color:
+                rgba: 0.745, 0.945, 0.549, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            id: idButton
+            text: "ID"
+            size_hint: 1, .5
+
+        Button:
+            id: nameButton
+            text: "Name"
+            size_hint: 1, .5
+
+<CreateGroupScreen>:
+    name: "CreateGroupScreen"
+    contactContainer: contactContainer
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, .1
+
+            Label:
+                text: 'Invite contacts to group'
+                size_hint_x: .8
+
+                canvas.before:
+                    Color:
+                        rgba: 0.369, 0.545, 0.776, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            Button:
+                background_normal: ''
+                background_color: 0.008, 0.267, 0.463, 1
+                text: "Back"
+                size_hint_x: .2
+                on_release: app.root.chatroomScreen.moveto_mainUI()
+
+        ScrollView:
+            size: self.parent.width, self.parent.height
+            do_scroll_x: False
+            bar_width: 10
+            bar_color: (0.000, 0.643, 0.616, 1)
+
+            canvas.before:
+                Color:
+                    rgba: 0.804, 0.804, 0.804, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            GridLayout:
+                id: contactContainer
+                cols: 1
+                padding: 10
+                spacing: 10
+                size_hint: 1,None
+                height: self.minimum_height
+
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, .1
+
+            Button:
+                text: 'Select'
+                id: 'selectButton'
+                size_hint: .5, 1
+
+            Button:
+                text: 'Cancel'
+                id: 'cancelButton'
+                size_hint: .5, 1
+
+
+
 <ChatroomScreen>:
     name: "ChatroomScreen"
-    scrollView_chat: scrollView_chat
     chatContainer: chatContainer
     messageInput: messageInput
     roomName: roomName
@@ -487,7 +586,6 @@
         BoxLayout:
             BoxLayout:
                 orientation: 'vertical'
-                messageInput: messageInput
 
                 BoxLayout:
                     orientation: "horizontal"
