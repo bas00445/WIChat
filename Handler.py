@@ -66,19 +66,31 @@ class Handler(threading.Thread):
 
                     if task.getName() == "Message":
                         msgObject = task.getData()
-                        receiverAddrList = msgObject.getReceiverAddr()
+                        receiverAddrs = msgObject.getReceiverAddr()
                         for soc in self.clientCollector.getSocketList():
-                            for addr in receiverAddrList:
-                                if self.soc != soc and soc.getpeername()[1] == addr[1]:
+                            for addr in receiverAddrs:
+                                if soc.getpeername()[1] == addr[1]:
                                     messageTask = Task("Message", msgObject)
                                     obj = pickle.dumps(messageTask)
                                     soc.send(obj)
 
+                    if task.getName() == "Invite to group":
+                        inviteObj = task.getData()
+                        receiverAddrs = inviteObj.getReceiverAddr()
+                        for soc in self.clientCollector.getSocketList():
+                            for addr in receiverAddrs:
+
+                                if soc.getpeername()[1] == int(addr):
+                                    inviteTask = Task("Invite to group", inviteObj)
+                                    obj = pickle.dumps(inviteTask)
+                                    soc.send(obj)
+                                    print("Sended")
+
                     if task.getName() == "Send File":
                         obj = task.getData()
-                        receiverAddrList = obj.getReceiverAddr()
+                        receiverAddrs = obj.getReceiverAddr()
                         for soc in self.clientCollector.getSocketList():
-                            for addr in receiverAddrList:
+                            for addr in receiverAddrs:
                                 if self.soc != soc and soc.getpeername()[1] == addr[1]:
                                     filename = obj.getFilename()
                                     filesize = obj.getFileSize()

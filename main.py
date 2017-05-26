@@ -20,6 +20,7 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.filechooser import *
 from kivy.properties import *
+from kivy.clock import Clock
 
 #####################################
 global WIApp
@@ -31,6 +32,7 @@ from Task import *
 from Chatroom import *
 from ChatroomCollector import *
 from FileObject import *
+from Invitation import *
 
 from kivy.core.window import Window
 
@@ -91,6 +93,11 @@ class StartupScreen(Screen):
         initialTask = Task("Submit ClientInfo", WIApp.clientInfo)
         WIApp.clientSocket.sendTask(initialTask)
 
+class InAppNotification(BoxLayout):
+    def __init__(self, **kwargs):
+        BoxLayout.__init__(self)
+
+
 class MainUIScreen(Screen):
     def __init__(self, **kwargs):
         super(MainUIScreen, self).__init__(**kwargs)
@@ -104,6 +111,20 @@ class MainUIScreen(Screen):
     def changeScreen(self, name):
         target_idx = self.listofScreen.index(name)
         self.screenSlider.load_slide(self.screenSlider.slides[target_idx])
+
+    def showNotification(self, title, detail):
+        self.inAppNotification.title.text = title
+        self.inAppNotification.detail.text = detail
+
+        anim = Animation(pos=(0, self.height-self.inAppNotification.height), duration=0.25)
+        anim.start(self.inAppNotification)
+
+        Clock.schedule_once(self.hideNotification, 3)
+
+    def hideNotification(self, data):
+        anim = Animation(pos=(-self.width, self.height - self.inAppNotification.height), duration=0.25)
+        anim.start(self.inAppNotification)
+
 
     def moveto_chatroom(self, id, name):
         WIApp.transition = SlideTransition(direction="up")
@@ -176,6 +197,13 @@ class MainUIScreen(Screen):
 
                     if task.getName() == "Remove Client":
                         self.removeContact(task, contactScrollView, inviteScrollView)
+
+                    if task.getName() == "Invite to group":
+                        print("Got inviation")
+                        inviteObj = task.getData()
+                        title = "Invitation"
+                        detail = inviteObj.getOwnerInfo().getName() + " invite to group: " + inviteObj.getGroupName()
+                        self.showNotification(title, detail)
 
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
@@ -284,6 +312,9 @@ class InviteComponent(BoxLayout):
     def __init__(self,**kwargs):
         BoxLayout.__init__(self) ## This one must use syntax like this
 
+    def isSelected(self):
+        return self.selection.active
+
 class CreateGroupScreen(Screen):
     def __init__(self, **kwargs):
         super(CreateGroupScreen, self).__init__(**kwargs)
@@ -298,6 +329,24 @@ class CreateGroupScreen(Screen):
                 ic.nameButton.text = client.getName()
                 self.contactContainer.add_widget(ic, idx)
                 idx += 1
+
+    def moveto_mainUI(self):
+        WIApp.transition = SlideTransition(direction="right")
+        WIApp.current = "MainUIScreen"
+
+    def sendInvitation(self):
+        receivedAddrs = []
+        print("SendInvitation")
+        for invc in self.contactContainer.children:
+            if invc.isSelected() == True:
+                print("Invite to ", invc.idButton.text)
+                receivedAddrs.append(invc.idButton.text)
+
+        inviteObj = Invitation(receivedAddrs, WIApp.clientInfo, self.groupNameInput.text)
+        task = Task("Invite to group", inviteObj)
+
+        WIApp.clientSocket.sendTask(task)
+
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
@@ -363,8 +412,6 @@ class ChatroomScreen(Screen):
 
         self.messageInput.focus = True
         self.messageInput.text = ""  ## Clear Message Input
-
-
 
     def updateMessage(self, task):
         msg = task.getData()

@@ -341,20 +341,85 @@
     HistoryScreen:
         id: historyScreen
 
+<InAppNotification>:
+    orientation: 'horizontal'
+    title: title
+    detail: detail
+
+    Label:
+        id: title
+        color: 0,0,0,1
+        size_hint: .3,1
+
+        canvas.before:
+            Color:
+                rgba: 0.745, 0.945, 0.549, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+    Label:
+        id: detail
+        color: 0,0,0,1
+        size_hint: .3,1
+
+        canvas.before:
+            Color:
+                rgba: 0.894, 0.910, 0.922, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+
 <MainUIScreen>:
     name: "MainUIScreen"
     profileArea: profileArea
     menuBar: menuBar
     screenSlider: screenSlider
+    inAppNotification: inAppNotification
 
-    BoxLayout:
-        orientation: 'vertical'
-        ProfileArea:
-            id: profileArea
-        MenuBar:
-            id: menuBar
-        ScreenSlider:
-            id: screenSlider
+    FloatLayout:
+
+        BoxLayout:
+            orientation: 'vertical'
+            ProfileArea:
+                id: profileArea
+            MenuBar:
+                id: menuBar
+            ScreenSlider:
+                id: screenSlider
+
+        BoxLayout:
+            id: inAppNotification
+            pos: -self.parent.width, self.parent.height - self.height
+            size_hint: 1, .1
+            orientation: 'horizontal'
+            title: title
+            detail: detail
+
+            Label:
+                id: title
+                color: 0,0,0,1
+                size_hint: .3,1
+
+                canvas.before:
+                    Color:
+                        rgba: 0.745, 0.945, 0.549, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            Label:
+                id: detail
+                color: 0,0,0,1
+                size_hint: .7,1
+
+                canvas.before:
+                    Color:
+                        rgba: 0.894, 0.910, 0.922, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
 
 
 <MessageBoxOwner>:
@@ -487,6 +552,7 @@
     CheckBox:
         id: selection
         size_hint: .1, None
+        color: 0,0,0,1
 
         canvas.before:
             Color:
@@ -497,19 +563,35 @@
 
     BoxLayout:
         orientation: 'vertical'
-        Button:
+        Label:
             id: idButton
             text: "ID"
+            color: 0,0,0,1
             size_hint: 1, .5
 
-        Button:
+            canvas.before:
+                Color:
+                    rgba: 0.894, 0.910, 0.922, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        Label:
             id: nameButton
             text: "Name"
+            color: 0,0,0,1
             size_hint: 1, .5
+
+            canvas.before:
+                Color:
+                    rgba: 0.894, 0.910, 0.922, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
 <CreateGroupScreen>:
     name: "CreateGroupScreen"
     contactContainer: contactContainer
+    groupNameInput: groupNameInput
 
     BoxLayout:
         orientation: 'vertical'
@@ -535,6 +617,20 @@
                 text: "Back"
                 size_hint_x: .2
                 on_release: app.root.chatroomScreen.moveto_mainUI()
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, .1
+
+            Label:
+                text: 'Group Name:'
+                size_hint: .3, 1
+
+            TextInput:
+                id: groupNameInput
+                size_hint: .7, 1
+                multiline: False
+                input_filter: lambda text, from_undo: text[:20 - len(self.text)]
 
         ScrollView:
             size: self.parent.width, self.parent.height
@@ -566,11 +662,13 @@
                 text: 'Select'
                 id: 'selectButton'
                 size_hint: .5, 1
+                on_release: root.sendInvitation()
 
             Button:
                 text: 'Cancel'
                 id: 'cancelButton'
                 size_hint: .5, 1
+                on_release: root.moveto_mainUI()
 
 
 
@@ -663,7 +761,7 @@
                         id: messageInput
                         size_hint: .4, 1
                         multiline: False
-                        input_filter: lambda text, from_undo: text[:60 - len(self.text)]
+                        input_filter: lambda text, from_undo: text[:30 - len(self.text)]
                         on_focus: root.hideSettingPanel()
 
 

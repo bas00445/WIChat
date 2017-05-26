@@ -42,6 +42,6 @@ class ClientInformation:
         return self.address
 
     def __str__(self):
-        return "Name: " + self.name + ", Status: " + self.status + ", Address: " + str(self.address) + ", Task: " + self.task
+        return self.name + " , id: " + str(self.address)
 
 
