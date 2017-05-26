@@ -3,6 +3,7 @@
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
 
 <WIChat>:
+    transition: SlideTransition(direction="up")
     startupScreen: StartupScreen
     mainUIScreen: MainUIScreen
     chatroomScreen: ChatroomScreen
@@ -178,6 +179,21 @@
         background_normal: ''
         background_color: 0.008, 0, 0.900,  1
 
+<GroupChatComponent>:
+    orientation: 'horizontal'
+    gnameButton: gnameButton
+    gPic: gPic
+    size_hint: 1, None
+
+    Button:
+        id: gPic
+        text: 'Pic'
+        size_hint: .3, 1
+
+    Button:
+        id: gnameButton
+        text: 'Group Name'
+        size_hint: .7, 1
 
 <ContactComponent>:
     orientation: 'horizontal'
@@ -230,7 +246,7 @@
 <ContactScreen>:
     orientation: 'vertical'
     contactScrollView: contactScrollView
-    groupScrollView: groupScrollView
+    groupContainer: groupContainer
 
     Accordion:
         orientation: 'vertical'
@@ -244,7 +260,7 @@
                 size: self.parent.width, self.parent.height
                 size_hint: None,None
                 GridLayout:
-                    id: groupScrollView
+                    id: groupContainer
                     cols: 1
                     spacing: 5
                     size_hint: 1,None

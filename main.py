@@ -34,6 +34,8 @@ from Chatroom import *
 from ChatroomCollector import *
 from FileObject import *
 from Invitation import *
+from GroupChat import *
+from GroupChatCollector import *
 
 from kivy.core.window import Window
 
@@ -210,6 +212,10 @@ class MainUIScreen(Screen):
                                                                      inviteObj.getOwnerInfo().getName(),
                                                                      inviteObj.getGroupName()))
 
+                    if task.getName() == "Response Invitation":
+                        inviteObj = task.getData()
+                        print("Got response from: ", inviteObj.getOwnerInfo().getID(), inviteObj.getResponse())
+
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
 
@@ -357,7 +363,34 @@ class CreateGroupScreen(Screen):
         inviteObj = Invitation(receivedAddrs, WIApp.clientInfo, self.groupNameInput.text)
         task = Task("Invite to group", inviteObj)
 
+        #### Create widget ####
+        group = GroupChatComponent(self.groupNameInput.text, WIApp.clientInfo)
+
+        groupContainer = WIApp.mainUIScreen.screenSlider.contactScreen.groupContainer
+        groupContainer.add_widget(group)
+
+        WIApp.groupChatCollector.addGroup(group)
         WIApp.clientSocket.sendTask(task)
+
+class GroupChatComponent(BoxLayout):
+    def __init__(self, gname, creatorInfo, **kwargs):
+        BoxLayout.__init__(self)  ## This one must use syntax like this
+        self.gnameButton.text = gname
+        self.creatorInfo = creatorInfo
+        self.memberInfos = []
+        self.memberIDs = []
+        self.memberInfos.append( (creatorInfo.getID(), creatorInfo.getName()) )
+
+    def addMember(self, id, name):
+        self.memberInfos.append((id, name))
+        self.memberIDs.append(id)
+
+    def getMemberIDs(self):
+        return self.memberIDs
+
+    def getGroupName(self):
+        return self.groupButton.text
+
 
 
 class ChatroomScreen(Screen):
@@ -565,6 +598,7 @@ class WIChat(ScreenManager):
         self.clientInfoList = None  # Friend list
         self.historyInfoList = None
         self.chatroomCollector = ChatroomCollector()
+        self.groupChatCollector = GroupChatCollector()
         self.serverSocket = None
         self.clientSocket = None
         self.clientTargetAddress = None

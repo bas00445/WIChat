@@ -1,15 +1,15 @@
 
 class GroupChat:
-    def __init__(self, name, id, **kwargs):
-        self.name = name
-        self.id = id
-        self.clientAddresses = []
+    def __init__(self, groupID, groupName, **kwargs):
+        self.groupID = groupID
+        self.groupName = groupName
+        self.memberIDs = []
 
-    def addClient(self, newClient):
-        self.clientAddresses.append(newClient)
+    def addMemberByID(self, id):
+        self.memberIDs.append(id)
 
-    def getName(self):
-        return self.name
+    def getGroupID(self):
+        return self.groupID
 
-    def getID(self):
-        return self.id
+    def getGroupName(self):
+        return self.groupName
