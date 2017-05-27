@@ -375,7 +375,7 @@ class CreateGroupScreen(Screen):
         #### Create widget ####
         gname = self.groupNameInput.text
         group = Chatroom(gname)
-        group.addMemberID(inviteObj.getOwnerInfo().getID())
+        group.addMemberID(inviteObj.getOwnerInfo().getID())  ## Attach id of sender
         WIApp.chatroomCollector.addNewChatroom(group)
 
         groupWidget = GroupChatComponent(gname, inviteObj.getOwnerInfo())
@@ -398,12 +398,11 @@ class GroupChatScreen(Screen):
     def sendMessageTask(self, groupname):
         if self.messageInput.text == "":
             return None
-
-        print("Groupname: ", groupname)
         groupChat = WIApp.chatroomCollector.getRoomByRoomName(groupname)
         receiverAddrs = groupChat.getMemberIDList()
+        print("sendMessageTask: ", receiverAddrs)
         msg = Message(self.messageInput.text, receiverAddrs,
-                      (WIApp.username, WIApp.clientInfo.getID()))
+                      (WIApp.username, WIApp.clientInfo.getID()), groupname)
 
         task = Task("Group Message", msg)
         WIApp.clientSocket.sendTask(task)
@@ -419,7 +418,20 @@ class GroupChatScreen(Screen):
         #WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
 
     def uppdateGroupMessage(self, task):
-        pass
+        msg = task.getData()
+        gname = msg.getGroupName()
+
+        print("Update group message")
+        groupChatroom = WIApp.chatroomCollector.getRoomByRoomName(gname)
+        print(groupChatroom)
+        groupChatroom.addMessage(msg)
+
+        if msg.getOwnerID() != WIApp.clientInfo.getID():
+            messageBox = MessageBoxPartner(msg.getOwnerName(), msg.getText(), msg.getCurrentTime())
+        elif msg.getOwnerID() == WIApp.clientInfo.getID():
+            messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getCurrentTime())
+        self.chatContainer.add_widget(messageBox)
+
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
@@ -496,6 +508,7 @@ class ChatroomScreen(Screen):
             ### Create a new room
             roomName = WIApp.username + ":" + targetName
             newChatroom = Chatroom(roomName)
+
             newChatroom.addMemberID(WIApp.clientInfo.getID())
             newChatroom.addMemberID(targetID)
             WIApp.chatroomCollector.addNewChatroom(newChatroom)
@@ -581,6 +594,7 @@ class RequestScreen(Screen):
             groupContainer = WIApp.mainUIScreen.screenSlider.contactScreen.groupContainer
             groupContainer.add_widget(groupWidget)
 
+            #### Problem Here ####
             groupChatroom = Chatroom(gname)
             groupChatroom.addMemberID(creatorID)
             groupChatroom.addMemberID(WIApp.clientInfo.getID())

@@ -2,10 +2,11 @@ import time
 from datetime import datetime
 
 class Message:
-    def __init__(self, text, receiverAddrList, ownerInfo, **kwargs):
+    def __init__(self, text, receiverAddrList, ownerInfo, groupName = None, **kwargs):
         self.text = text
         self.receiverAddr = receiverAddrList # Socket address of the receiver
         self.ownerInfo = ownerInfo
+        self.groupName = groupName
         self.ownerName = ownerInfo[0]
         self.ownerID = ownerInfo[1]
         self.currentTime = self.getCurrentTime()
@@ -24,6 +25,9 @@ class Message:
 
     def getReceiverAddr(self):
         return self.receiverAddr
+
+    def getGroupName(self):
+        return self.groupName
 
     def getCurrentTime(self):
         s = str(datetime.now())

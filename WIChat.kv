@@ -79,12 +79,12 @@
             Button:
                 id: loginButton
                 text: "LOG IN AS CLIENT"
-                on_release: root.login()
+                on_press: root.login()
 
             Button:
                 id: loginButton
                 text: "BECOME A HOST"
-                on_release: root.openHostPopup()
+                on_press: root.openHostPopup()
 
 <ProfileArea>:
 
@@ -158,7 +158,7 @@
         background_normal: ''
         background_color: 0, 0, 0.400,  1
 
-        on_release: app.root.mainUIScreen.changeScreen('contact')
+        on_press: app.root.mainUIScreen.changeScreen('contact')
 
     Button:
         text: 'History'
@@ -166,7 +166,7 @@
         background_normal: ''
         background_color: 0, 0, 0.600,  1
 
-        on_release: app.root.mainUIScreen.changeScreen('history')
+        on_press: app.root.mainUIScreen.changeScreen('history')
 
     Button:
         text: 'Requests'
@@ -174,7 +174,7 @@
         background_normal: ''
         background_color: 0, 0, 0.800,  1
 
-        on_release: app.root.mainUIScreen.changeScreen('request')
+        on_press: app.root.mainUIScreen.changeScreen('request')
 
     Button:
         text: 'Setting'
@@ -192,7 +192,7 @@
         id: gPic
         text: 'Pic'
         size_hint: .3, 1
-        on_release: app.root.mainUIScreen.moveto_groupchat(gnameButton.text)
+        on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text)
 
     Button:
         id: gnameButton
@@ -213,7 +213,7 @@
         size_hint: .3, 1
         text: 'Pic'
 
-        on_release: app.root.mainUIScreen.moveto_chatroom(idButton.text, nameButton.text)
+        on_press: app.root.mainUIScreen.moveto_chatroom(idButton.text, nameButton.text)
 
     BoxLayout:
         orientation: 'vertical'
@@ -273,7 +273,7 @@
                     Button:
                         text: "+ Create a new group"
                         size_hint: 1, None
-                        on_release: app.root.mainUIScreen.moveto_createGroup()
+                        on_press: app.root.mainUIScreen.moveto_createGroup()
 
 
         AccordionItem:
@@ -332,7 +332,7 @@
         background_color: 0.196, 0.663, 0.914,  1
         size_hint: .3, 1
         text: 'Pic'
-        on_release: app.root.mainUIScreen.moveto_chatroom(idButton.text, nameButton.text)
+        on_press: app.root.mainUIScreen.moveto_chatroom(idButton.text, nameButton.text)
 
     BoxLayout:
         orientation: 'vertical'
@@ -472,13 +472,13 @@
             id: acceptButton
             size_hint: 1, 1
             text: 'Accept'
-            on_release: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "accept")
+            on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "accept")
 
         Button:
             id: cancelButton
             size_hint: 1, 1
             text: 'Cancel'
-            on_release: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "cancel")
+            on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "cancel")
 
 
 <MainUIScreen>:
@@ -649,7 +649,7 @@
 
         Button:
             text: 'Select'
-            on_release: app.root.chatroomScreen.selectFile(root.chooser.path, root.chooser.selection)
+            on_press: app.root.chatroomScreen.selectFile(root.chooser.path, root.chooser.selection)
 
 <InviteComponent>:
     orientation: 'horizontal'
@@ -726,7 +726,7 @@
                 background_color: 0.008, 0.267, 0.463, 1
                 text: "Back"
                 size_hint_x: .2
-                on_release: app.root.chatroomScreen.moveto_mainUI()
+                on_press: app.root.chatroomScreen.moveto_mainUI()
 
         BoxLayout:
             orientation: 'horizontal'
@@ -772,13 +772,13 @@
                 text: 'Select'
                 id: 'selectButton'
                 size_hint: .5, 1
-                on_release: root.sendInvitation()
+                on_press: root.sendInvitation()
 
             Button:
                 text: 'Cancel'
                 id: 'cancelButton'
                 size_hint: .5, 1
-                on_release: root.moveto_mainUI()
+                on_press: root.moveto_mainUI()
 
 <GroupChatScreen>:
     name: "GroupChatScreen"
@@ -808,14 +808,14 @@
                         background_color: 0.008, 0.267, 0.463, 1
                         text: "Back"
                         size_hint_x: .2
-                        on_release: app.root.chatroomScreen.moveto_mainUI()
+                        on_press: app.root.chatroomScreen.moveto_mainUI()
 
                     Button:
                         background_normal: ''
                         background_color: 0.008, 0.267, 0.463, 1
                         text: "More"
                         size_hint_x: .2
-                        on_release: root.showSettingPanel()
+                        on_press: root.showSettingPanel()
 
                 ScrollView:
                     id: scrollView_chat
@@ -859,7 +859,7 @@
                         id: cfButton
                         text: 'SEND FILE'
                         size_hint: .25, 1
-                        on_release: root.openChooserDialog()
+                        on_press: root.openChooserDialog()
 
                     TextInput:
                         id: messageInput
@@ -876,8 +876,8 @@
                         text: "SEND"
                         size_hint: .2, 1
 
-                        on_release: root.sendMessageTask(roomName.text)
-                        on_release: root.messageInput.focus = True
+                        on_press: root.sendMessageTask(roomName.text)
+                        on_press: root.messageInput.focus = True
 
 
 <ChatroomScreen>:
@@ -910,14 +910,14 @@
                         background_color: 0.008, 0.267, 0.463, 1
                         text: "Back"
                         size_hint_x: .2
-                        on_release: app.root.chatroomScreen.moveto_mainUI()
+                        on_press: app.root.chatroomScreen.moveto_mainUI()
 
                     Button:
                         background_normal: ''
                         background_color: 0.008, 0.267, 0.463, 1
                         text: "Setting"
                         size_hint_x: .2
-                        on_release: root.showSettingPanel()
+                        on_press: root.showSettingPanel()
 
                 ScrollView:
                     id: scrollView_chat
@@ -963,7 +963,7 @@
                         id: cfButton
                         text: 'SEND FILE'
                         size_hint: .25, 1
-                        on_release: root.openChooserDialog()
+                        on_press: root.openChooserDialog()
 
                     TextInput:
                         id: messageInput
@@ -980,9 +980,9 @@
                         id: sendButton
                         text: "SEND"
                         size_hint: .2, 1
-                        on_release: app.root.clientSocket.setText(messageInput.text)
-                        on_release: root.sendMessageTask()
-                        on_release: root.messageInput.focus = True
+                        on_press: app.root.clientSocket.setText(messageInput.text)
+                        on_press: root.sendMessageTask()
+                        on_press: root.messageInput.focus = True
 
         BoxLayout:
             id: settingPanel
@@ -1010,7 +1010,7 @@
                 background_normal: ''
                 background_color: (0.000, 0.643, 0.616, 1)
 
-                on_release: root.hideSettingPanel()
+                on_press: root.hideSettingPanel()
 
             Button:
                 text: "Clear"
@@ -1019,7 +1019,7 @@
                 background_normal: ''
                 background_color: (0.000, 0.643, 0.616, 1)
 
-                on_release: root.hideSettingPanel()
+                on_press: root.hideSettingPanel()
 
             Button:
                 text: "Block"
@@ -1028,7 +1028,7 @@
                 background_normal: ''
                 background_color: (0.000, 0.643, 0.616, 1)
 
-                on_release: root.hideSettingPanel()
+                on_press: root.hideSettingPanel()
 
             Button:
                 text: "Block"
@@ -1037,7 +1037,7 @@
                 background_normal: ''
                 background_color: (0.000, 0.643, 0.616, 1)
 
-                on_release: root.hideSettingPanel()
+                on_press: root.hideSettingPanel()
 
             Button:
                 text: "Block"
@@ -1046,7 +1046,7 @@
                 background_normal: ''
                 background_color: (0.000, 0.643, 0.616, 1)
 
-                on_release: root.hideSettingPanel()
+                on_press: root.hideSettingPanel()
 
 
 
