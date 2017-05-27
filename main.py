@@ -138,6 +138,9 @@ class MainUIScreen(Screen):
         WIApp.current = "GroupChatScreen"
         WIApp.groupchatScreen.roomName.text = gname
 
+        WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByRoomName(gname)
+        WIApp.groupchatScreen.loadDataGroupChatroom(WIApp.currentChatroom)
+
     def moveto_createGroup(self):
         WIApp.transition = SlideTransition(direction="up")
         WIApp.current = "CreateGroupScreen"
@@ -242,7 +245,7 @@ class MainUIScreen(Screen):
                         WIApp.chatroomScreen.updateMessage(task)
 
                     if task.getName() == "Group Message":
-                        WIApp.groupchatScreen.uppdateGroupMessage(task)
+                        WIApp.groupchatScreen.updateGroupMessage(task)
 
                     if task.getName() == "Update Group Members":
                         self.updateGroupMembers(task)
@@ -433,20 +436,39 @@ class GroupChatScreen(Screen):
 
         #WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
 
-    def uppdateGroupMessage(self, task):
+    def loadDataGroupChatroom(self, room):
+        self.messageList = room.getMsgCollector()
+        self.chatContainer.clear_widgets()
+        self.messageInput.bind(on_text_validate=self.on_enter)
+
+        for msg in self.messageList:
+            if msg.getOwnerID() != WIApp.clientInfo.getID():
+                messageBox = MessageBoxPartner(msg.getOwnerName(), msg.getText(), msg.getCurrentTime())
+
+            elif msg.getOwnerID() == WIApp.clientInfo.getID():
+                messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getCurrentTime())
+
+            self.chatContainer.add_widget(messageBox)
+
+    def updateGroupMessage(self, task):
         msg = task.getData()
         gname = msg.getGroupName()
 
-        print("Update group message")
-        groupChatroom = WIApp.chatroomCollector.getRoomByRoomName(gname)
-        print(groupChatroom)
-        groupChatroom.addMessage(msg)
+        if WIApp.currentChatroom == None:
+            WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByRoomName(gname)
 
-        if msg.getOwnerID() != WIApp.clientInfo.getID():
-            messageBox = MessageBoxPartner(msg.getOwnerName(), msg.getText(), msg.getCurrentTime())
-        elif msg.getOwnerID() == WIApp.clientInfo.getID():
-            messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getCurrentTime())
-        self.chatContainer.add_widget(messageBox)
+        #### Got the message while talking to another chatroom #####
+        for room in WIApp.chatroomCollector.getChatroomList():
+            if room.getRoomName() == gname:
+                room.addMessage(msg)
+
+                ## If got any message while talking in the selected chatroom
+                if room.getRoomName() == WIApp.currentChatroom.getRoomName():
+                    if msg.getOwnerID() != WIApp.clientInfo.getID():
+                        messageBox = MessageBoxPartner(msg.getOwnerName(), msg.getText(), msg.getCurrentTime())
+                    elif msg.getOwnerID() == WIApp.clientInfo.getID():
+                        messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getCurrentTime())
+                    self.chatContainer.add_widget(messageBox)
 
 
 class ChatroomScreen(Screen):
