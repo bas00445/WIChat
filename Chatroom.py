@@ -1,6 +1,7 @@
 class Chatroom:
-    def __init__(self, roomName):
+    def __init__(self, roomName, roomID = None):
         self.roomName = roomName
+        self.roomID = roomID
         self.msgCollector = [] ## Message obj
         self.fileCollector = []  ## File obj
         self.memberNameList = [] ## ClientName
@@ -31,6 +32,9 @@ class Chatroom:
 
     def setRoomName(self, name):
         self.roomName = name
+
+    def setRoomID(self, roomID):
+        self.roomID = roomID
 
     def addWidget(self, widget):
         self.widgetCollector.append(widget)

@@ -1,6 +1,9 @@
+import random
+
 class ChatroomCollector:
     def __init__(self, **kwargs):
         self.chatroomList = []
+        self.roomIDs = []
 
     def getRoomByRoomName(self, roomName):
         for room in self.chatroomList:
@@ -21,6 +24,11 @@ class ChatroomCollector:
         return self.chatroomList
 
     def addNewChatroom(self, newRoom):
+        roomID = random.randint(150,400)
+        while roomID in self.roomIDs:
+            roomID = random.randint(150, 400)
+
+        newRoom.setRoomID(roomID)
         self.chatroomList.append(newRoom)
 
     def listAllChatroom(self):
