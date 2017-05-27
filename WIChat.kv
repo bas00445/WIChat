@@ -468,13 +468,13 @@
             id: acceptButton
             size_hint: 1, 1
             text: 'Accept'
-            on_release: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(idButton.text, "accept")
+            on_release: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "accept")
 
         Button:
             id: cancelButton
             size_hint: 1, 1
             text: 'Cancel'
-            on_release: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(idButton.text, "cancel")
+            on_release: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "cancel")
 
 
 <MainUIScreen>:

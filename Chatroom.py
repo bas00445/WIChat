@@ -57,8 +57,8 @@ class Chatroom:
     def __str__(self):
         s = "Room name: " + self.roomName + "\n"
         s += "Member: \n"
-        for member in self.memberNameList:
-            s += "\t" + member + "\n"
+        for id in self.memberIDList:
+            s += "\t" + id + "\n"
 
         return s
 

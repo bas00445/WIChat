@@ -215,6 +215,11 @@ class MainUIScreen(Screen):
                     if task.getName() == "Response Invitation":
                         inviteObj = task.getData()
                         print("Got response from: ", inviteObj.getOwnerInfo().getID(), inviteObj.getResponse())
+                        if inviteObj.getResponse() == "accept":
+                            gname = inviteObj.getGroupName()
+                            ownerID =  inviteObj.getOwnerInfo().getID()
+                            currentRoom = WIApp.chatroomCollector.getRoomByRoomName(gname)
+                            currentRoom.addMemberID(ownerID)
 
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
@@ -354,22 +359,24 @@ class CreateGroupScreen(Screen):
 
     def sendInvitation(self):
         receivedAddrs = []
-        print("SendInvitation")
         for invc in self.contactContainer.children:
             if invc.isSelected() == True:
-                print("Invite to ", invc.idButton.text)
                 receivedAddrs.append(invc.idButton.text)
 
         inviteObj = Invitation(receivedAddrs, WIApp.clientInfo, self.groupNameInput.text)
         task = Task("Invite to group", inviteObj)
 
         #### Create widget ####
-        group = GroupChatComponent(self.groupNameInput.text, WIApp.clientInfo)
+        gname = self.groupNameInput.text
+        group = Chatroom(gname)
+        group.addMemberID(inviteObj.getOwnerInfo().getID())
+        WIApp.chatroomCollector.addNewChatroom(group)
+        WIApp.chatroomCollector.listAllChatroom()
+        groupWidget = GroupChatComponent(gname, inviteObj.getOwnerInfo())
 
         groupContainer = WIApp.mainUIScreen.screenSlider.contactScreen.groupContainer
-        groupContainer.add_widget(group)
+        groupContainer.add_widget(groupWidget)
 
-        WIApp.groupChatCollector.addGroup(group)
         WIApp.clientSocket.sendTask(task)
 
 class GroupChatComponent(BoxLayout):
@@ -377,21 +384,6 @@ class GroupChatComponent(BoxLayout):
         BoxLayout.__init__(self)  ## This one must use syntax like this
         self.gnameButton.text = gname
         self.creatorInfo = creatorInfo
-        self.memberInfos = []
-        self.memberIDs = []
-        self.memberInfos.append( (creatorInfo.getID(), creatorInfo.getName()) )
-
-    def addMember(self, id, name):
-        self.memberInfos.append((id, name))
-        self.memberIDs.append(id)
-
-    def getMemberIDs(self):
-        return self.memberIDs
-
-    def getGroupName(self):
-        return self.groupButton.text
-
-
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
@@ -546,13 +538,15 @@ class RequestScreen(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
-    def responseInvitation(self, id, answer):
-        inv = Invitation([id], WIApp.clientInfo, None, answer)
-
+    def responseInvitation(self, gname, creatorID, creatorName, answer):
+        inv = Invitation([creatorID], WIApp.clientInfo, gname, answer)
         task = Task("Response Invitation", inv)
         WIApp.clientSocket.sendTask(task)
-
         print("Response to invitation")
+        if answer == "accept":
+            groupWidget = GroupChatComponent(gname, (creatorID, creatorName))
+            groupContainer = WIApp.mainUIScreen.screenSlider.contactScreen.groupContainer
+            groupContainer.add_widget(groupWidget)
 
 
 class ScreenSlider(Carousel):
