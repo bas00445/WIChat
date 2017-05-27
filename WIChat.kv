@@ -40,7 +40,7 @@
         BoxLayout:
             orientation: 'horizontal'
             Label:
-                text: "NICKNAME\n(Max length = 8)"
+                text: "NICKNAME"
                 size_hint_x: .3
                 halign: 'center'
             TextInput:
@@ -876,8 +876,8 @@
                         text: "SEND"
                         size_hint: .2, 1
 
-                        on_press: root.sendMessageTask(roomName.text)
-                        on_press: root.messageInput.focus = True
+                        on_release: root.sendMessageTask(roomName.text)
+                        on_release: root.messageInput.focus = True
 
 
 <ChatroomScreen>:
@@ -980,9 +980,8 @@
                         id: sendButton
                         text: "SEND"
                         size_hint: .2, 1
-                        on_press: app.root.clientSocket.setText(messageInput.text)
-                        on_press: root.sendMessageTask()
-                        on_press: root.messageInput.focus = True
+                        on_release: app.root.clientSocket.setText(messageInput.text)
+                        on_release: root.sendMessageTask()
 
         BoxLayout:
             id: settingPanel

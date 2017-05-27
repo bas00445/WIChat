@@ -46,8 +46,6 @@ class Handler(threading.Thread):
             while not self.exit:
                 try:
                     data = self.soc.recv(1024)
-                    if not data:
-                        continue
 
                     if data:
                         task = pickle.loads(data)
@@ -81,7 +79,6 @@ class Handler(threading.Thread):
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
                                 if self.soc != soc and soc.getpeername()[1] == int(addr):
-                                    print("Send to member")
                                     obj = pickle.dumps(task)
                                     soc.send(obj)
 
