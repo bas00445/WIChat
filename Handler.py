@@ -67,9 +67,10 @@ class Handler(threading.Thread):
                     if task.getName() == "Message":
                         msgObject = task.getData()
                         receiverAddrs = msgObject.getReceiverAddr()
+
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
-                                if soc.getpeername()[1] == addr[1]:
+                                if self.soc != soc and soc.getpeername()[1] == int(addr):
                                     messageTask = Task("Message", msgObject)
                                     obj = pickle.dumps(messageTask)
                                     soc.send(obj)
@@ -79,22 +80,20 @@ class Handler(threading.Thread):
                         receiverAddrs = inviteObj.getReceiverAddr()
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
-                                if soc.getpeername()[1] == int(addr):
+                                if self.soc != soc and soc.getpeername()[1] == int(addr):
                                     inviteTask = Task("Invite to group", inviteObj)
                                     obj = pickle.dumps(inviteTask)
                                     soc.send(obj)
-                                    print("Invite to group")
 
                     if task.getName() == "Response Invitation":
                         inviteObj = task.getData()
                         receiverAddrs = inviteObj.getReceiverAddr()
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
-                                if soc.getpeername()[1] == int(addr):
+                                if self.soc != soc and soc.getpeername()[1] == int(addr):
                                     inviteTask = Task("Response Invitation", inviteObj)
                                     obj = pickle.dumps(inviteTask)
                                     soc.send(obj)
-                                    print("Response to invitor")
 
                     if task.getName() == "Send File":
                         obj = task.getData()

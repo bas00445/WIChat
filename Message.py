@@ -2,10 +2,9 @@ import time
 from datetime import datetime
 
 class Message:
-    def __init__(self, text, receiverAddrList, memberIDList, ownerInfo, **kwargs):
+    def __init__(self, text, receiverAddrList, ownerInfo, **kwargs):
         self.text = text
         self.receiverAddr = receiverAddrList # Socket address of the receiver
-        self.memberIDList = memberIDList # IDs who can receive this message
         self.ownerInfo = ownerInfo
         self.ownerName = ownerInfo[0]
         self.ownerID = ownerInfo[1]
@@ -31,6 +30,4 @@ class Message:
         s = s[0:len(s)-7]
         return s
 
-    def getMemberIDList(self):
-        return self.memberIDList
 

@@ -134,6 +134,11 @@ class MainUIScreen(Screen):
         WIApp.current = "ChatroomScreen"
         self.setClientTarget(id, name)
 
+    def moveto_groupchat(self, gname):
+        WIApp.transition = SlideTransition(direction="up")
+        WIApp.current = "GroupChatScreen"
+        WIApp.groupchatScreen.roomName.text = gname
+
     def moveto_createGroup(self):
         WIApp.transition = SlideTransition(direction="up")
         WIApp.current = "CreateGroupScreen"
@@ -220,6 +225,7 @@ class MainUIScreen(Screen):
                             ownerID =  inviteObj.getOwnerInfo().getID()
                             currentRoom = WIApp.chatroomCollector.getRoomByRoomName(gname)
                             currentRoom.addMemberID(ownerID)
+                            print("\n" + str(currentRoom))
 
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
@@ -306,14 +312,12 @@ class MainUIScreen(Screen):
 
     def setClientTarget(self, targetID, targetName):
         WIApp.clientTargetName = targetName
-        WIApp.clientTargetAddress = (WIApp.ip, int(targetID))
         WIApp.clientTargetID = targetID
 
         WIApp.chatroomScreen.roomName.text = WIApp.username + ":" + targetName + " Chatroom"
         currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
 
         if currentRoom not in WIApp.chatroomCollector.getChatroomList():
-            WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
             roomName = WIApp.username + ":" + targetName
             newChatroom = Chatroom(roomName)
             newChatroom.addMemberID(WIApp.clientInfo.getID())
@@ -385,6 +389,34 @@ class GroupChatComponent(BoxLayout):
         self.gnameButton.text = gname
         self.creatorInfo = creatorInfo
 
+class GroupChatScreen(Screen):
+    def __init__(self, **kwargs):
+        super(GroupChatScreen, self).__init__(**kwargs)
+
+    def sendMessageTask(self, groupname):
+        if self.messageInput.text == "":
+            return None
+
+        groupChat = WIApp.chatroomCollector.getRoomByRoomName(groupname)
+        receiverAddrs = groupChat.getMemberIDList()
+        msg = Message(self.messageInput.text, receiverAddrs,
+                      (WIApp.username, WIApp.clientInfo.getID()))
+
+        task = Task("Message", msg)
+        WIApp.clientSocket.sendTask(task)
+
+        if WIApp.currentChatroom != None:
+            WIApp.currentChatroom.addMessage(msg)
+
+        if self.messageInput.text != "":
+            messageBox = MessageBoxOwner("You", msg.getText(), msg.getCurrentTime())
+            self.chatContainer.add_widget(messageBox)
+
+            WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
+
+        self.messageInput.focus = True
+        self.messageInput.text = ""  ## Clear Message Input
+
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
         super(ChatroomScreen, self).__init__(**kwargs)
@@ -433,10 +465,11 @@ class ChatroomScreen(Screen):
         if self.messageInput.text == "":
             return None
 
-        msg = Message(self.messageInput.text, [WIApp.clientTargetAddress], [WIApp.clientInfo.getID(), WIApp.clientTargetID],
+        msg = Message(self.messageInput.text, [WIApp.clientTargetID, WIApp.clientInfo.getID()],
                       (WIApp.username, WIApp.clientInfo.getID()))
         task = Task("Message", msg)
         WIApp.clientSocket.sendTask(task)
+
 
         if WIApp.currentChatroom != None:
             WIApp.currentChatroom.addMessage(msg)
@@ -447,18 +480,16 @@ class ChatroomScreen(Screen):
 
             WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
 
-        self.messageInput.focus = True
         self.messageInput.text = ""  ## Clear Message Input
 
     def updateMessage(self, task):
         msg = task.getData()
         targetName = msg.getOwnerName()
         targetID = msg.getOwnerID()
+        WIApp.clientTargetID = targetID
 
         currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
         if currentRoom not in WIApp.chatroomCollector.getChatroomList():
-            WIApp.clientSocket.setTargetAddress(WIApp.clientTargetAddress)
-
             ### Create a new room
             roomName = WIApp.username + ":" + targetName
             newChatroom = Chatroom(roomName)
@@ -469,14 +500,12 @@ class ChatroomScreen(Screen):
         if WIApp.currentChatroom == None:
             WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
 
-        isSelf = False
-        if WIApp.clientInfo.getID() == msg.getOwnerID():
-            isSelf = True
-
         #### Got the message while talking to another chatroom #####
         for room in WIApp.chatroomCollector.getChatroomList():
-            if set(room.getMemberIDList()) == set(msg.getMemberIDList()) and not isSelf:
+            if (set(room.getMemberIDList()) == set(msg.getReceiverAddr())
+                and not (WIApp.clientInfo.getID() == msg.getOwnerID())):
                 room.addMessage(msg)
+
                 ## If got any message while talking in the selected chatroom
                 if set(room.getMemberIDList()) == set(WIApp.currentChatroom.getMemberIDList()):
                     if msg.getOwnerID() != WIApp.clientInfo.getID():
@@ -499,7 +528,7 @@ class ChatroomScreen(Screen):
         fsize = os.path.getsize(fname)
         fname = fname.split('\\')[-1] ## Use the last index as a filename
 
-        obj = FileObject(fname, fsize, WIApp.clientInfo.getID(), [WIApp.clientTargetAddress])
+        obj = FileObject(fname, fsize, WIApp.clientInfo.getID(), [WIApp.clientTargetID])
         task = Task("Send File", obj)
         WIApp.clientSocket.sendTask(task)
 
@@ -595,7 +624,6 @@ class WIChat(ScreenManager):
         self.groupChatCollector = GroupChatCollector()
         self.serverSocket = None
         self.clientSocket = None
-        self.clientTargetAddress = None
         self.clientInfo = None
         self.currentChatroom = None
         self.clientTargetName = None

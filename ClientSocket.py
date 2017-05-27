@@ -64,10 +64,6 @@ class ClientSocket:
     def sendData(self, data):
         self.soc.send(data)
 
-    def setTargetAddress(self, newTargetAddr):
-        if newTargetAddr != None:
-            self.targetServer = newTargetAddr
-
     def clearData(self):
         self.dataIncome = None
 
