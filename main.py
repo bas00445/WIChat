@@ -185,9 +185,21 @@ class MainUIScreen(Screen):
                     historyScrollView.children[i].lastestMessage.text = msg.getText()
                     self.move_to_front(historyScrollView.children[i], historyScrollView.children)
 
-    def createNewGroup(self):
-        groupScrollView = self.screenSlider.contactScreen.groupScrollView
-        groupScrollView.add_widget(Button(text="Hello", size_hint=(1, None)))
+    def sendGroupInformation(self, groupChat):
+        task = Task("Update Group Members", groupChat)
+        WIApp.clientSocket.sendTask(task)
+
+    def updateGroupMembers(self, task):
+        groupObj = task.getData()
+        gname = groupObj.getRoomName()
+        currentGroup = WIApp.chatroomCollector.getRoomByRoomName(gname)
+
+        gmemberID = groupObj.getMemberIDList()
+        currentGroupID = currentGroup.getMemberIDList()
+
+        difference = set(gmemberID).difference(set(currentGroupID))
+        while len(difference) != 0:
+            currentGroup.addMemberID(difference.pop())
 
     def receiveData(self):
         contactScrollView = self.screenSlider.contactScreen.contactScrollView
@@ -224,13 +236,17 @@ class MainUIScreen(Screen):
                             ownerID = inviteObj.getOwnerInfo().getID()
                             groupChatRoom = WIApp.chatroomCollector.getRoomByRoomName(gname)
                             groupChatRoom.addMemberID(ownerID)
-
+                            self.sendGroupInformation(groupChatRoom)
 
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
 
                     if task.getName() == "Group Message":
                         WIApp.groupchatScreen.uppdateGroupMessage(task)
+
+                    if task.getName() == "Update Group Members":
+                        self.updateGroupMembers(task)
+
 
                     if task.getName() == "StoreFile":
                         print("StoreFile")

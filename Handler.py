@@ -71,8 +71,7 @@ class Handler(threading.Thread):
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
                                 if self.soc != soc and soc.getpeername()[1] == int(addr):
-                                    messageTask = Task("Message", msgObject)
-                                    obj = pickle.dumps(messageTask)
+                                    obj = pickle.dumps(task)
                                     soc.send(obj)
 
                     if task.getName() == "Group Message":
@@ -83,10 +82,19 @@ class Handler(threading.Thread):
                             for addr in receiverAddrs:
                                 if self.soc != soc and soc.getpeername()[1] == int(addr):
                                     print("Send to member")
-                                    messageTask = Task("Group Message", msgObject)
-                                    obj = pickle.dumps(messageTask)
+                                    obj = pickle.dumps(task)
                                     soc.send(obj)
 
+                    if task.getName() == "Update Group Members":
+                        groupChat = task.getData()
+                        receiverAddrs = groupChat.getMemberIDList()
+
+                        for soc in self.clientCollector.getSocketList():
+                            for addr in receiverAddrs:
+                                if self.soc != soc and soc.getpeername()[1] == int(addr):
+                                    print("Update Group Members")
+                                    obj = pickle.dumps(task)
+                                    soc.send(obj)
 
                     if task.getName() == "Invite to group":
                         inviteObj = task.getData()
@@ -94,8 +102,7 @@ class Handler(threading.Thread):
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
                                 if self.soc != soc and soc.getpeername()[1] == int(addr):
-                                    inviteTask = Task("Invite to group", inviteObj)
-                                    obj = pickle.dumps(inviteTask)
+                                    obj = pickle.dumps(task)
                                     soc.send(obj)
 
                     if task.getName() == "Response Invitation":
@@ -104,8 +111,7 @@ class Handler(threading.Thread):
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
                                 if self.soc != soc and soc.getpeername()[1] == int(addr):
-                                    inviteTask = Task("Response Invitation", inviteObj)
-                                    obj = pickle.dumps(inviteTask)
+                                    obj = pickle.dumps(task)
                                     soc.send(obj)
 
                     if task.getName() == "Send File":
