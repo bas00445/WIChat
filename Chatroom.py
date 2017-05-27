@@ -62,6 +62,7 @@ class Chatroom:
 
         return s
 
+
     def showAllMessageHistory(self):
         pass
 

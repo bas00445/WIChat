@@ -75,6 +75,19 @@ class Handler(threading.Thread):
                                     obj = pickle.dumps(messageTask)
                                     soc.send(obj)
 
+                    if task.getName() == "Group Message":
+                        msgObject = task.getData()
+                        receiverAddrs = msgObject.getReceiverAddr()
+
+                        for soc in self.clientCollector.getSocketList():
+                            for addr in receiverAddrs:
+                                if self.soc != soc and soc.getpeername()[1] == int(addr):
+                                    print("Send to member")
+                                    messageTask = Task("Group Message", msgObject)
+                                    obj = pickle.dumps(messageTask)
+                                    soc.send(obj)
+
+
                     if task.getName() == "Invite to group":
                         inviteObj = task.getData()
                         receiverAddrs = inviteObj.getReceiverAddr()

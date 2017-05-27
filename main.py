@@ -128,7 +128,6 @@ class MainUIScreen(Screen):
         anim = Animation(pos=(-self.width, self.height - self.inAppNotification.height), duration=0.25)
         anim.start(self.inAppNotification)
 
-
     def moveto_chatroom(self, id, name):
         WIApp.transition = SlideTransition(direction="up")
         WIApp.current = "ChatroomScreen"
@@ -222,13 +221,16 @@ class MainUIScreen(Screen):
                         print("Got response from: ", inviteObj.getOwnerInfo().getID(), inviteObj.getResponse())
                         if inviteObj.getResponse() == "accept":
                             gname = inviteObj.getGroupName()
-                            ownerID =  inviteObj.getOwnerInfo().getID()
-                            currentRoom = WIApp.chatroomCollector.getRoomByRoomName(gname)
-                            currentRoom.addMemberID(ownerID)
-                            print("\n" + str(currentRoom))
+                            ownerID = inviteObj.getOwnerInfo().getID()
+                            groupChatRoom = WIApp.chatroomCollector.getRoomByRoomName(gname)
+                            groupChatRoom.addMemberID(ownerID)
+
 
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
+
+                    if task.getName() == "Group Message":
+                        WIApp.groupchatScreen.uppdateGroupMessage(task)
 
                     if task.getName() == "StoreFile":
                         print("StoreFile")
@@ -375,7 +377,7 @@ class CreateGroupScreen(Screen):
         group = Chatroom(gname)
         group.addMemberID(inviteObj.getOwnerInfo().getID())
         WIApp.chatroomCollector.addNewChatroom(group)
-        WIApp.chatroomCollector.listAllChatroom()
+
         groupWidget = GroupChatComponent(gname, inviteObj.getOwnerInfo())
 
         groupContainer = WIApp.mainUIScreen.screenSlider.contactScreen.groupContainer
@@ -397,25 +399,27 @@ class GroupChatScreen(Screen):
         if self.messageInput.text == "":
             return None
 
+        print("Groupname: ", groupname)
         groupChat = WIApp.chatroomCollector.getRoomByRoomName(groupname)
         receiverAddrs = groupChat.getMemberIDList()
         msg = Message(self.messageInput.text, receiverAddrs,
                       (WIApp.username, WIApp.clientInfo.getID()))
 
-        task = Task("Message", msg)
+        task = Task("Group Message", msg)
         WIApp.clientSocket.sendTask(task)
 
         if WIApp.currentChatroom != None:
             WIApp.currentChatroom.addMessage(msg)
 
-        if self.messageInput.text != "":
-            messageBox = MessageBoxOwner("You", msg.getText(), msg.getCurrentTime())
-            self.chatContainer.add_widget(messageBox)
-
-            WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
-
+        messageBox = MessageBoxOwner("You", msg.getText(), msg.getCurrentTime())
+        self.chatContainer.add_widget(messageBox)
         self.messageInput.focus = True
         self.messageInput.text = ""  ## Clear Message Input
+
+        #WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
+
+    def uppdateGroupMessage(self, task):
+        pass
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
@@ -469,7 +473,6 @@ class ChatroomScreen(Screen):
                       (WIApp.username, WIApp.clientInfo.getID()))
         task = Task("Message", msg)
         WIApp.clientSocket.sendTask(task)
-
 
         if WIApp.currentChatroom != None:
             WIApp.currentChatroom.addMessage(msg)
@@ -573,9 +576,17 @@ class RequestScreen(Screen):
         WIApp.clientSocket.sendTask(task)
         print("Response to invitation")
         if answer == "accept":
+            ### Create a groupchat widget
             groupWidget = GroupChatComponent(gname, (creatorID, creatorName))
             groupContainer = WIApp.mainUIScreen.screenSlider.contactScreen.groupContainer
             groupContainer.add_widget(groupWidget)
+
+            groupChatroom = Chatroom(gname)
+            groupChatroom.addMemberID(creatorID)
+            groupChatroom.addMemberID(WIApp.clientInfo.getID())
+            WIApp.chatroomCollector.addNewChatroom(groupChatroom)
+
+
 
 
 class ScreenSlider(Carousel):
