@@ -1,7 +1,8 @@
 class Chatroom:
-    def __init__(self, roomName, roomID = None):
+    def __init__(self, roomName, roomID = None, rType = "private"):
         self.roomName = roomName
         self.roomID = roomID
+        self.rType = rType
         self.msgCollector = [] ## Message obj
         self.fileCollector = []  ## File obj
         self.memberNameList = [] ## ClientName
@@ -17,6 +18,9 @@ class Chatroom:
 
     def getRoomName(self):
         return self.roomName
+
+    def getRoomType(self):
+        return self.rType
 
     def getMsgCollector(self):
         return self.msgCollector

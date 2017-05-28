@@ -7,8 +7,9 @@ class ChatroomCollector:
 
     def getRoomByRoomName(self, roomName):
         for room in self.chatroomList:
-            if room.getRoomName() == roomName:
-                return room
+            if room.getRoomType() == "group":
+                if room.getRoomName() == roomName:
+                    return room
 
     def getRoomByMemberName(self, memberNameList):
         for room in self.chatroomList:
@@ -17,8 +18,9 @@ class ChatroomCollector:
 
     def getRoomByMemberID(self, memberIDList):
         for room in self.chatroomList:
-            if set(room.getMemberIDList()) == set(memberIDList):
-                return room
+            if room.getRoomType() == "single":
+                if set(room.getMemberIDList()) == set(memberIDList):
+                    return room
 
     def getChatroomList(self):
         return self.chatroomList
