@@ -16,3 +16,4 @@ class Invitation:
 
     def getResponse(self):
         return self.response
+

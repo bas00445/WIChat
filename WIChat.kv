@@ -111,6 +111,9 @@
                 pos_hint: {'x': .25}
                 padding_x: self.width/4
 
+        Label:
+            size_hint_y: 0.2
+
         BoxLayout:
             orientation: 'horizontal'
             size_hint: 1, .1
@@ -406,7 +409,6 @@
         on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text)
 
     BoxLayout:
-        size_hint: .7, 1
         orientation: 'vertical'
         Label:
             id: creatorIDLabel
@@ -433,7 +435,7 @@
 
     idButton: idButton
     nameButton: nameButton
-    lastestMessage: lastestMessage
+    lastestMsg: lastestMsg
 
     Button:
         id: nameButton
@@ -454,7 +456,7 @@
                     size: self.size
 
         Label:
-            id: lastestMessage
+            id: lastestMsg
             text: "None"
             canvas.before:
                 Color:
@@ -928,7 +930,7 @@
                         background_color: 0.369, 0.545, 0.776, 1
 
                         id: roomName
-                        text: "GroupChat"
+                        text: "Chatroom"
                         size_hint_x: .6
 
                     Button:
@@ -1004,9 +1006,8 @@
                         id: sendButton
                         text: "Send"
                         size_hint: .2, 1
-
-                        on_release: root.sendMessageTask(roomName.text)
-                        on_release: root.messageInput.focus = True
+                        on_release: app.root.clientSocket.setText(messageInput.text)
+                        on_release: root.sendMessageTask(root.roomName.text)
 
         BoxLayout:
             id: inRoomNotification
@@ -1046,46 +1047,56 @@
             size_hint_x: 0.6
 
             orientation: 'vertical'
-            spacing: 5
 
             canvas.before:
                 Color:
-                    rgba: 0.565, 0.663, 0.840, 1
+                    rgba: 0.000, 0.314, 0.541, 1
+
                 Rectangle:
                     pos: self.pos
                     size: self.size
 
             Button:
-                size_hint: 1, 0.2
+                size_hint: 1, 0.08
                 text: "Setting Panel"
-
-            Button:
-                text: "Backup"
-                size_hint_y: 0.2
-
                 background_normal: ''
-                background_color: (0.000, 0.643, 0.616, 1)
+                background_color: 0.027, 0.412, 0.698, 1
 
-                on_press: root.hideMenu()
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint: 1, 0.9
+                spacing: 5
 
-            Button:
-                text: "Clear"
-                size_hint_y: 0.2
+                Button:
+                    text: "List Members"
+                    size_hint_y: .1
 
-                background_normal: ''
-                background_color: (0.000, 0.643, 0.616, 1)
+                    background_normal: ''
+                    background_color: (0.000, 0.643, 0.616, 1)
 
-                on_press: root.hideMenu()
+                    on_press: root.listMembers()
+                    on_press: root.hideMenu()
 
-            Button:
-                text: "Block"
-                size_hint_y: 0.2
+                Button:
+                    text: "Backup"
+                    size_hint_y: .1
 
-                background_normal: ''
-                background_color: (0.000, 0.643, 0.616, 1)
+                    background_normal: ''
+                    background_color: (0.000, 0.643, 0.616, 1)
 
-                on_press: root.hideMenu()
+                    on_press: root.hideMenu()
 
+                Button:
+                    text: "Clear"
+                    size_hint_y: .1
+
+                    background_normal: ''
+                    background_color: (0.000, 0.643, 0.616, 1)
+
+                    on_press: root.hideMenu()
+
+                Label:
+                    size_hint_y: .6
 
 
 <ChatroomScreen>:
@@ -1149,8 +1160,6 @@
                         spacing: 10
                         size_hint: 1,None
                         height: self.minimum_height
-
-
 
                 BoxLayout:
                     canvas.before:
@@ -1230,45 +1239,47 @@
             size_hint_x: 0.6
 
             orientation: 'vertical'
-            spacing: 5
 
             canvas.before:
                 Color:
-                    rgba: 0.565, 0.663, 0.840, 1
+                    rgba: 0.000, 0.314, 0.541, 1
+
                 Rectangle:
                     pos: self.pos
                     size: self.size
 
             Button:
-                size_hint: 1, 0.2
+                size_hint: 1, 0.08
                 text: "Setting Panel"
-
-            Button:
-                text: "Backup"
-                size_hint_y: 0.2
-
                 background_normal: ''
-                background_color: (0.000, 0.643, 0.616, 1)
+                background_color: 0.027, 0.412, 0.698, 1
 
-                on_press: root.hideMenu()
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint: 1, 0.9
+                spacing: 5
 
-            Button:
-                text: "Clear"
-                size_hint_y: 0.2
+                Button:
+                    text: "Backup"
+                    size_hint_y: .1
 
-                background_normal: ''
-                background_color: (0.000, 0.643, 0.616, 1)
+                    background_normal: ''
+                    background_color: 0.000, 0.643, 0.616, 1
 
-                on_press: root.hideMenu()
+                    on_press: root.hideMenu()
 
-            Button:
-                text: "Block"
-                size_hint_y: 0.2
+                Button:
+                    text: "Clear"
+                    size_hint_y: .1
 
-                background_normal: ''
-                background_color: (0.000, 0.643, 0.616, 1)
+                    background_normal: ''
+                    background_color: 0.000, 0.643, 0.616, 1
 
-                on_press: root.hideMenu()
+                    on_press: root.hideMenu()
+
+                Label:
+                    size_hint_y: .6
+
 
 
 

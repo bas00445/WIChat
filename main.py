@@ -151,10 +151,20 @@ class MainUIScreen(Screen):
 
     def isNewHisComp(self, container, obj):
         for element in container:
-            if element.idButton.text == obj.idButton.text:
-                return False
-
+            if isinstance(element, HistoryComponent) and isinstance(obj, HistoryComponent):
+                if element.idButton.text == obj.idButton.text:
+                    return False
+            elif isinstance(element, HistoryGroupComponent) and isinstance(obj, HistoryGroupComponent):
+                if ( element.gnameButton.text == obj.gnameButton.text and
+                     element.creatorID.text == obj.creatorID.text):
+                    return False
         return True
+
+
+        # for element in container:
+        #     if element.idButton.text == obj.idButton.text:
+        #         return False
+        # return True
 
     def move_to_front(self, key, mylist):
         mylist.remove(key)
@@ -168,7 +178,34 @@ class MainUIScreen(Screen):
             historyComp = HistoryComponent(WIApp.clientTargetID, WIApp.clientTargetName, msg.getText())
 
         elif msg.getGroupName() != None:
-            print("Eiei")
+            historyComp = HistoryGroupComponent(msg.getGroupName(), msg.getOwnerID(), msg.getText())
+
+        # Add a new History component to its scroll view
+        if self.isNewHisComp(historyScrollView.children, historyComp) == True:
+            print("New comp")
+            historyScrollView.add_widget(historyComp, len(historyScrollView.children))
+
+        # If it already exist, rotate the lastest to the front
+        elif self.isNewHisComp(historyScrollView.children, historyComp) == False:
+            for i in range(len(historyScrollView.children)):
+                if isinstance(historyScrollView.children[i], HistoryComponent):
+                    if historyScrollView.children[i].idButton.text == msg.getReceiverAddr()[0]:
+                        historyScrollView.children[i].lastestMsg.text = msg.getText()
+                        self.move_to_front(historyScrollView.children[i], historyScrollView.children)
+
+                elif isinstance(historyScrollView.children[i], HistoryGroupComponent):
+                    if historyScrollView.children[i].gnameButton.text == WIApp.currentChatroom.getRoomName():
+                        historyScrollView.children[i].lastestMsg.text = msg.getText()
+                        self.move_to_front(historyScrollView.children[i], historyScrollView.children)
+
+    # When got an incoming message
+    def updateHistoryType_2(self, msg):
+        historyScrollView = self.screenSlider.historyScreen.historyScrollView
+
+        if msg.getGroupName() == None:
+            historyComp = HistoryComponent(msg.getOwnerID(), msg.getOwnerName(), msg.getText())
+
+        elif msg.getGroupName() != None:
             historyComp = HistoryGroupComponent(msg.getGroupName(), msg.getOwnerID(), msg.getText())
 
         # Add a new History component to its scroll view
@@ -178,25 +215,15 @@ class MainUIScreen(Screen):
         # If it already exist, rotate the lastest to the front
         elif self.isNewHisComp(historyScrollView.children, historyComp) == False:
             for i in range(len(historyScrollView.children)):
-                if historyScrollView.children[i].idButton.text == WIApp.clientTargetID:
-                    historyScrollView.children[i].lastestMessage.text = msg.getText()
-                    self.move_to_front(historyScrollView.children[i], historyScrollView.children)
+                if isinstance(historyScrollView.children[i], HistoryComponent):
+                    if historyScrollView.children[i].idButton.text == msg.getOwnerID():
+                        historyScrollView.children[i].lastestMsg.text = msg.getText()
+                        self.move_to_front(historyScrollView.children[i], historyScrollView.children)
 
-    # When got an incoming message
-    def updateHistoryType_2(self, msg):
-        historyScrollView = self.screenSlider.historyScreen.historyScrollView
-        historyComp = HistoryComponent(msg.getOwnerID(), msg.getOwnerName(), msg.getText())
-
-        # Add a new History component to its scroll view
-        if self.isNewHisComp(historyScrollView.children, historyComp) == True:
-            historyScrollView.add_widget(historyComp, len(historyScrollView.children))
-
-        # If it already exist, rotate the lastest to the front
-        elif self.isNewHisComp(historyScrollView.children, historyComp) == False:
-            for i in range(len(historyScrollView.children)):
-                if historyScrollView.children[i].idButton.text == msg.getOwnerID():
-                    historyScrollView.children[i].lastestMessage.text = msg.getText()
-                    self.move_to_front(historyScrollView.children[i], historyScrollView.children)
+                elif isinstance(historyScrollView.children[i], HistoryGroupComponent):
+                    if historyScrollView.children[i].gnameButton.text == WIApp.currentChatroom.getRoomName():
+                        historyScrollView.children[i].lastestMsg.text = msg.getText()
+                        self.move_to_front(historyScrollView.children[i], historyScrollView.children)
 
     def sendGroupInformation(self, groupChat):
         task = Task("Update Group Members", groupChat)
@@ -490,6 +517,11 @@ class GroupChatScreen(Screen):
         anim.start(self.inRoomNotification)
         Clock.schedule_once(self.hideNotification, 3)
 
+    def listMembers(self):
+
+        # popup = Popup(title="Members in this group", content=)
+        pass
+
     def hideNotification(self, data):
         anim = Animation(pos=(-self.width, self.height - self.inRoomNotification.height), duration=0.25)
         anim.start(self.inRoomNotification)
@@ -517,7 +549,8 @@ class GroupChatScreen(Screen):
 
         self.messageInput.text = ""  # Clear Message Input
 
-        #WIApp.mainUIScreen.updateHistoryType_1(msg) # Update history scroll view when send a new message
+        ### Group Chat
+        WIApp.mainUIScreen.updateHistoryType_1(msg) # Update history scroll view when send a new message
 
     def loadDataGroupChatroom(self, room):
         self.messageList = room.getMsgCollector()
@@ -566,6 +599,8 @@ class GroupChatScreen(Screen):
 
                     self.groupchatContainer.add_widget(messageBox)
 
+                WIApp.mainUIScreen.updateHistoryType_2(msg)
+
     def openChooserDialog(self):
         cd = FileChooserDialog()
         popup = Popup(title="Choose a file to send", content=cd, size_hint=(.8, .8), auto_dismiss=True)
@@ -590,6 +625,7 @@ class GroupChatScreen(Screen):
 
         print("Completed sending file!")
         file.close()
+
 
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
@@ -685,8 +721,6 @@ class ChatroomScreen(Screen):
 
         if WIApp.currentChatroom == None:
             WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
-
-        print("Got Message From: ", msg.getOwnerID())
 
         # Got the message while talking to another chatroom
         twice = False
@@ -789,7 +823,7 @@ class HistoryComponent(BoxLayout):
         BoxLayout.__init__(self) # This one must use syntax like this
         self.idButton.text = str(id)
         self.nameButton.text = name
-        self.lastestMessage.text = lastestMsg
+        self.lastestMsg.text = lastestMsg
 
 class MessageBoxOwner(BoxLayout):
     def __init__(self, name, text, time, **kwargs):
