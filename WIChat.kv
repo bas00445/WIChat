@@ -392,37 +392,36 @@
 
 <HistoryGroupComponent>:
     orientation: 'horizontal'
+    gnameButton: gnameButton
+    creatorID: creatorIDLabel
+    lastestMsg: lastestMsg
     size_hint: None, None
     width: app.root.mainUIScreen.width
 
-    gnameButton: gnameButton
-    lastestMessage: lastestMessage
-
     Button:
-        background_normal: ''
-        background_color: 0.196, 0.663, 0.914,  1
+        id: gnameButton
         size_hint: .3, 1
-        text: 'Pic'
+        background_normal: ''
+        background_color: 0.353, 0.259, 0.549, 1
         on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text)
 
     BoxLayout:
+        size_hint: .7, 1
         orientation: 'vertical'
-
         Label:
-            id: gnameButton
+            id: creatorIDLabel
             canvas.before:
                 Color:
-                    rgba: 0.369, 0.545, 0.776, 1
+                    rgba: 0.525, 0.427, 0.729, 1
                 Rectangle:
                     pos: self.pos
                     size: self.size
 
         Label:
-            id: lastestMessage
-            text: "None"
+            id: lastestMsg
             canvas.before:
                 Color:
-                    rgba: 0.369, 0.545, 0.776, 1
+                    rgba: 0.525, 0.427, 0.729, 1
                 Rectangle:
                     pos: self.pos
                     size: self.size

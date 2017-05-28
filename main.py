@@ -153,6 +153,7 @@ class MainUIScreen(Screen):
         for element in container:
             if element.idButton.text == obj.idButton.text:
                 return False
+
         return True
 
     def move_to_front(self, key, mylist):
@@ -162,7 +163,13 @@ class MainUIScreen(Screen):
     # When send a new message
     def updateHistoryType_1(self, msg):
         historyScrollView = self.screenSlider.historyScreen.historyScrollView
-        historyComp = HistoryComponent(WIApp.clientTargetID, WIApp.clientTargetName, msg.getText())
+
+        if msg.getGroupName() == None:
+            historyComp = HistoryComponent(WIApp.clientTargetID, WIApp.clientTargetName, msg.getText())
+
+        elif msg.getGroupName() != None:
+            print("Eiei")
+            historyComp = HistoryGroupComponent(msg.getGroupName(), msg.getOwnerID(), msg.getText())
 
         # Add a new History component to its scroll view
         if self.isNewHisComp(historyScrollView.children, historyComp) == True:
@@ -245,7 +252,6 @@ class MainUIScreen(Screen):
 
                     if task.getName() == "Response Invitation":
                         inviteObj = task.getData()
-                        print("Got response from: ", inviteObj.getOwnerInfo().getID(), inviteObj.getResponse())
                         if inviteObj.getResponse() == "accept":
                             gname = inviteObj.getGroupName()
                             ownerID = inviteObj.getOwnerInfo().getID()
@@ -364,7 +370,7 @@ class MainUIScreen(Screen):
 
         idx = 0  # Index of contact
         for client in WIApp.clientInfoList:
-            if client.getName() != WIApp.username:
+            if client.getID() != WIApp.clientInfo.getID():
                 c = ContactComponent(client.getID(), client.getName())
                 container.add_widget(c, idx)
                 idx += 1
@@ -378,7 +384,7 @@ class MainUIScreen(Screen):
         WIApp.clientTargetName = targetName
         WIApp.clientTargetID = targetID
 
-        WIApp.chatroomScreen.roomName.text = WIApp.username + ":" + targetName + " Chatroom"
+        WIApp.chatroomScreen.roomName.text = WIApp.username + " : " + targetName
         currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
 
         if currentRoom not in WIApp.chatroomCollector.getChatroomList():
@@ -414,7 +420,7 @@ class CreateGroupScreen(Screen):
         self.contactContainer.clear_widgets()
         idx = 0
         for client in WIApp.clientInfoList:
-            if client.getName() != WIApp.username:
+            if client.getID() != WIApp.clientInfo.getID():
                 ic = InviteComponent()
                 ic.idButton.text = str(client.getID())
                 ic.nameButton.text = client.getName()
@@ -459,10 +465,11 @@ class GroupChatComponent(BoxLayout):
         self.creatorName.text = creatorName
 
 class HistoryGroupComponent(BoxLayout):
-    def __init__(self, gname, lastestMsg, **kwargs):
+    def __init__(self, gname, creatorID, lastestMsg, **kwargs):
         BoxLayout.__init__(self)
         self.gnameButton.text = gname
-        self.lastestMessage.text = lastestMsg
+        self.creatorID.text = creatorID
+        self.lastestMsg.text = lastestMsg
 
 class GroupChatScreen(Screen):
     def __init__(self, **kwargs):
