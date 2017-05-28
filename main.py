@@ -49,8 +49,8 @@ class StartupScreen(Screen):
     def openHostPopup(self):
         notification = BoxLayout(orientation="vertical")
         label = Label(text="Please turn on Hotspot\n    before start hosting", font_size="20sp")
-        closeButton = Button(text="Close", background_color=(0.000, 0.361, 0.659, 1))
-        startHostButton = Button(text="Start Hosting", background_color=(0.000, 0.361, 0.659, 1))
+        closeButton = Button(text="Close")
+        startHostButton = Button(text="Start Hosting")
 
         closeButton.size_hint = 1, .3
         startHostButton.size_hint = 1, .3
@@ -59,7 +59,7 @@ class StartupScreen(Screen):
         notification.add_widget(startHostButton)
         notification.add_widget(closeButton)
 
-        self.popup = Popup(title='CAUTION!',content=notification, size_hint=(.8, .5), auto_dismiss=True, background='backgroundPopup.png')
+        self.popup = Popup(title='Caution', content=notification, size_hint=(.8, .5), auto_dismiss=True)
         self.popup.open()
 
         closeButton.bind(on_press=self.popup.dismiss)
@@ -214,6 +214,7 @@ class MainUIScreen(Screen):
 
         while True:
             data = WIApp.clientSocket.getDataIncome()
+
             if data != None:
                 try:
                     task = pickle.loads(data)
@@ -229,7 +230,6 @@ class MainUIScreen(Screen):
                         title = "Invitation"
                         detail = inviteObj.getOwnerInfo().getName() + " invite to group: " + inviteObj.getGroupName()
                         self.showNotification(title, detail)
-                        self.sound_invite.play()
                         requestContainer = self.screenSlider.requestScreen.requestContainer
                         requestContainer.add_widget(RequestComponent(inviteObj.getOwnerInfo().getID(),
                                                                      inviteObj.getOwnerInfo().getName(),
@@ -566,7 +566,7 @@ class ChatroomScreen(Screen):
         anim.start(self.settingPanel)
 
     def hideSettingPanel(self):
-        anim = Animation(pos=(-self.width, 0), duration=.5)
+        anim = Animation(pos=(-self.parent.width, 0), duration=.5)
         anim.start(self.settingPanel)
 
     def sendMessageTask(self):
