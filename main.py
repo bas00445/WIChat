@@ -237,6 +237,9 @@ class MainUIScreen(Screen):
                         if WIApp.current == "ChatroomScreen":
                             WIApp.chatroomScreen.showNotificationChatroom(title, detail)
 
+                        if WIApp.current == "GroupChatScreen":
+                            WIApp.groupchatScreen.showNotificationChatroom(title, detail)
+
                         if self.inviteSound == True:
                             self.sound_invite.play()
 
@@ -262,15 +265,33 @@ class MainUIScreen(Screen):
                         if WIApp.current == "ChatroomScreen":
                             WIApp.chatroomScreen.showNotificationChatroom(ownerName, detail)
 
+                        if WIApp.current == "GroupChatScreen":
+                            WIApp.groupchatScreen.showNotificationChatroom(ownerName, detail)
+
                         if self.messageSound == True:
                             self.sound_msg.play()
 
                     if task.getName() == "Group Message":
                         WIApp.groupchatScreen.updateGroupMessage(task)
 
+                        msgObj = task.getData()
+                        gName = msgObj.getGroupName()
+                        detail = msgObj.getText()
+
+                        if WIApp.current == "MainUIScreen":
+                            self.showNotification(gName, detail)
+
+                        if WIApp.current == "ChatroomScreen":
+                            WIApp.chatroomScreen.showNotificationChatroom(gName, detail)
+
+                        if WIApp.current == "GroupChatScreen":
+                            WIApp.groupchatScreen.showNotificationChatroom(gName, detail)
+
+                        if self.messageSound == True:
+                            self.sound_msg.play()
+
                     if task.getName() == "Update Group Members":
                         self.updateGroupMembers(task)
-
 
                     if task.getName() == "StoreFile":
                         print("StoreFile")
@@ -422,7 +443,8 @@ class CreateGroupScreen(Screen):
         group.addMemberID(inviteObj.getOwnerInfo().getID())  ## Attach id of sender
         WIApp.chatroomCollector.addNewChatroom(group)
 
-        groupWidget = GroupChatComponent(gname, inviteObj.getOwnerInfo())
+        groupWidget = GroupChatComponent(gname, inviteObj.getOwnerInfo().getID(),
+                                                inviteObj.getOwnerInfo().getName())
 
         groupContainer = WIApp.mainUIScreen.screenSlider.contactScreen.groupContainer
         groupContainer.add_widget(groupWidget)
@@ -430,10 +452,11 @@ class CreateGroupScreen(Screen):
         WIApp.clientSocket.sendTask(task)
 
 class GroupChatComponent(BoxLayout):
-    def __init__(self, gname, creatorInfo, **kwargs):
+    def __init__(self, gname, creatorID, creatorName, **kwargs):
         BoxLayout.__init__(self)
         self.gnameButton.text = gname
-        self.creatorInfo = creatorInfo
+        self.creatorID.text = creatorID
+        self.creatorName.text = creatorName
 
 class HistoryGroupComponent(BoxLayout):
     def __init__(self, gname, lastestMsg, **kwargs):
@@ -444,6 +467,22 @@ class HistoryGroupComponent(BoxLayout):
 class GroupChatScreen(Screen):
     def __init__(self, **kwargs):
         super(GroupChatScreen, self).__init__(**kwargs)
+        self.filePath = None
+
+    def showNotificationChatroom(self, title, detail):
+        if title == WIApp.clientTargetName:
+            return None
+
+        self.inRoomNotification.title.text = title
+        self.inRoomNotification.detail.text = detail
+
+        anim = Animation(pos=(0, self.height - self.inRoomNotification.height), duration=0.25)
+        anim.start(self.inRoomNotification)
+        Clock.schedule_once(self.hideNotification, 3)
+
+    def hideNotification(self, data):
+        anim = Animation(pos=(-self.width, self.height - self.inRoomNotification.height), duration=0.25)
+        anim.start(self.inRoomNotification)
 
     def sendMessageTask(self, groupname):
         if self.messageInput.text == "":
@@ -485,6 +524,14 @@ class GroupChatScreen(Screen):
 
                 self.groupchatContainer.add_widget(messageBox)
 
+    def showMenu(self):
+        anim = Animation(pos=(0, 0), duration=.5)
+        anim.start(self.menu)
+
+    def hideMenu(self):
+        anim = Animation(pos=(-self.width, 0), duration=.5)
+        anim.start(self.menu)
+
     def updateGroupMessage(self, task):
         msg = task.getData()
         gname = msg.getGroupName()
@@ -509,22 +556,39 @@ class GroupChatScreen(Screen):
 
                     self.groupchatContainer.add_widget(messageBox)
 
+    def openChooserDialog(self):
+        cd = FileChooserDialog()
+        popup = Popup(title="Choose a file to send", content=cd, size_hint=(.8, .8), auto_dismiss=True)
+        popup.open()
+
+    def selectFile(self, path, filename):
+        file = open(os.path.join(path, filename[0]), 'rb')
+
+        fname = os.path.join(path, filename[0])
+        fsize = os.path.getsize(fname)
+        fname = fname.split('\\')[-1] # Use the last index as a filename
+
+        obj = FileObject(fname, fsize, WIApp.clientInfo.getID(), [WIApp.clientTargetID])
+        task = Task("Send File", obj)
+        WIApp.clientSocket.sendTask(task)
+
+        data = file.read(1024)
+        while data:
+            print(">>Sending a file<<")
+            WIApp.clientSocket.sendData(data)
+            data = file.read(1024)
+
+        print("Completed sending file!")
+        file.close()
+
 class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
         super(ChatroomScreen, self).__init__(**kwargs)
         self.messageList = None
-        self.msgFontSize = "16sp"
-        self.colorMsgText = "000000"
-        self.colorPartnerText = self.colorMsgText
-        self.colorOwnerText = "ffffff"
-        self.colorMsgBackground = (0.894, 0.910, 0.922, 1)
-        self.colorOwnerBackground = (0.192, 0.263, 0.592, 1)
-        self.colorPartnerBackground = (0.745, 0.945, 0.549, 1)
-        self.lengthOfHistoryChat = 0
         self.filePath = None
 
     def on_enter(self, *args):
-        self.hideSettingPanel()
+        self.hideMenu()
 
     def showNotificationChatroom(self, title, detail):
         if title == WIApp.clientTargetName:
@@ -547,7 +611,7 @@ class ChatroomScreen(Screen):
     def moveto_mainUI(self):
         WIApp.transition = SlideTransition(direction="right")
         WIApp.current = "MainUIScreen"
-        self.hideSettingPanel()
+        self.hideMenu()
 
     def loadDataChatroom(self, room):
         self.messageList = room.getMsgCollector()
@@ -563,13 +627,13 @@ class ChatroomScreen(Screen):
 
             self.chatContainer.add_widget(messageBox)
 
-    def showSettingPanel(self):
+    def showMenu(self):
         anim = Animation(pos=(0, 0), duration=.5)
-        anim.start(self.settingPanel)
+        anim.start(self.menu)
 
-    def hideSettingPanel(self):
+    def hideMenu(self):
         anim = Animation(pos=(-self.width, 0), duration=.5)
-        anim.start(self.settingPanel)
+        anim.start(self.menu)
 
     def sendMessageTask(self):
         if self.messageInput.text == "":
@@ -689,7 +753,7 @@ class RequestScreen(Screen):
 
         if answer == "accept":
             # Create a groupchat widget
-            groupWidget = GroupChatComponent(gname, (creatorID, creatorName))
+            groupWidget = GroupChatComponent(gname, creatorID, creatorName)
             groupContainer = WIApp.mainUIScreen.screenSlider.contactScreen.groupContainer
             groupContainer.add_widget(groupWidget)
 
