@@ -31,60 +31,107 @@
 
     BoxLayout:
         orientation: 'vertical'
-        spacing: 5
-        Button:
+        spacing: 15
+
+        canvas.before:
+            Color:
+                rgba: 0.157, 0.643, 1.000, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
             id: StartupLabel
             text: "Start Up"
-            size_hint: 1, .2
+            size_hint: 1, .1
+            font_size: 30
+
+            canvas.before:
+                Color:
+                    rgba: 0.027, 0.412, 0.698, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
 
         BoxLayout:
-            orientation: 'horizontal'
+            orientation: 'vertical'
+            size_hint_y: 0.2
+
             Label:
                 text: "NICKNAME"
-                size_hint_x: .3
                 halign: 'center'
+                size_hint_y: .1
+                font_size: 25
+
             TextInput:
                 id: nameInput
                 text: "Untitiled"
+                font_size: 20
+                padding_x: self.width/4
                 multiline: False
-                size_hint_x: .7
                 input_filter: lambda text, from_undo: text[:8 - len(self.text)]
+                size_hint: .5, .1
+                pos_hint: {'x': .25}
+
 
         BoxLayout:
-            orientation: 'horizontal'
+            orientation: 'vertical'
+            size_hint_y: 0.2
+
             Label:
                 text: "HOST IP"
-                size_hint_x: .3
+                size_hint_y: .1
+                font_size: 25
+
             TextInput:
                 id: ipInput
                 text: "127.0.0.1"
+                font_size: 20
                 multiline: False
-                size_hint_x: .7
+                size_hint: .5, .1
+                pos_hint: {'x': .25}
+                padding_x: self.width/4
 
         BoxLayout:
-            orientation: 'horizontal'
+            orientation: 'vertical'
+            size_hint_y: 0.2
+
             Label:
                 text: "PORT"
-                size_hint_x: .3
+                size_hint_y: .1
+                font_size: 25
+
             TextInput:
                 id: portInput
                 text: "5000"
+                font_size: 20
                 multiline: False
-                size_hint_x: .7
-
+                size_hint: .5, .1
+                pos_hint: {'x': .25}
+                padding_x: self.width/4
 
         BoxLayout:
             orientation: 'horizontal'
-            size_hint: 1, .3
+            size_hint: 1, .1
+
             Button:
                 id: loginButton
                 text: "LOG IN AS CLIENT"
+                font_size: "16sp"
                 on_press: root.login()
+
+                background_normal: ''
+                background_color: 0.000, 0.314, 0.541, 1
 
             Button:
                 id: loginButton
                 text: "BECOME A HOST"
+                font_size: "16sp"
                 on_press: root.openHostPopup()
+
+                background_normal: ''
+                background_color: 0.000, 0.314, 0.541, 1
 
 <ProfileArea>:
 
@@ -431,12 +478,12 @@
 
     Label:
         id: title
-        color: 0,0,0,1
+        color: 1, 1, 1, 1
         size_hint: .3,1
 
         canvas.before:
             Color:
-                rgba: 0.745, 0.945, 0.549, 1
+                rgba: 0.000, 0.643, 0.580, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
@@ -473,7 +520,7 @@
 
             canvas.before:
                 Color:
-                    rgba: 0.745, 0.945, 0.549, 1
+                    rgba: 0.000, 0.643, 0.580, 1
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -547,12 +594,12 @@
 
             Label:
                 id: title
-                color: 0,0,0,1
+                color: 1,1,1,1
                 size_hint: .3,1
 
                 canvas.before:
                     Color:
-                        rgba: 0.745, 0.945, 0.549, 1
+                        rgba: 0.000, 0.643, 0.580, 1
                     Rectangle:
                         pos: self.pos
                         size: self.size
@@ -629,20 +676,19 @@
     size_hint: 1, None
 
     BoxLayout:
-
         orientation: 'horizontal'
         height: 400
 
         Label:
             id: senderArea
             text: 'Partner'
-            color: 0, 0, 0, 1
+            color: 1, 1, 1, 1
             size_hint: 0.3, None
             font_size: '16sp'
 
             canvas.before:
                 Color:
-                    rgba: 0.745, 0.945, 0.549, 1
+                    rgba: 0.000, 0.643, 0.580, 1
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -706,11 +752,11 @@
     CheckBox:
         id: selection
         size_hint: .1, None
-        color: 0,0,0,1
+        color: 0,0,.400,1
 
         canvas.before:
             Color:
-                rgba: 0.745, 0.945, 0.549, 1
+                rgba: 0.102, 0.314, 0.549, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
@@ -780,8 +826,16 @@
                 text: 'Group Name:'
                 size_hint: .3, 1
 
+                canvas.before:
+                    Color:
+                        rgba: 0, 0, .600, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
             TextInput:
                 id: groupNameInput
+                text: '>> Input <<'
                 size_hint: .7, 1
                 multiline: False
                 input_filter: lambda text, from_undo: text[:20 - len(self.text)]
@@ -1103,12 +1157,12 @@
 
             Label:
                 id: title
-                color: 0,0,0,1
+                color: 1,1,1,1
                 size_hint: .3,1
 
                 canvas.before:
                     Color:
-                        rgba: 0.745, 0.945, 0.549, 1
+                        rgba: 0.000, 0.643, 0.580, 1
                     Rectangle:
                         pos: self.pos
                         size: self.size
