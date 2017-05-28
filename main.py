@@ -234,6 +234,7 @@ class MainUIScreen(Screen):
                         title = "Invitation"
                         ownerName = inviteObj.getOwnerInfo().getName()
                         detail = ownerName + " invite to group: " + inviteObj.getGroupName()
+                        detail = detail[:20]
                         requestContainer = self.screenSlider.requestScreen.requestContainer
                         requestContainer.add_widget(RequestComponent(inviteObj.getOwnerInfo().getID(),
                                                                      inviteObj.getOwnerInfo().getName(),
@@ -264,6 +265,7 @@ class MainUIScreen(Screen):
                         msgObj = task.getData()
                         ownerName = msgObj.getOwnerName()
                         detail = msgObj.getText()
+                        detail = detail[:20]
 
                         if WIApp.current == "MainUIScreen":
                             self.showNotification(ownerName, detail)
@@ -283,6 +285,7 @@ class MainUIScreen(Screen):
                         msgObj = task.getData()
                         gName = msgObj.getGroupName()
                         detail = msgObj.getText()
+                        detail = detail[:20]
 
                         if WIApp.current == "MainUIScreen":
                             self.showNotification(gName, detail)
