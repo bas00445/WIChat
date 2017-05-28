@@ -136,7 +136,6 @@
 <ProfileArea>:
 
     orientation: 'horizontal'
-    profileButton: profileButton
 
     idButton: idButton
     nameButton: nameButton
@@ -152,8 +151,7 @@
             size: self.size
 
     Button:
-        id: profileButton
-        text: "Profile"
+        id: nameButton
         size_hint_x: .3
         background_normal: 'backgroundPic.png'
         background_color: 0.196, 0.663, 0.914,  1
@@ -161,21 +159,11 @@
 
     BoxLayout:
         padding: 8
-        spacing: 1
         orientation: 'vertical'
 
         Button:
             id: idButton
             text: "ID"
-            pos_hint: {'x': .125}
-            size_hint_x: .8
-            size_hint_y: .2
-            background_normal: ''
-            background_color: 0.196, 0.663, 0.914,  1
-
-        Button:
-            id: nameButton
-            text: "Name"
             pos_hint: {'x': .125}
             size_hint_x: .8
             size_hint_y: .2
@@ -232,19 +220,15 @@
 <GroupChatComponent>:
     orientation: 'horizontal'
     gnameButton: gnameButton
-    gPic: gPic
     size_hint: 1, None
 
     Button:
-        id: gPic
-        text: 'Pic'
-        size_hint: .3, 1
+        id: gnameButton
+        size_hint: 1, 1
+        background_normal: ''
+        background_color: 0.412, 0.302, 0.643, 1
         on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text)
 
-    Button:
-        id: gnameButton
-        text: 'Group Name'
-        size_hint: .7, 1
 
 <ContactComponent>:
     orientation: 'horizontal'
@@ -259,6 +243,7 @@
         background_color: 0.196, 0.663, 0.914,  1
         size_hint: .3, 1
         text: 'Pic'
+        id: nameButton
 
         on_press: app.root.mainUIScreen.moveto_chatroom(idButton.text, nameButton.text)
 
@@ -274,14 +259,6 @@
                     pos: self.pos
                     size: self.size
 
-        Label:
-            id: nameButton
-            canvas.before:
-                Color:
-                    rgba: 0.369, 0.545, 0.776, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
 
         Label:
             id: statusButton
@@ -339,6 +316,7 @@
                 GridLayout:
                     id: contactScrollView
                     cols: 1
+                    padding: 2.5
                     spacing: 5
                     size_hint: None,None
                     height: self.minimum_height
@@ -421,25 +399,16 @@
     lastestMessage: lastestMessage
 
     Button:
+        id: nameButton
         background_normal: ''
         background_color: 0.196, 0.663, 0.914,  1
         size_hint: .3, 1
-        text: 'Pic'
         on_press: app.root.mainUIScreen.moveto_chatroom(idButton.text, nameButton.text)
 
     BoxLayout:
         orientation: 'vertical'
         Label:
             id: idButton
-            canvas.before:
-                Color:
-                    rgba: 0.369, 0.545, 0.776, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-        Label:
-            id: nameButton
             canvas.before:
                 Color:
                     rgba: 0.369, 0.545, 0.776, 1
@@ -524,7 +493,7 @@
 
         Label:
             id: nameButton
-            color: 0,0,0,1
+            color: 1, 1, 1 ,1
             size_hint: 1,.4
 
             canvas.before:
@@ -559,26 +528,26 @@
                     size: self.size
 
     BoxLayout:
-        orientation: 'horizontal'
-        size_hint: .4, 1
+        orientation: 'vertical'
+        size_hint: .2, 1
 
         Button:
             id: acceptButton
-            size_hint: 1, 1
-            text: 'Accept'
+            size_hint: 1, .5
+            text: 'ACCEPT'
             on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "accept", root)
 
             background_normal: ''
-            background_color: 0.196, 0.663, 0.914,  1
+            background_color: 0.000, 0.314, 0.541, 1
 
         Button:
             id: cancelButton
-            size_hint: 1, 1
-            text: 'Cancel'
-            on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "cancel")
+            size_hint: 1, .5
+            text: 'CANCEL'
+            on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "cancel", root)
 
             background_normal: ''
-            background_color: 0.196, 0.663, 0.914,  1
+            background_color: 0.000, 0.314, 0.541, 1
 
 <MainUIScreen>:
     name: "MainUIScreen"
@@ -752,7 +721,7 @@
         size_hint_y: 0.1
 
         Button:
-            text: 'Select'
+            text: 'SELECT'
             background_normal: ''
             background_color: 0.071, 0.4, 0.840, 1
 
