@@ -680,7 +680,7 @@ class RequestScreen(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
-    def responseInvitation(self, gname, creatorID, creatorName, answer):
+    def responseInvitation(self, gname, creatorID, creatorName, answer, root):
         inv = Invitation([creatorID], WIApp.clientInfo, gname, answer)
         task = Task("Response Invitation", inv)
         WIApp.clientSocket.sendTask(task)
@@ -696,6 +696,8 @@ class RequestScreen(Screen):
             groupChatroom.addMemberID(creatorID)
             groupChatroom.addMemberID(WIApp.clientInfo.getID())
             WIApp.chatroomCollector.addNewChatroom(groupChatroom)
+
+        self.requestContainer.remove_widget(root) ## Remove the request component
 
 
 class ScreenSlider(Carousel):

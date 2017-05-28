@@ -304,8 +304,8 @@
 
         AccordionItem:
             title: 'Available Groups'
-            background_selected: 'accordionBG.png'
-            background_normal: 'accordionBG.png'
+            background_selected: 'accordionBG_normal.png'
+            background_normal: 'accordionBG_selected.png'
 
             ScrollView:
                 size: self.parent.width, self.parent.height
@@ -313,6 +313,7 @@
                 GridLayout:
                     id: groupContainer
                     cols: 1
+                    padding: 2.5
                     spacing: 5
                     size_hint: 1,None
                     height: self.minimum_height
@@ -323,9 +324,14 @@
                         size_hint: 1, None
                         on_press: app.root.mainUIScreen.moveto_createGroup()
 
+                        background_normal: ''
+                        background_color: 0.000, 0.314, 0.541, 1
+
 
         AccordionItem:
             title: 'Available Contacts'
+            background_selected: 'accordionBG_normal.png'
+            background_normal: 'accordionBG_selected.png'
 
             ScrollView:
                 size: self.parent.width, self.parent.height
@@ -347,6 +353,7 @@
         GridLayout:
             id: historyScrollView
             cols: 1
+            padding: 2.5
             spacing: 5
             size_hint: None,None
             height: self.minimum_height
@@ -362,7 +369,8 @@
         GridLayout:
             id: requestContainer
             cols: 1
-            spacing: 10
+            padding: 2.5
+            spacing: 5
             size_hint: 1,None
             height: self.minimum_height
 
@@ -558,7 +566,10 @@
             id: acceptButton
             size_hint: 1, 1
             text: 'Accept'
-            on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "accept")
+            on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "accept", root)
+
+            background_normal: ''
+            background_color: 0.196, 0.663, 0.914,  1
 
         Button:
             id: cancelButton
@@ -566,6 +577,8 @@
             text: 'Cancel'
             on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "cancel")
 
+            background_normal: ''
+            background_color: 0.196, 0.663, 0.914,  1
 
 <MainUIScreen>:
     name: "MainUIScreen"
@@ -860,11 +873,10 @@
             GridLayout:
                 id: contactContainer
                 cols: 1
-                padding: 10
-                spacing: 10
+                padding: 2.5
+                spacing: 5
                 size_hint: 1,None
                 height: self.minimum_height
-
 
         BoxLayout:
             orientation: 'horizontal'
