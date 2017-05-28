@@ -48,7 +48,7 @@ class StartupScreen(Screen):
 
     def openHostPopup(self):
         notification = BoxLayout(orientation="vertical")
-        label = Label(text="Please turn on Hotspot\n    before start hosting", font_size="20dp")
+        label = Label(text="Please turn on Hotspot\n    before start hosting", font_size="20sp")
         closeButton = Button(text="Close")
         startHostButton = Button(text="Start Hosting")
 
@@ -66,7 +66,7 @@ class StartupScreen(Screen):
         startHostButton.bind(on_press=self.startHosting)
 
     def getInputStartup(self):
-        WIApp.username = self.nameInput.text
+        WIApp.username = self.nameInput.text.upper()
         WIApp.status = ""
         WIApp.ip = self.ipInput.text
         WIApp.port = int(self.portInput.text)
@@ -96,10 +96,10 @@ class StartupScreen(Screen):
         initialTask = Task("Submit ClientInfo", WIApp.clientInfo)
         WIApp.clientSocket.sendTask(initialTask)
 
+
 class InAppNotification(BoxLayout):
     def __init__(self, **kwargs):
         BoxLayout.__init__(self)
-
 
 class MainUIScreen(Screen):
     def __init__(self, **kwargs):
@@ -110,6 +110,10 @@ class MainUIScreen(Screen):
         self.receiveData_thread = threading.Thread(target=self.receiveData)
         self.filename = None
         self.tLock = threading.Lock()
+        self.messageSound = True
+        self.sound_msg = SoundLoader.load('sounds/messageSound.mp3')
+        self.sound_invite = SoundLoader.load('sounds/inviteSound.mp3')
+
 
     def changeScreen(self, name):
         target_idx = self.listofScreen.index(name)
@@ -220,8 +224,8 @@ class MainUIScreen(Screen):
                     if task.getName() == "Remove Client":
                         self.removeContact(task, contactScrollView, inviteScrollView)
 
+
                     if task.getName() == "Invite to group":
-                        print("Got inviation")
                         inviteObj = task.getData()
                         title = "Invitation"
                         detail = inviteObj.getOwnerInfo().getName() + " invite to group: " + inviteObj.getGroupName()
@@ -243,6 +247,21 @@ class MainUIScreen(Screen):
 
                     if task.getName() == "Message":
                         WIApp.chatroomScreen.updateMessage(task)
+
+                        if WIApp.current == "MainUIScreen":
+                            msgObj = task.getData()
+                            ownerName = msgObj.getOwnerName()
+                            detail = msgObj.getText()
+                            self.showNotification(ownerName, detail)
+
+                        if WIApp.current == "ChatroomScreen":
+                            msgObj = task.getData()
+                            ownerName = msgObj.getOwnerName()
+                            detail = msgObj.getText()
+                            WIApp.chatroomScreen.showNotificationChatroom(ownerName, detail)
+
+                        if self.messageSound == True:
+                            self.sound_msg.play()
 
                     if task.getName() == "Group Message":
                         WIApp.groupchatScreen.updateGroupMessage(task)
@@ -313,6 +332,7 @@ class MainUIScreen(Screen):
         ## Remove InviteComponent
         for child in container2.children:
             if child.idButton.text == str(id):
+                print("remove Invite")
                 container2.remove_widget(child)
 
     def appendNewContact(self, task,  container):
@@ -346,7 +366,7 @@ class MainUIScreen(Screen):
             WIApp.chatroomCollector.addNewChatroom(newChatroom)
 
         ### Choose the current chatroom to load and save the history chat
-        WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
+        WIApp.currentChatroom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID]) ## Load private chat
         WIApp.chatroomScreen.loadDataChatroom(WIApp.currentChatroom)
 
 class InviteComponent(BoxLayout):
@@ -377,6 +397,9 @@ class CreateGroupScreen(Screen):
                 ic.nameButton.text = client.getName()
                 self.contactContainer.add_widget(ic, idx)
                 idx += 1
+
+    def removeContact(self):
+        pass
 
     def moveto_mainUI(self):
         WIApp.transition = SlideTransition(direction="right")
@@ -410,6 +433,12 @@ class GroupChatComponent(BoxLayout):
         self.gnameButton.text = gname
         self.creatorInfo = creatorInfo
 
+class HistoryGroupComponent(BoxLayout):
+    def __init__(self, gname, lastestMsg, **kwargs):
+        BoxLayout.__init__(self) ## This one must use syntax like this
+        self.gnameButton.text = gname
+        self.lastestMessage.text = lastestMsg
+
 class GroupChatScreen(Screen):
     def __init__(self, **kwargs):
         super(GroupChatScreen, self).__init__(**kwargs)
@@ -432,7 +461,7 @@ class GroupChatScreen(Screen):
         WIApp.currentChatroom.addMessage(msg)
 
         if self.messageInput.text != "":
-            messageBox = MessageBoxOwner("You", msg.getText(), msg.getTimeCreated())
+            messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getTimeCreated())
             self.groupchatContainer.add_widget(messageBox)
 
         self.messageInput.text = ""  ## Clear Message Input
@@ -482,7 +511,7 @@ class ChatroomScreen(Screen):
     def __init__(self, **kwargs):
         super(ChatroomScreen, self).__init__(**kwargs)
         self.messageList = None
-        self.msgFontSize = 16
+        self.msgFontSize = "16sp"
         self.colorMsgText = "000000"
         self.colorPartnerText = self.colorMsgText
         self.colorOwnerText = "ffffff"
@@ -495,9 +524,28 @@ class ChatroomScreen(Screen):
     def on_enter(self, *args):
         self.hideSettingPanel()
 
+    def showNotificationChatroom(self, title, detail):
+        if title == WIApp.clientTargetName:
+            return None
+
+        self.inRoomNotification.title.text = title
+        self.inRoomNotification.detail.text = detail
+
+        anim = Animation(pos=(0, self.height - self.inRoomNotification.height), duration=0.25)
+        anim.start(self.inRoomNotification)
+
+        Clock.schedule_once(self.hideNotification, 3)
+
+
+    def hideNotification(self, data):
+        anim = Animation(pos=(-self.width, self.height - self.inRoomNotification.height), duration=0.25)
+        anim.start(self.inRoomNotification)
+
+
     def moveto_mainUI(self):
         WIApp.transition = SlideTransition(direction="right")
         WIApp.current = "MainUIScreen"
+        self.hideSettingPanel()
 
     def loadDataChatroom(self, room):
         self.messageList = room.getMsgCollector()
@@ -536,7 +584,7 @@ class ChatroomScreen(Screen):
         WIApp.currentChatroom.addMessage(msg)
 
         if self.messageInput.text != "":
-            messageBox = MessageBoxOwner("You", msg.getText(), msg.getTimeCreated())
+            messageBox = MessageBoxOwner("YOU", msg.getText(), msg.getTimeCreated())
             self.chatContainer.add_widget(messageBox)
 
             WIApp.mainUIScreen.updateHistoryType_1(msg) ## Update history scroll view when send a new message
@@ -550,8 +598,6 @@ class ChatroomScreen(Screen):
         WIApp.clientTargetID = targetID
 
         currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
-        WIApp.currentChatroom =currentRoom
-
         if currentRoom not in WIApp.chatroomCollector.getChatroomList():
             ### Create a new room
             roomName = WIApp.username + ":" + targetName

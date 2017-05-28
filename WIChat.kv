@@ -318,6 +318,43 @@
             size_hint: 1,None
             height: self.minimum_height
 
+<HistoryGroupComponent>:
+    orientation: 'horizontal'
+    size_hint: None, None
+    width: app.root.mainUIScreen.width
+
+    gnameButton: gnameButton
+    lastestMessage: lastestMessage
+
+    Button:
+        background_normal: ''
+        background_color: 0.196, 0.663, 0.914,  1
+        size_hint: .3, 1
+        text: 'Pic'
+        on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text)
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        Label:
+            id: gnameButton
+            canvas.before:
+                Color:
+                    rgba: 0.369, 0.545, 0.776, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        Label:
+            id: lastestMessage
+            text: "None"
+            canvas.before:
+                Color:
+                    rgba: 0.369, 0.545, 0.776, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
 <HistoryComponent>:
     orientation: 'horizontal'
     size_hint: None, None
@@ -390,6 +427,7 @@
     orientation: 'horizontal'
     title: title
     detail: detail
+    size_hint_y: .1
 
     Label:
         id: title
@@ -406,7 +444,7 @@
     Label:
         id: detail
         color: 0,0,0,1
-        size_hint: .3,1
+        size_hint: .7,1
 
         canvas.before:
             Color:
@@ -548,6 +586,7 @@
             text: 'text message'
             size_hint_y: 0.8
             color: 0,0,0,1
+            font_size: '16sp'
 
             canvas.before:
                 Color:
@@ -561,6 +600,7 @@
             text: 'time'
             size_hint_y: 0.2
             color: 0,0,0,1
+            font_size: '13sp'
 
             canvas.before:
                 Color:
@@ -573,6 +613,7 @@
         id: senderArea
         text: 'YOU'
         size_hint: 0.3, None
+        font_size: '16sp'
 
         canvas.before:
             Color:
@@ -597,6 +638,7 @@
             text: 'Partner'
             color: 0, 0, 0, 1
             size_hint: 0.3, None
+            font_size: '16sp'
 
             canvas.before:
                 Color:
@@ -614,6 +656,7 @@
                 text: 'text message'
                 size_hint_y: 0.8
                 color: 0,0,0,1
+                font_size: '16sp'
 
                 canvas.before:
                     Color:
@@ -627,6 +670,7 @@
                 text: 'time'
                 size_hint_y: 0.2
                 color: 0,0,0,1
+                font_size: '13sp'
 
                 canvas.before:
                     Color:
@@ -785,6 +829,7 @@
     groupchatContainer: groupchatContainer
     messageInput: messageInput
     roomName: roomName
+    settingPanel: settingPanel
 
     FloatLayout:
         BoxLayout:
@@ -865,7 +910,7 @@
                         id: messageInput
                         size_hint: .4, 1
                         multiline: False
-                        input_filter: lambda text, from_undo: text[:30 - len(self.text)]
+                        input_filter: lambda text, from_undo: text[:26 - len(self.text)]
 
 
                     Button:
@@ -879,6 +924,70 @@
                         on_release: root.sendMessageTask(roomName.text)
                         on_release: root.messageInput.focus = True
 
+        BoxLayout:
+            id: settingPanel
+            pos: -self.parent.width, 0
+            size_hint_x: 0.6
+
+            orientation: 'vertical'
+            spacing: 5
+
+            canvas.before:
+                Color:
+                    rgba: 0.565, 0.663, 0.840, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                size_hint: 1, 0.2
+                text: "Setting Panel"
+
+            Button:
+                text: "Backup"
+                size_hint_y: 0.2
+
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_press: root.hideSettingPanel()
+
+            Button:
+                text: "Clear"
+                size_hint_y: 0.2
+
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_press: root.hideSettingPanel()
+
+            Button:
+                text: "Block"
+                size_hint_y: 0.2
+
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_press: root.hideSettingPanel()
+
+            Button:
+                text: "Block"
+                size_hint_y: 0.2
+
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_press: root.hideSettingPanel()
+
+            Button:
+                text: "Block"
+                size_hint_y: 0.2
+
+                background_normal: ''
+                background_color: (0.000, 0.643, 0.616, 1)
+
+                on_press: root.hideSettingPanel()
+
 
 <ChatroomScreen>:
     name: "ChatroomScreen"
@@ -886,6 +995,7 @@
     messageInput: messageInput
     roomName: roomName
     settingPanel: settingPanel
+    inRoomNotification: inRoomNotification
 
     FloatLayout:
 
@@ -969,7 +1079,7 @@
                         id: messageInput
                         size_hint: .4, 1
                         multiline: False
-                        input_filter: lambda text, from_undo: text[:30 - len(self.text)]
+                        input_filter: lambda text, from_undo: text[:26 - len(self.text)]
                         on_focus: root.hideSettingPanel()
 
 
@@ -982,6 +1092,38 @@
                         size_hint: .2, 1
                         on_release: app.root.clientSocket.setText(messageInput.text)
                         on_release: root.sendMessageTask()
+
+        BoxLayout:
+            id: inRoomNotification
+            pos: -self.parent.width, self.parent.height - self.height
+            size_hint: 1, .1
+            orientation: 'horizontal'
+            title: title
+            detail: detail
+
+            Label:
+                id: title
+                color: 0,0,0,1
+                size_hint: .3,1
+
+                canvas.before:
+                    Color:
+                        rgba: 0.745, 0.945, 0.549, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            Label:
+                id: detail
+                color: 0,0,0,1
+                size_hint: .7,1
+
+                canvas.before:
+                    Color:
+                        rgba: 0.894, 0.910, 0.922, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
 
         BoxLayout:
             id: settingPanel
