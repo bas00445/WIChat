@@ -183,12 +183,14 @@ class MainUIScreen(Screen):
         elif self.isNewHisComp(historyScrollView.children, historyComp) == False:
             for i in range(len(historyScrollView.children)):
                 if isinstance(historyScrollView.children[i], HistoryComponent):
-                    if historyScrollView.children[i].idButton.text == msg.getReceiverAddr()[0]:
+                    if ( historyScrollView.children[i].idButton.text == msg.getReceiverAddr()[0]
+                         and msg.getGroupName() == None ):
                         historyScrollView.children[i].lastestMsg.text = msg.getText()
                         self.move_to_front(historyScrollView.children[i], historyScrollView.children)
 
                 elif isinstance(historyScrollView.children[i], HistoryGroupComponent):
-                    if historyScrollView.children[i].gnameButton.text == WIApp.currentChatroom.getRoomName():
+                    if ( historyScrollView.children[i].gnameButton.text == msg.getGroupName() and
+                         historyScrollView.children[i].creatorID.text == msg.getRoomCreatorID()):
                         historyScrollView.children[i].lastestMsg.text = msg.getText()
                         self.move_to_front(historyScrollView.children[i], historyScrollView.children)
 
