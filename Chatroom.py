@@ -1,13 +1,12 @@
 class Chatroom:
-    def __init__(self, roomName, roomID = None, rType = "private"):
+    def __init__(self, roomName, creatorID = None, rType = "private"):
         self.roomName = roomName
-        self.roomID = roomID
+        self.creatorID = creatorID
         self.rType = rType
         self.msgCollector = [] ## Message obj
         self.fileCollector = []  ## File obj
         self.memberNameList = [] ## ClientName
         self.memberIDList = []  ## ClientName
-        self.widgetCollector = [] ## All widget
         self.lengthOfData = 0
 
     def getLengthOfData(self):
@@ -18,6 +17,9 @@ class Chatroom:
 
     def getRoomName(self):
         return self.roomName
+
+    def getCreatorID(self):
+        return self.creatorID
 
     def getRoomType(self):
         return self.rType

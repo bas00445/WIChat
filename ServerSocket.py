@@ -8,7 +8,6 @@ from ClientCollector import ClientCollector
 class ServerSocket(threading.Thread):
     def __init__(self, ip, port, maximumClient = 10, **kwargs):
         threading.Thread.__init__(self)
-
         self.ip = ip
         self.port = port
         self.server = ((ip, port))

@@ -5,11 +5,15 @@ class ChatroomCollector:
         self.chatroomList = []
         self.roomIDs = []
 
-    def getRoomByRoomName(self, roomName):
+    def getRoomByRoomName(self, roomName, creatorID):
+        # For single chat
         for room in self.chatroomList:
+            print("Check: ", room.getRoomName(), room.getCreatorID())
             if room.getRoomType() == "group":
-                if room.getRoomName() == roomName:
+                print("AA: ", room.getRoomName(), room.getCreatorID())
+                if room.getRoomName() == roomName and room.getCreatorID() == creatorID:
                     return room
+
 
     def getRoomByMemberName(self, memberNameList):
         for room in self.chatroomList:

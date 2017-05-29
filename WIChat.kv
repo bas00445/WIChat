@@ -228,12 +228,15 @@
     creatorName: creatorNameLabel
     size_hint: 1, None
 
+    primary_color: 0.000, 0.314, 0.541, 1
+    secondary_color: 0.020, 0.584, 0.647, 1
+
     Button:
         id: gnameButton
         size_hint: .3, 1
         background_normal: ''
-        background_color: 0.353, 0.259, 0.549, 1
-        on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text)
+        background_color: root.primary_color
+        on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text, root.creatorID.text)
 
 
     BoxLayout:
@@ -241,10 +244,10 @@
         orientation: 'vertical'
 
         Label:
-            text: 'GROUPCHAT'
+            text: 'Group Chat'
             canvas.before:
                 Color:
-                    rgba: 0.525, 0.427, 0.729, 1
+                    rgba: root.secondary_color
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -253,7 +256,7 @@
             id: creatorIDLabel
             canvas.before:
                 Color:
-                    rgba: 0.525, 0.427, 0.729, 1
+                    rgba: root.secondary_color
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -262,7 +265,7 @@
             id: creatorNameLabel
             canvas.before:
                 Color:
-                    rgba: 0.525, 0.427, 0.729, 1
+                    rgba: root.secondary_color
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -401,12 +404,15 @@
     size_hint: None, None
     width: app.root.mainUIScreen.width
 
+    primary_color: 0.000, 0.314, 0.541, 1
+    secondary_color: 0.020, 0.584, 0.647, 1
+
     Button:
         id: gnameButton
         size_hint: .3, 1
         background_normal: ''
-        background_color: 0.353, 0.259, 0.549, 1
-        on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text)
+        background_color: root.primary_color
+        on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text, root.creatorID.text)
 
     BoxLayout:
         orientation: 'vertical'
@@ -414,7 +420,7 @@
             id: creatorIDLabel
             canvas.before:
                 Color:
-                    rgba: 0.525, 0.427, 0.729, 1
+                    rgba: root.secondary_color
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -423,7 +429,7 @@
             id: lastestMsg
             canvas.before:
                 Color:
-                    rgba: 0.525, 0.427, 0.729, 1
+                    rgba: root.secondary_color
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -568,25 +574,25 @@
 
     BoxLayout:
         orientation: 'vertical'
-        size_hint: .2, 1
+        size_hint: .08, 1
 
         Button:
             id: acceptButton
             size_hint: 1, .5
-            text: 'ACCEPT'
+            text: 'Y'
             on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "accept", root)
 
             background_normal: ''
-            background_color: 0.000, 0.314, 0.541, 1
+            background_color: 0.000, 0.643, 0.580, 1
 
         Button:
             id: cancelButton
             size_hint: 1, .5
-            text: 'CANCEL'
+            text: 'N'
             on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "cancel", root)
 
             background_normal: ''
-            background_color: 0.000, 0.314, 0.541, 1
+            background_color: 0.000, 0.643, 0.580, 1
 
 <MainUIScreen>:
     name: "MainUIScreen"
@@ -1007,7 +1013,7 @@
                         text: "Send"
                         size_hint: .2, 1
                         on_release: app.root.clientSocket.setText(messageInput.text)
-                        on_release: root.sendMessageTask(root.roomName.text)
+                        on_release: root.sendMessageTask(root.roomName.text, root.roomCreatorID)
 
         BoxLayout:
             id: inRoomNotification

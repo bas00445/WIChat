@@ -2,11 +2,12 @@ import time
 from datetime import datetime
 
 class Message:
-    def __init__(self, text, receiverAddrList, ownerInfo, groupName = None, timeCreated=None, **kwargs):
+    def __init__(self, text, receiverAddrList, ownerInfo, groupName = None, roomCreatorID = None, timeCreated=None, **kwargs):
         self.text = text
         self.receiverAddr = receiverAddrList # Socket address of the receiver
         self.ownerInfo = ownerInfo
         self.groupName = groupName
+        self.roomCreatorID = roomCreatorID
         self.ownerName = ownerInfo[0]
         self.ownerID = ownerInfo[1]
         self.timeCreated = timeCreated
@@ -28,6 +29,9 @@ class Message:
 
     def getGroupName(self):
         return self.groupName
+
+    def getRoomCreatorID(self):
+        return self.roomCreatorID
 
     def getTimeCreated(self):
         return self.timeCreated
