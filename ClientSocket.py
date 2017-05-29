@@ -12,10 +12,8 @@ class ClientSocket:
         self.tLock = threading.Lock()
         self.shutdown = False
         self.pauseMsg = True
-
         self.clientName = name
         self.clientMessage = ""
-
         self.ip = ip
         self.port = port
         self.targetServer = (ip, port)

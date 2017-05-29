@@ -35,7 +35,6 @@ from Chatroom import *
 from ChatroomCollector import *
 from FileObject import *
 from Invitation import *
-from GroupChat import *
 
 from kivy.core.window import Window
 
@@ -72,12 +71,17 @@ class StartupScreen(Screen):
         WIApp.port = int(self.portInput.text)
 
     def login(self):
-        self.getInputStartup()
-        self.startClient(WIApp.ip, WIApp.port, WIApp.username)
-        WIApp.current = "MainUIScreen"
-        WIApp.mainUIScreen.profileArea.idButton.text = WIApp.clientInfo.getID()
-        WIApp.mainUIScreen.profileArea.nameButton.text = WIApp.username
-        WIApp.mainUIScreen.receiveData_thread.start()
+        try:
+            self.getInputStartup()
+            self.startClient(WIApp.ip, WIApp.port, WIApp.username)
+            WIApp.current = "MainUIScreen"
+            WIApp.mainUIScreen.profileArea.idButton.text = WIApp.clientInfo.getID()
+            WIApp.mainUIScreen.profileArea.nameButton.text = WIApp.username
+            WIApp.mainUIScreen.receiveData_thread.start()
+        except OSError:
+            popup = Popup(title="ERROR!", content=Label(text="There is no any host in server.", font_size="18sp"), auto_dismiss=True, size_hint=(0.8, 0.2),
+                          background='backgroundPopup.png', title_size='20sp')
+            popup.open()
 
     def startHosting(self, instance):
         self.getInputStartup()
@@ -422,11 +426,11 @@ class MainUIScreen(Screen):
         WIApp.clientTargetName = targetName
         WIApp.clientTargetID = targetID
 
-        WIApp.chatroomScreen.roomName.text = WIApp.username + " : " + targetName
+        WIApp.chatroomScreen.roomName.text = WIApp.username + " and " + targetName
         currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
 
         if currentRoom not in WIApp.chatroomCollector.getChatroomList():
-            roomName = WIApp.username + ":" + targetName
+            roomName = WIApp.username + " and " + targetName
             newChatroom = Chatroom(roomName, rType="single")
             newChatroom.addMemberID(WIApp.clientInfo.getID())
             newChatroom.addMemberID(targetID)
@@ -438,7 +442,6 @@ class MainUIScreen(Screen):
 
 class InviteComponent(BoxLayout):
     def __init__(self,**kwargs):
-        #BoxLayout.__init__(self)
         super(BoxLayout, self).__init__(**kwargs)
 
     def isSelected(self):
@@ -505,7 +508,6 @@ class CreateGroupScreen(Screen):
 
 class GroupChatComponent(BoxLayout):
     def __init__(self, gname, creatorID, creatorName, **kwargs):
-        #BoxLayout.__init__(self)
         super(BoxLayout, self).__init__(**kwargs)
         self.gnameButton.text = gname
         self.creatorID.text = creatorID
@@ -513,7 +515,6 @@ class GroupChatComponent(BoxLayout):
 
 class HistoryGroupComponent(BoxLayout):
     def __init__(self, gname, creatorID, lastestMsg, **kwargs):
-        #BoxLayout.__init__(self)
         super(BoxLayout, self).__init__(**kwargs)
         self.gnameButton.text = gname
         self.creatorID.text = creatorID
@@ -528,6 +529,25 @@ class GroupChatScreen(Screen):
         super(GroupChatScreen, self).__init__(**kwargs)
         self.filePath = None
         self.roomCreatorID = None
+
+    def backup(self):
+        currentRoom = WIApp.currentChatroom
+        messages = currentRoom.getMsgCollector()
+        filename = currentRoom.getRoomName() + '.txt'
+        file = open('backupChat/' + filename, 'w')
+
+        for msg in messages:
+            print(msg.getOwnerName())
+            if msg.getOwnerID() != WIApp.clientInfo.getID():
+                data = msg.getOwnerName() + " @ " + msg.getTimeCreated() + " : " + msg.getText() + "\n"
+                file.write(data)
+
+            elif msg.getOwnerID() == WIApp.clientInfo.getID():
+                data = "You @ " + msg.getTimeCreated() + " : " + msg.getText() + "\n"
+                file.write(data)
+
+        file.close()
+        print("Close file")
 
     def showNotificationChatroom(self, title, detail):
         if title == WIApp.clientTargetName or title == WIApp.groupchatScreen.roomName.text:
@@ -666,6 +686,26 @@ class ChatroomScreen(Screen):
     def on_enter(self, *args):
         self.hideMenu()
 
+    def backup(self):
+        currentRoom = WIApp.currentChatroom
+        messages = currentRoom.getMsgCollector()
+        filename = currentRoom.getRoomName() + '.txt'
+        file = open('backupChat/' + filename, 'w')
+
+        for msg in messages:
+            print(msg.getOwnerName())
+            if msg.getOwnerID() != WIApp.clientInfo.getID():
+                data = msg.getOwnerName() + " @ " + msg.getTimeCreated() + " : " + msg.getText() + "\n"
+                file.write(data)
+
+            elif msg.getOwnerID() == WIApp.clientInfo.getID():
+                data = "You @ " + msg.getTimeCreated() + " : " + msg.getText() + "\n"
+                file.write(data)
+
+        file.close()
+        print("Close file")
+
+
     def showNotificationChatroom(self, title, detail):
         if title == WIApp.clientTargetName:
             return None
@@ -742,7 +782,7 @@ class ChatroomScreen(Screen):
         currentRoom = WIApp.chatroomCollector.getRoomByMemberID([WIApp.clientInfo.getID(), targetID])
         if currentRoom not in WIApp.chatroomCollector.getChatroomList():
             # Create a new room
-            roomName = WIApp.username + ":" + targetName
+            roomName = WIApp.username + " and " + targetName
             newChatroom = Chatroom(roomName, rType="single")
 
             newChatroom.addMemberID(WIApp.clientInfo.getID())
