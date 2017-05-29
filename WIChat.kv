@@ -228,7 +228,6 @@
     creatorName: creatorNameLabel
     size_hint: None, None
 
-    height: app.root.mainUIScreen.height / 6
     width: app.root.mainUIScreen.width
 
     primary_color: 0.000, 0.314, 0.541, 1
@@ -283,7 +282,6 @@
     orientation: 'horizontal'
     size_hint: None, None
     width: app.root.mainUIScreen.width
-    height: app.root.mainUIScreen.height / 6
 
     idButton: idButton
     nameButton: nameButton
@@ -412,7 +410,6 @@
     lastestMsg: lastestMsg
     size_hint: None, None
     width: app.root.mainUIScreen.width
-    height: app.root.mainUIScreen.height / 6
 
     primary_color: 0.000, 0.314, 0.541, 1
     secondary_color: 0.020, 0.584, 0.647, 1
@@ -448,7 +445,6 @@
     orientation: 'horizontal'
     size_hint: None, None
     width: app.root.mainUIScreen.width
-    height: app.root.mainUIScreen.height / 6
 
     idButton: idButton
     nameButton: nameButton
@@ -543,7 +539,6 @@
     cancelButton: cancelButton
     size_hint: 1, None
 
-    height: app.root.mainUIScreen.height / 6
 
     BoxLayout:
         orientation: 'vertical'
@@ -672,7 +667,6 @@
     size_hint: 1, None
     orientation: 'horizontal'
 
-    height: app.root.mainUIScreen.height / 6
 
     BoxLayout:
         orientation: 'vertical'
@@ -724,8 +718,6 @@
     timeArea: timeArea
     senderArea: senderArea
     size_hint: 1, None
-
-    height: app.root.mainUIScreen.height / 6
 
     BoxLayout:
         orientation: 'horizontal'
@@ -800,7 +792,6 @@
     orientation: 'horizontal'
     size_hint: None, None
     selection: selection
-    height: app.root.mainUIScreen.height / 6
     width: app.root.mainUIScreen.width
 
     idButton: idButton
@@ -925,7 +916,7 @@
             size_hint: 1, .1
 
             Button:
-                text: 'SELECT'
+                text: 'Select'
                 id: 'selectButton'
                 size_hint: .5, 1
                 on_press: root.sendInvitation()
@@ -941,6 +932,24 @@
 
                 background_normal: ''
                 background_color: 0.000, 0.314, 0.541, 1
+
+<IDContainer>:
+    container: container
+    orientation: 'vertical'
+
+    ScrollView:
+        size: self.parent.width, self.parent.height
+        do_scroll_x: False
+        bar_width: 2
+        bar_color: (0.000, 0.643, 0.616, 1)
+
+        GridLayout:
+            id: container
+            cols: 1
+            padding: 10
+            spacing: 10
+            size_hint: 1,None
+            height: self.minimum_height
 
 <GroupChatScreen>:
     name: "GroupChatScreen"

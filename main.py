@@ -23,6 +23,7 @@ from kivy.properties import *
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
 
+
 #####################################
 global WIApp
 
@@ -47,7 +48,7 @@ class StartupScreen(Screen):
 
     def openHostPopup(self):
         notification = BoxLayout(orientation="vertical")
-        label = Label(text="Please turn on Hotspot\n    before start hosting", font_size=20)
+        label = Label(text="Please turn on Hotspot\n    before start hosting", font_size="20sp")
         closeButton = Button(text="Close", background_color=(0.000, 0.361, 0.659, 1))
         startHostButton = Button(text="Start Hosting", background_color=(0.000, 0.361, 0.659, 1))
 
@@ -58,7 +59,7 @@ class StartupScreen(Screen):
         notification.add_widget(startHostButton)
         notification.add_widget(closeButton)
 
-        self.popup = Popup(title='CAUTION',content=notification, size_hint=(.8, .5), auto_dismiss=True, background='backgroundPopup.png')
+        self.popup = Popup(title='CAUTION' ,content=notification, size_hint=(.8, .5), auto_dismiss=True, background='backgroundPopup.png')
         self.popup.open()
 
         closeButton.bind(on_press=self.popup.dismiss)
@@ -84,7 +85,6 @@ class StartupScreen(Screen):
         WIApp.serverSocket.start()
         self.popup.dismiss()
         self.login()
-
 
     def startClient(self, ip, port, username):
         WIApp.clientSocket = ClientSocket(ip, int(port), username)  # Start client socket loop
@@ -413,7 +413,6 @@ class MainUIScreen(Screen):
                 container2.add_widget(c, idx)
                 idx += 1
 
-
     def searchAddrByName(self, targetName):
         for client in WIApp.clientInfoList:
             if client.getName() == targetName:
@@ -475,6 +474,13 @@ class CreateGroupScreen(Screen):
         WIApp.current = "MainUIScreen"
 
     def sendInvitation(self):
+        if len(self.groupNameInput.text) == 0:
+            popup = Popup(title='Invalid Group Name', content=Label(text="Group name can not be empty!"),
+                          auto_dismiss=True, size_hint=(.7,.2))
+            popup.open()
+            return None
+
+
         receivedAddrs = []
         for invc in self.contactContainer.children:
             if invc.isSelected() == True:
@@ -513,6 +519,10 @@ class HistoryGroupComponent(BoxLayout):
         self.creatorID.text = creatorID
         self.lastestMsg.text = lastestMsg
 
+class IDContainer(BoxLayout):
+    def __init__(self, **kwargs):
+        super(BoxLayout, self).__init__(**kwargs)
+
 class GroupChatScreen(Screen):
     def __init__(self, **kwargs):
         super(GroupChatScreen, self).__init__(**kwargs)
@@ -531,9 +541,17 @@ class GroupChatScreen(Screen):
         Clock.schedule_once(self.hideNotification, 3)
 
     def listMembers(self):
+        idContainer = IDContainer()
+        currentRoom = WIApp.chatroomCollector.getRoomByRoomName(self.roomName.text, self.roomCreatorID)
+        idList = currentRoom.getMemberIDList()
 
-        # popup = Popup(title="Members in this group", content=)
-        print("Hello")
+        for id in idList:
+            idContainer.container.add_widget(Label(text= "ID: " + str(id), size_hint_y=None, font_size="18sp"))
+
+        popup = Popup(title="All members:", content=idContainer, auto_dismiss=True, size_hint=(0.7,0.7),
+                      background='backgroundPopup.png', title_size='20sp')
+        popup.open()
+
 
     def hideNotification(self, data):
         anim = Animation(pos=(-self.width, self.height - self.inRoomNotification.height), duration=0.25)

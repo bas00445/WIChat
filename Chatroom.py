@@ -53,9 +53,6 @@ class Chatroom:
         self.fileCollector.append(fileObject)
         self.lengthOfData += 1
 
-    def addMemberName(self, newMemberName):
-        self.memberNameList.append(newMemberName)
-
     def addMemberID(self, newMemberID):
         self.memberIDList.append(newMemberID)
 
