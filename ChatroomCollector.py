@@ -8,10 +8,10 @@ class ChatroomCollector:
     def getRoomByRoomName(self, roomName, creatorID):
         # For single chat
         for room in self.chatroomList:
-            print("Check: ", room.getRoomName(), room.getCreatorID())
             if room.getRoomType() == "group":
-                print("AA: ", room.getRoomName(), room.getCreatorID())
-                if room.getRoomName() == roomName and room.getCreatorID() == creatorID:
+                if ( room.getRoomName() == roomName and
+                     room.getCreatorID() == creatorID ):
+
                     return room
 
 

@@ -35,7 +35,6 @@ from ChatroomCollector import *
 from FileObject import *
 from Invitation import *
 from GroupChat import *
-from GroupChatCollector import *
 
 from kivy.core.window import Window
 
@@ -48,7 +47,7 @@ class StartupScreen(Screen):
 
     def openHostPopup(self):
         notification = BoxLayout(orientation="vertical")
-        label = Label(text="Please turn on Hotspot\n    before start hosting", font_size="20sp")
+        label = Label(text="Please turn on Hotspot\n    before start hosting", font_size=20)
         closeButton = Button(text="Close", background_color=(0.000, 0.361, 0.659, 1))
         startHostButton = Button(text="Start Hosting", background_color=(0.000, 0.361, 0.659, 1))
 
@@ -59,7 +58,7 @@ class StartupScreen(Screen):
         notification.add_widget(startHostButton)
         notification.add_widget(closeButton)
 
-        self.popup = Popup(title='CAUTION!',content=notification, size_hint=(.8, .5), auto_dismiss=True, background='backgroundPopup.png')
+        self.popup = Popup(title='CAUTION',content=notification, size_hint=(.8, .5), auto_dismiss=True, background='backgroundPopup.png')
         self.popup.open()
 
         closeButton.bind(on_press=self.popup.dismiss)
@@ -98,7 +97,7 @@ class StartupScreen(Screen):
 
 class InAppNotification(BoxLayout):
     def __init__(self, **kwargs):
-        BoxLayout.__init__(self)
+        super(BoxLayout, self).__init__(**kwargs)
 
 class MainUIScreen(Screen):
     def __init__(self, **kwargs):
@@ -440,14 +439,15 @@ class MainUIScreen(Screen):
 
 class InviteComponent(BoxLayout):
     def __init__(self,**kwargs):
-        BoxLayout.__init__(self)
+        #BoxLayout.__init__(self)
+        super(BoxLayout, self).__init__(**kwargs)
 
     def isSelected(self):
         return self.selection.active
 
 class RequestComponent(BoxLayout):
     def __init__(self, id, name, groupname, **kwargs):
-        BoxLayout.__init__(self)
+        super(BoxLayout, self).__init__(**kwargs)
         self.idButton.text = str(id)
         self.nameButton.text = name
         self.groupButton.text = groupname
@@ -499,14 +499,16 @@ class CreateGroupScreen(Screen):
 
 class GroupChatComponent(BoxLayout):
     def __init__(self, gname, creatorID, creatorName, **kwargs):
-        BoxLayout.__init__(self)
+        #BoxLayout.__init__(self)
+        super(BoxLayout, self).__init__(**kwargs)
         self.gnameButton.text = gname
         self.creatorID.text = creatorID
         self.creatorName.text = "Creator: " + creatorName
 
 class HistoryGroupComponent(BoxLayout):
     def __init__(self, gname, creatorID, lastestMsg, **kwargs):
-        BoxLayout.__init__(self)
+        #BoxLayout.__init__(self)
+        super(BoxLayout, self).__init__(**kwargs)
         self.gnameButton.text = gname
         self.creatorID.text = creatorID
         self.lastestMsg.text = lastestMsg
@@ -531,7 +533,7 @@ class GroupChatScreen(Screen):
     def listMembers(self):
 
         # popup = Popup(title="Members in this group", content=)
-        pass
+        print("Hello")
 
     def hideNotification(self, data):
         anim = Animation(pos=(-self.width, self.height - self.inRoomNotification.height), duration=0.25)
@@ -560,7 +562,7 @@ class GroupChatScreen(Screen):
 
         self.messageInput.text = ""  # Clear Message Input
 
-        ### Group Chat
+        # Group Chat
         WIApp.mainUIScreen.updateHistoryType_1(msg) # Update history scroll view when send a new message
 
     def loadDataGroupChatroom(self, room):
@@ -858,10 +860,9 @@ class WIChat(ScreenManager):
         self.username = ""
         self.ip = ""
         self.port = ""
-        self.clientInfoList = None  # Friend list
+        self.clientInfoList = None
         self.historyInfoList = None
         self.chatroomCollector = ChatroomCollector()
-        self.groupChatCollector = GroupChatCollector()
         self.serverSocket = None
         self.clientSocket = None
         self.clientInfo = None

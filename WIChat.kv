@@ -44,7 +44,7 @@
             id: StartupLabel
             text: "Start Up"
             size_hint: 1, .1
-            font_size: 30
+            font_size: '30sp'
 
             canvas.before:
                 Color:
@@ -62,12 +62,12 @@
                 text: "NICKNAME"
                 halign: 'center'
                 size_hint_y: .1
-                font_size: 25
+                font_size: '25sp'
 
             TextInput:
                 id: nameInput
                 text: "Untitiled"
-                font_size: 20
+                font_size: '20sp'
                 padding_x: self.width/4
                 multiline: False
                 input_filter: lambda text, from_undo: text[:8 - len(self.text)]
@@ -82,12 +82,12 @@
             Label:
                 text: "HOST IP"
                 size_hint_y: .1
-                font_size: 25
+                font_size: '25sp'
 
             TextInput:
                 id: ipInput
                 text: "127.0.0.1"
-                font_size: 20
+                font_size: '20sp'
                 multiline: False
                 size_hint: .5, .1
                 pos_hint: {'x': .25}
@@ -100,12 +100,12 @@
             Label:
                 text: "PORT"
                 size_hint_y: .1
-                font_size: 25
+                font_size: '25sp'
 
             TextInput:
                 id: portInput
                 text: "5000"
-                font_size: 20
+                font_size: '20sp'
                 multiline: False
                 size_hint: .5, .1
                 pos_hint: {'x': .25}
@@ -226,7 +226,10 @@
     gnameButton: gnameButton
     creatorID: creatorIDLabel
     creatorName: creatorNameLabel
-    size_hint: 1, None
+    size_hint: None, None
+
+    height: app.root.mainUIScreen.height / 6
+    width: app.root.mainUIScreen.width
 
     primary_color: 0.000, 0.314, 0.541, 1
     secondary_color: 0.020, 0.584, 0.647, 1
@@ -234,6 +237,7 @@
     Button:
         id: gnameButton
         size_hint: .3, 1
+        font_size: '15sp'
         background_normal: ''
         background_color: root.primary_color
         on_press: app.root.mainUIScreen.moveto_groupchat(gnameButton.text, root.creatorID.text)
@@ -245,6 +249,7 @@
 
         Label:
             text: 'Group Chat'
+            font_size: '16sp'
             canvas.before:
                 Color:
                     rgba: root.secondary_color
@@ -254,6 +259,7 @@
 
         Label:
             id: creatorIDLabel
+            font_size: '16sp'
             canvas.before:
                 Color:
                     rgba: root.secondary_color
@@ -263,6 +269,7 @@
 
         Label:
             id: creatorNameLabel
+            font_size: '16sp'
             canvas.before:
                 Color:
                     rgba: root.secondary_color
@@ -276,6 +283,8 @@
     orientation: 'horizontal'
     size_hint: None, None
     width: app.root.mainUIScreen.width
+    height: app.root.mainUIScreen.height / 6
+
     idButton: idButton
     nameButton: nameButton
     statusButton: statusButton
@@ -403,6 +412,7 @@
     lastestMsg: lastestMsg
     size_hint: None, None
     width: app.root.mainUIScreen.width
+    height: app.root.mainUIScreen.height / 6
 
     primary_color: 0.000, 0.314, 0.541, 1
     secondary_color: 0.020, 0.584, 0.647, 1
@@ -438,6 +448,7 @@
     orientation: 'horizontal'
     size_hint: None, None
     width: app.root.mainUIScreen.width
+    height: app.root.mainUIScreen.height / 6
 
     idButton: idButton
     nameButton: nameButton
@@ -532,6 +543,8 @@
     cancelButton: cancelButton
     size_hint: 1, None
 
+    height: app.root.mainUIScreen.height / 6
+
     BoxLayout:
         orientation: 'vertical'
         size_hint: .6, 1
@@ -540,6 +553,7 @@
             id: nameButton
             color: 1, 1, 1 ,1
             size_hint: 1,.4
+            font_size: '16sp'
 
             canvas.before:
                 Color:
@@ -552,6 +566,7 @@
             id: idButton
             color: 0,0,0,1
             size_hint: 1,.3
+            font_size: '16sp'
 
             canvas.before:
                 Color:
@@ -564,6 +579,7 @@
             id: groupButton
             color: 0,0,0,1
             size_hint: 1,.3
+            font_size: '16sp'
 
             canvas.before:
                 Color:
@@ -580,6 +596,8 @@
             id: acceptButton
             size_hint: 1, .5
             text: 'Y'
+            font_size: '16sp'
+
             on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "accept", root)
 
             background_normal: ''
@@ -589,6 +607,8 @@
             id: cancelButton
             size_hint: 1, .5
             text: 'N'
+            font_size: '16sp'
+
             on_press: app.root.mainUIScreen.screenSlider.requestScreen.responseInvitation(groupButton.text, idButton.text, nameButton.text, "cancel", root)
 
             background_normal: ''
@@ -652,6 +672,8 @@
     size_hint: 1, None
     orientation: 'horizontal'
 
+    height: app.root.mainUIScreen.height / 6
+
     BoxLayout:
         orientation: 'vertical'
         size_hint: 1, None
@@ -702,6 +724,8 @@
     timeArea: timeArea
     senderArea: senderArea
     size_hint: 1, None
+
+    height: app.root.mainUIScreen.height / 6
 
     BoxLayout:
         orientation: 'horizontal'
@@ -774,8 +798,10 @@
 
 <InviteComponent>:
     orientation: 'horizontal'
-    size_hint: 1, None
+    size_hint: None, None
     selection: selection
+    height: app.root.mainUIScreen.height / 6
+    width: app.root.mainUIScreen.width
 
     idButton: idButton
     nameButton: nameButton
@@ -797,6 +823,7 @@
         Label:
             id: idButton
             text: "ID"
+            font_size: '16sp'
             color: 0,0,0,1
             size_hint: 1, .5
 
@@ -809,6 +836,7 @@
         Label:
             id: nameButton
             text: "Name"
+            font_size: '16sp'
             color: 0,0,0,1
             size_hint: 1, .5
 
@@ -1084,13 +1112,14 @@
                     on_press: root.hideMenu()
 
                 Button:
-                    text: "Backup"
+                    text: "Backup as text file"
                     size_hint_y: .1
 
                     background_normal: ''
                     background_color: (0.000, 0.643, 0.616, 1)
 
                     on_press: root.hideMenu()
+
 
                 Button:
                     text: "Clear"
@@ -1148,7 +1177,6 @@
                 ScrollView:
                     id: scrollView_chat
                     size: self.parent.width, self.parent.height
-                    do_scroll_x: False
                     bar_width: 10
                     bar_color: (0.000, 0.643, 0.616, 1)
 
@@ -1162,8 +1190,8 @@
                     GridLayout:
                         id: chatContainer
                         cols: 1
-                        padding: 10
-                        spacing: 10
+                        padding: 2.5
+                        spacing: 5
                         size_hint: 1,None
                         height: self.minimum_height
 

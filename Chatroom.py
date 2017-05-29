@@ -1,5 +1,5 @@
 class Chatroom:
-    def __init__(self, roomName, creatorID = None, rType = "private"):
+    def __init__(self, roomName, creatorID = None, rType = "private", **kwargs):
         self.roomName = roomName
         self.creatorID = creatorID
         self.rType = rType

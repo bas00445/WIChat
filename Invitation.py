@@ -1,5 +1,5 @@
 class Invitation:
-    def __init__(self, receivedAddrs, ownerInfo, groupName, response = False):
+    def __init__(self, receivedAddrs, ownerInfo, groupName, response = False, **kwargs):
         self.receivedAddrs = receivedAddrs
         self.ownerInfo = ownerInfo
         self.groupName = groupName

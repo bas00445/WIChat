@@ -1,5 +1,5 @@
 class FileObject:
-    def __init__(self, filename, fsize, ownerID, receiverAddrList):
+    def __init__(self, filename, fsize, ownerID, receiverAddrList, **kwargs):
         self.filename = filename
         self.fsize = fsize
         self.ownerID = ownerID
