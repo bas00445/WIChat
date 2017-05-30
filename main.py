@@ -477,12 +477,18 @@ class CreateGroupScreen(Screen):
         WIApp.current = "MainUIScreen"
 
     def sendInvitation(self):
-        if len(self.groupNameInput.text) == 0:
-            popup = Popup(title='Invalid Group Name', content=Label(text="Group name can not be empty!"),
-                          auto_dismiss=True, size_hint=(.7,.2))
+        if len(self.groupNameInput.text) == 0 or not self.groupNameInput.text.isalpha():
+            popup = Popup(title='Invalid Group Name', content=Label(text="Group name must be alphabet!"),
+                          auto_dismiss=True, size_hint=(.7,.2), background='backgroundPopup.png')
             popup.open()
             return None
 
+
+        if len(self.contactContainer.children) == 0:
+            popup = Popup(title='ERROR', content=Label(text="There is no client in server!"),
+                          auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
+            popup.open()
+            return None
 
         receivedAddrs = []
         for invc in self.contactContainer.children:
@@ -508,7 +514,7 @@ class CreateGroupScreen(Screen):
 
 class GroupChatComponent(BoxLayout):
     def __init__(self, gname, creatorID, creatorName, **kwargs):
-        super(BoxLayout, self).__init__(**kwargs)
+        BoxLayout.__init__(self)
         self.gnameButton.text = gname
         self.creatorID.text = creatorID
         self.creatorName.text = "Creator: " + creatorName
@@ -600,7 +606,6 @@ class GroupChatScreen(Screen):
 
         self.messageInput.text = ""  # Clear Message Input
 
-        # Group Chat
         WIApp.mainUIScreen.updateHistoryType_1(msg) # Update history scroll view when send a new message
 
     def loadDataGroupChatroom(self, room):

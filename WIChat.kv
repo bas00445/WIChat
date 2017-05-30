@@ -194,32 +194,34 @@
     Button:
         text: 'Contact'
         id: contactButton
-        background_normal: ''
-        background_color: 0, 0, 0.400,  1
+        background_normal: 'menubarBG_normal.png'
+        background_down: 'menubarBG_selected.png'
+        border: 30,30,30,30
 
         on_press: app.root.mainUIScreen.changeScreen('contact')
 
     Button:
         text: 'History'
         id: historyButton
-        background_normal: ''
-        background_color: 0, 0, 0.600,  1
+        background_normal: 'menubarBG_normal.png'
+        background_down: 'menubarBG_selected.png'
 
         on_press: app.root.mainUIScreen.changeScreen('history')
 
     Button:
         text: 'Request'
         id: requestButton
-        background_normal: ''
-        background_color: 0, 0, 0.800,  1
+        background_normal: 'menubarBG_normal.png'
+        background_down: 'menubarBG_selected.png'
 
         on_press: app.root.mainUIScreen.changeScreen('request')
 
     Button:
         text: 'Setting'
         id: settingButton
-        background_normal: ''
-        background_color: 0.008, 0, 0.900,  1
+        background_normal: 'menubarBG_normal.png'
+        background_down: 'menubarBG_selected.png'
+
 
 <GroupChatComponent>:
     orientation: 'horizontal'
@@ -353,7 +355,7 @@
                         on_press: app.root.mainUIScreen.moveto_createGroup()
 
                         background_normal: ''
-                        background_color: 0.000, 0.314, 0.541, 1
+                        background_color: 0.000, 0.475, 0.824, 1
 
 
         AccordionItem:
