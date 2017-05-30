@@ -26,7 +26,6 @@ class Handler(threading.Thread):
             soc.send(obj)
 
     def transferFile(self, soc, directory, fileObj):
-
         file = open(directory, "rb")
         task = Task("StoreFile", fileObj)
         obj = pickle.dumps(task)
@@ -89,7 +88,6 @@ class Handler(threading.Thread):
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
                                 if self.soc != soc and soc.getpeername()[1] == int(addr):
-                                    print("Update Group Members")
                                     obj = pickle.dumps(task)
                                     soc.send(obj)
 
@@ -114,17 +112,18 @@ class Handler(threading.Thread):
                     if task.getName() == "Change Status":
                         clientInfo = task.getData()
                         for soc in self.clientCollector.getSocketList():
-                            task_update_client = Task("Change Status", clientInfo)
-                            obj = pickle.dumps(task_update_client)
-                            soc.send(obj)
-
+                            if self.soc != soc:
+                                task_update_client = Task("Change Status", clientInfo)
+                                obj = pickle.dumps(task_update_client)
+                                soc.send(obj)
 
                     if task.getName() == "Send File":
+
                         obj = task.getData()
                         receiverAddrs = obj.getReceiverAddr()
                         for soc in self.clientCollector.getSocketList():
                             for addr in receiverAddrs:
-                                if self.soc != soc and soc.getpeername()[1] == addr[1]:
+                                if self.soc != soc and soc.getpeername()[1] == int(addr):
                                     filename = obj.getFilename()
                                     filesize = obj.getFileSize()
                                     directory = "download/" + filename

@@ -23,7 +23,6 @@ from kivy.properties import *
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
 
-
 #####################################
 global WIApp
 
@@ -135,19 +134,8 @@ class MainUIScreen(Screen):
         task = Task("Change Status", WIApp.clientInfo)
         WIApp.clientSocket.sendTask(task)
 
-    def updateContactName(self, task, contactContainer):
-        print("Update Status")
-        clientInfo = task.getData()
-        id = clientInfo.getID()
-        name = clientInfo.getName()
-
-        for child in contactContainer.children:
-            if child.idButton.text == id:
-                child.nameButton.text = name
-
 
     def updateContactStatus(self, task, contactContainer):
-        print("Update Status")
         clientInfo = task.getData()
         id = clientInfo.getID()
         name = clientInfo.getName()
@@ -377,27 +365,27 @@ class MainUIScreen(Screen):
                         self.updateGroupMembers(task)
 
                     if task.getName() == "StoreFile":
-                        print("StoreFile")
+                        print("StoreFile Client")
                         fileObj = task.getData()
                         filename = fileObj.getFilename()
                         filesize = fileObj.getFileSize()
                         directory = "received/" + filename
                         file = open(directory, "wb")
-                        # data = WIApp.clientSocket.soc.recv(1024)
-                        # print("Size: ", filesize)
-                        # targetSize = filesize
-                        # currentSize = 0
-                        # if filesize <= 1024:
-                        #     file.write(data)
-                        # elif filesize > 1024:
-                        #     while filesize >= 0:
-                        #         print(">>Client: Receiving a file : ", str(100 * currentSize // targetSize) + " % <<")
-                        #         file.write(data)
-                        #         currentSize += 1024
-                        #         filesize -= 1024
-                        #         if filesize < 0:
-                        #             break
-                        #         data = WIApp.clientSocket.soc.recv(1024)
+                        data = WIApp.clientSocket.soc.recv(1024)
+                        print("Size: ", filesize)
+                        targetSize = filesize
+                        currentSize = 0
+                        if filesize <= 1024:
+                            file.write(data)
+                        elif filesize > 1024:
+                            while filesize >= 0:
+                                print(">>Client: Receiving a file : ", str(100 * currentSize // targetSize) + " % <<")
+                                file.write(data)
+                                currentSize += 1024
+                                filesize -= 1024
+                                if filesize < 0:
+                                    break
+                                data = WIApp.clientSocket.soc.recv(1024)
 
                         data = WIApp.clientSocket.soc.recv(1024)
                         while data:
