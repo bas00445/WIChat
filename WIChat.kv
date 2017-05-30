@@ -157,7 +157,7 @@
         id: nameButton
         size_hint_x: .3
         font_size: '15sp'
-        background_normal: 'backgroundPic.png'
+        background_normal: 'pictures/backgroundPic.png'
         background_color: 0.196, 0.663, 0.914,  1
         border: 30,30,30,30
 
@@ -173,8 +173,6 @@
             size_hint_y: .2
             background_normal: ''
             background_color: 0.196, 0.663, 0.914,  1
-
-            on_press: app.root.mainUIScreen.openNameInput()
 
         Button:
             id: statusButton
@@ -198,8 +196,8 @@
     Button:
         text: 'Contact'
         id: contactButton
-        background_normal: 'menubarBG_normal.png'
-        background_down: 'menubarBG_selected.png'
+        background_normal: 'pictures/menubarBG_normal.png'
+        background_down: 'pictures/menubarBG_selected.png'
         border: 30,30,30,30
 
         on_press: app.root.mainUIScreen.changeScreen('contact')
@@ -207,24 +205,24 @@
     Button:
         text: 'History'
         id: historyButton
-        background_normal: 'menubarBG_normal.png'
-        background_down: 'menubarBG_selected.png'
+        background_normal: 'pictures/menubarBG_normal.png'
+        background_down: 'pictures/menubarBG_selected.png'
 
         on_press: app.root.mainUIScreen.changeScreen('history')
 
     Button:
         text: 'Request'
         id: requestButton
-        background_normal: 'menubarBG_normal.png'
-        background_down: 'menubarBG_selected.png'
+        background_normal: 'pictures/menubarBG_normal.png'
+        background_down: 'pictures/menubarBG_selected.png'
 
         on_press: app.root.mainUIScreen.changeScreen('request')
 
     Button:
         text: 'Setting'
         id: settingButton
-        background_normal: 'menubarBG_normal.png'
-        background_down: 'menubarBG_selected.png'
+        background_normal: 'pictures/menubarBG_normal.png'
+        background_down: 'pictures/menubarBG_selected.png'
 
 
 <GroupChatComponent>:
@@ -338,8 +336,8 @@
 
         AccordionItem:
             title: 'Available Groups'
-            background_selected: 'accordionBG_normal.png'
-            background_normal: 'accordionBG_selected.png'
+            background_selected: 'pictures/accordionBG_normal.png'
+            background_normal: 'pictures/accordionBG_selected.png'
 
             ScrollView:
                 size: self.parent.width, self.parent.height
@@ -364,8 +362,8 @@
 
         AccordionItem:
             title: 'Available Contacts'
-            background_selected: 'accordionBG_normal.png'
-            background_normal: 'accordionBG_selected.png'
+            background_selected: 'pictures/accordionBG_normal.png'
+            background_normal: 'pictures/accordionBG_selected.png'
 
             ScrollView:
                 size: self.parent.width, self.parent.height
@@ -983,14 +981,14 @@
                         size_hint_x: .6
 
                     Button:
-                        background_normal: 'backButton.png'
-                        background_down: 'backButton_selected.png'
+                        background_normal: 'pictures/backButton.png'
+                        background_down: 'pictures/backButton_selected.png'
                         size_hint_x: .2
                         on_press: app.root.chatroomScreen.moveto_mainUI()
 
                     Button:
-                        background_normal: 'menuIcon.png'
-                        background_down: 'menuIcon_selected.png'
+                        background_normal: 'pictures/menuIcon.png'
+                        background_down: 'pictures/menuIcon_selected.png'
                         size_hint_x: .2
                         on_press: root.showMenu()
 
@@ -1135,13 +1133,14 @@
                     on_press: root.backup()
 
                 Button:
-                    text: "Clear"
+                    text: "Delete History Messages"
                     size_hint_y: .1
 
                     background_normal: ''
                     background_color: (0.000, 0.643, 0.616, 1)
 
                     on_press: root.hideMenu()
+                    on_press: root.groupchatContainer.clear_widgets()
 
                 Label:
                     size_hint_y: .6
@@ -1174,14 +1173,14 @@
                         size_hint_x: .6
 
                     Button:
-                        background_normal: 'backButton.png'
-                        background_down: 'backButton_selected.png'
+                        background_normal: 'pictures/backButton.png'
+                        background_down: 'pictures/backButton_selected.png'
                         size_hint_x: .2
                         on_press: app.root.chatroomScreen.moveto_mainUI()
 
                     Button:
-                        background_normal: 'menuIcon.png'
-                        background_down: 'menuIcon_selected.png'
+                        background_normal: 'pictures/menuIcon.png'
+                        background_down: 'pictures/menuIcon_selected.png'
                         size_hint_x: .2
                         on_press: root.showMenu()
 
@@ -1315,13 +1314,14 @@
                     on_press: root.backup()
 
                 Button:
-                    text: "Clear"
+                    text: "Delete History Messages"
                     size_hint_y: .1
 
                     background_normal: ''
                     background_color: 0.000, 0.643, 0.616, 1
 
                     on_press: root.hideMenu()
+                    on_press: root.chatContainer.clear_widgets()
 
                 Label:
                     size_hint_y: .6

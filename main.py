@@ -58,7 +58,7 @@ class StartupScreen(Screen):
         notification.add_widget(startHostButton)
         notification.add_widget(closeButton)
 
-        self.popup = Popup(title='CAUTION' ,content=notification, size_hint=(.8, .5), auto_dismiss=True, background='backgroundPopup.png')
+        self.popup = Popup(title='CAUTION' ,content=notification, size_hint=(.8, .5), auto_dismiss=True, background='pictures/backgroundPopup.png')
         self.popup.open()
 
         closeButton.bind(on_press=self.popup.dismiss)
@@ -80,7 +80,7 @@ class StartupScreen(Screen):
             WIApp.mainUIScreen.receiveData_thread.start()
         except OSError:
             popup = Popup(title="ERROR!", content=Label(text="There is no any host in server.", font_size="18sp"), auto_dismiss=True, size_hint=(0.8, 0.2),
-                          background='backgroundPopup.png', title_size='20sp')
+                          background='pictures/backgroundPopup.png', title_size='20sp')
             popup.open()
 
     def startHosting(self, instance):
@@ -117,17 +117,6 @@ class MainUIScreen(Screen):
         self.sound_msg = SoundLoader.load('sounds/messageSound.mp3')
         self.sound_invite = SoundLoader.load('sounds/inviteSound.mp3')
 
-    def openNameInput(self):
-        container = BoxLayout(orientation='vertical')
-        self.nameInput = TextInput(multiline=False)
-        confirmButton = Button(text='Confirm', background_color=(0.000, 0.361, 0.659, 1))
-        container.add_widget(self.nameInput)
-        container.add_widget(confirmButton)
-        popup = Popup(title='Input your name', content=container, title_size='20sp',
-                      auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
-        popup.open()
-        confirmButton.bind(on_press=self.changeName)
-
     def openStatusInput(self):
         container = BoxLayout(orientation='vertical')
         self.statusInput = TextInput(multiline=False)
@@ -135,17 +124,9 @@ class MainUIScreen(Screen):
         container.add_widget(self.statusInput)
         container.add_widget(confirmButton)
         popup = Popup(title='Input your status', content=container, title_size='20sp',
-                      auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
+                      auto_dismiss=True, size_hint=(.7, .2), background='pictures/backgroundPopup.png')
         popup.open()
         confirmButton.bind(on_press=self.changeStatus)
-
-    def changeName(self, instance):
-        name = self.nameInput.text[:20]
-        WIApp.clientInfo.setName(name)
-        self.profileArea.nameButton.text = name
-        WIApp.clientInfo.setName(name)
-        task = Task("Change Name", WIApp.clientInfo)
-        WIApp.clientSocket.sendTask(task)
 
     def changeStatus(self, instance):
         status = self.statusInput.text[:20]
@@ -321,9 +302,6 @@ class MainUIScreen(Screen):
 
                     if task.getName() == "Change Status":
                         self.updateContactStatus(task, contactScrollView)
-
-                    if task.getName() == "Change Name":
-                        self.updateContactName(task, contactScrollView)
 
                     if task.getName() == "Invite to group":
                         inviteObj = task.getData()
@@ -548,19 +526,19 @@ class CreateGroupScreen(Screen):
 
         if len(gname) == 0 or not gname.isalpha():
             popup = Popup(title='Invalid Group Name', content=Label(text="Group name must be alphabet!"),
-                          auto_dismiss=True, size_hint=(.7,.2), background='backgroundPopup.png')
+                          auto_dismiss=True, size_hint=(.7,.2), background='pictures/backgroundPopup.png')
             popup.open()
             return None
 
         if len(self.contactContainer.children) == 0:
             popup = Popup(title='ERROR', content=Label(text="There is no client in server!"),
-                          auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
+                          auto_dismiss=True, size_hint=(.7, .2), background='pictures/backgroundPopup.png')
             popup.open()
             return None
 
         if WIApp.chatroomCollector.isExist(gname, creatorID):
             popup = Popup(title='Invalid Group Name', content=Label(text="This name already exist!"),
-                          auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
+                          auto_dismiss=True, size_hint=(.7, .2), background='pictures/backgroundPopup.png')
             popup.open()
             return None
 
@@ -649,7 +627,7 @@ class GroupChatScreen(Screen):
             idContainer.container.add_widget(Label(text= "ID: " + str(id), size_hint_y=None, font_size="18sp"))
 
         popup = Popup(title="All members:", content=idContainer, auto_dismiss=True, size_hint=(0.7,0.7),
-                      background='backgroundPopup.png', title_size='20sp')
+                      background='pictures/backgroundPopup.png', title_size='20sp')
         popup.open()
 
     def hideNotification(self, data):

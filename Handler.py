@@ -113,19 +113,11 @@ class Handler(threading.Thread):
 
                     if task.getName() == "Change Status":
                         clientInfo = task.getData()
-
                         for soc in self.clientCollector.getSocketList():
                             task_update_client = Task("Change Status", clientInfo)
                             obj = pickle.dumps(task_update_client)
                             soc.send(obj)
 
-                    if task.getName() == "Change Name":
-                        clientInfo = task.getData()
-
-                        for soc in self.clientCollector.getSocketList():
-                            task_update_client = Task("Change Name", clientInfo)
-                            obj = pickle.dumps(task_update_client)
-                            soc.send(obj)
 
                     if task.getName() == "Send File":
                         obj = task.getData()
