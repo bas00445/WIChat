@@ -117,6 +117,66 @@ class MainUIScreen(Screen):
         self.sound_msg = SoundLoader.load('sounds/messageSound.mp3')
         self.sound_invite = SoundLoader.load('sounds/inviteSound.mp3')
 
+    def openNameInput(self):
+        container = BoxLayout(orientation='vertical')
+        self.nameInput = TextInput(multiline=False)
+        confirmButton = Button(text='Confirm', background_color=(0.000, 0.361, 0.659, 1))
+        container.add_widget(self.nameInput)
+        container.add_widget(confirmButton)
+        popup = Popup(title='Input your name', content=container, title_size='20sp',
+                      auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
+        popup.open()
+        confirmButton.bind(on_press=self.changeName)
+
+    def openStatusInput(self):
+        container = BoxLayout(orientation='vertical')
+        self.statusInput = TextInput(multiline=False)
+        confirmButton = Button(text='Confirm', background_color=(0.000, 0.361, 0.659, 1))
+        container.add_widget(self.statusInput)
+        container.add_widget(confirmButton)
+        popup = Popup(title='Input your status', content=container, title_size='20sp',
+                      auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
+        popup.open()
+        confirmButton.bind(on_press=self.changeStatus)
+
+    def changeName(self, instance):
+        name = self.nameInput.text[:20]
+        WIApp.clientInfo.setName(name)
+        self.profileArea.nameButton.text = name
+        WIApp.clientInfo.setName(name)
+        task = Task("Change Name", WIApp.clientInfo)
+        WIApp.clientSocket.sendTask(task)
+
+    def changeStatus(self, instance):
+        status = self.statusInput.text[:20]
+        self.profileArea.statusButton.text = status
+        WIApp.clientInfo.setStatus(status)
+        task = Task("Change Status", WIApp.clientInfo)
+        WIApp.clientSocket.sendTask(task)
+
+    def updateContactName(self, task, contactContainer):
+        print("Update Status")
+        clientInfo = task.getData()
+        id = clientInfo.getID()
+        name = clientInfo.getName()
+
+        for child in contactContainer.children:
+            if child.idButton.text == id:
+                child.nameButton.text = name
+
+
+    def updateContactStatus(self, task, contactContainer):
+        print("Update Status")
+        clientInfo = task.getData()
+        id = clientInfo.getID()
+        name = clientInfo.getName()
+        newStatus = clientInfo.getStatus()
+
+        for child in contactContainer.children:
+            if child.idButton.text == id and child.nameButton.text == name:
+                child.statusButton.text = newStatus
+
+
     def changeScreen(self, name):
         target_idx = self.listofScreen.index(name)
         self.screenSlider.load_slide(self.screenSlider.slides[target_idx])
@@ -258,6 +318,12 @@ class MainUIScreen(Screen):
 
                     if task.getName() == "Remove Client":
                         self.removeContact(task, contactScrollView, inviteScrollView)
+
+                    if task.getName() == "Change Status":
+                        self.updateContactStatus(task, contactScrollView)
+
+                    if task.getName() == "Change Name":
+                        self.updateContactName(task, contactScrollView)
 
                     if task.getName() == "Invite to group":
                         inviteObj = task.getData()
@@ -449,7 +515,7 @@ class InviteComponent(BoxLayout):
 
 class RequestComponent(BoxLayout):
     def __init__(self, id, name, groupname, **kwargs):
-        super(BoxLayout, self).__init__(**kwargs)
+        BoxLayout.__init__(self, **kwargs)
         self.idButton.text = str(id)
         self.nameButton.text = name
         self.groupButton.text = groupname
@@ -477,15 +543,23 @@ class CreateGroupScreen(Screen):
         WIApp.current = "MainUIScreen"
 
     def sendInvitation(self):
-        if len(self.groupNameInput.text) == 0 or not self.groupNameInput.text.isalpha():
+        gname = self.groupNameInput.text
+        creatorID = WIApp.clientInfo.getID()
+
+        if len(gname) == 0 or not gname.isalpha():
             popup = Popup(title='Invalid Group Name', content=Label(text="Group name must be alphabet!"),
                           auto_dismiss=True, size_hint=(.7,.2), background='backgroundPopup.png')
             popup.open()
             return None
 
-
         if len(self.contactContainer.children) == 0:
             popup = Popup(title='ERROR', content=Label(text="There is no client in server!"),
+                          auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
+            popup.open()
+            return None
+
+        if WIApp.chatroomCollector.isExist(gname, creatorID):
+            popup = Popup(title='Invalid Group Name', content=Label(text="This name already exist!"),
                           auto_dismiss=True, size_hint=(.7, .2), background='backgroundPopup.png')
             popup.open()
             return None
@@ -577,7 +651,6 @@ class GroupChatScreen(Screen):
         popup = Popup(title="All members:", content=idContainer, auto_dismiss=True, size_hint=(0.7,0.7),
                       background='backgroundPopup.png', title_size='20sp')
         popup.open()
-
 
     def hideNotification(self, data):
         anim = Animation(pos=(-self.width, self.height - self.inRoomNotification.height), duration=0.25)

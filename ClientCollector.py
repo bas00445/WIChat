@@ -30,6 +30,10 @@ class ClientCollector:
             if clientInfo.getAddress() == addr:
                 self.clientInfoList.remove(clientInfo)
 
+    def setNewStatus(self, id, status):
+        for clientInfo in self.clientInfoList:
+            if clientInfo.getID() == id:
+                clientInfo.setStatus(status)
 
     def removeSocket(self, soc):
         self.socketList.remove(soc)
@@ -47,11 +51,6 @@ class ClientCollector:
     def getSocketList(self):
         return self.socketList
 
-    def getGroupChat(self):
-        return self.groupChatList
-
-    def getHandlerList(self):
-        return self.handlerList
 
     def getAddrList(self):
         return self.addressList

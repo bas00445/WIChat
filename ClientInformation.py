@@ -14,6 +14,9 @@ class ClientInformation:
     def setMessage(self, newMsg):
         self.message = newMsg
 
+    def setName(self, name):
+        self.name = name
+
     def setStatus(self, newStatus):
         self.status = newStatus
 

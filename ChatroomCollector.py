@@ -44,7 +44,9 @@ class ChatroomCollector:
     def __len__(self):
         return len(self.chatroomList)
 
-    def isEmpty(self):
-        if len(self.chatroomList) == 0:
-            return True
+    def isExist(self, gname, creatorID):
+        for room in self.chatroomList:
+            if ( room.getRoomName() == gname and
+                 room.getCreatorID() == creatorID ):
+                return True
         return False
