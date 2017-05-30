@@ -25,20 +25,10 @@ class Handler(threading.Thread):
             obj = pickle.dumps(task_update_client)
             soc.send(obj)
 
-    def transferFile(self, soc, directory, fileObj):
-        file = open(directory, "rb")
-        task = Task("StoreFile", fileObj)
+    def sendFileDetail(self, soc, directory, fileObj):
+        task = Task("FileDetail", fileObj)
         obj = pickle.dumps(task)
-
         soc.send(obj)
-
-        data = file.read(1024)
-        while data:
-            soc.send(data)
-            data = file.read(1024)
-
-        file.close()
-        print("TransferFile: Close file.")
 
     def run(self):
         try:
@@ -126,7 +116,7 @@ class Handler(threading.Thread):
                                 if self.soc != soc and soc.getpeername()[1] == int(addr):
                                     filename = obj.getFilename()
                                     filesize = obj.getFileSize()
-                                    directory = "download/" + filename
+                                    directory = "serverFiles/" + filename
                                     file = open(directory, "wb")
                                     data = self.soc.recv(1024)
                                     targetSize = filesize
@@ -147,7 +137,7 @@ class Handler(threading.Thread):
                                     print("Server received a new file.")
                                     print("Closed file.")
 
-                                    self.transferFile(soc, directory, obj)
+                                    self.sendFileDetail(soc, directory, obj)
 
                 except OverflowError:
                     pass

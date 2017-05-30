@@ -106,11 +106,10 @@ class MainUIScreen(Screen):
     def __init__(self, **kwargs):
         super(MainUIScreen, self).__init__(**kwargs)
         self.listofScreen = ["contact", "history", "request"]
-        self.curIndxScreen = 0
-        self.groupIdx = 0
         self.receiveData_thread = threading.Thread(target=self.receiveData)
         self.filename = None
-        self.tLock = threading.Lock()
+        self.filePath = None
+        self.fileSize = None
         self.messageSound = True
         self.inviteSound = True
         self.sound_msg = SoundLoader.load('sounds/messageSound.mp3')
@@ -192,7 +191,16 @@ class MainUIScreen(Screen):
                     return False
         return True
 
+    def sortContactByName(self):
+        contactScrollView = self.screenSlider.contactScreen.contactScrollView
+        for i in range(len(contactScrollView.children) - 1):
+            for j in range(len(contactScrollView.children) - 1):
+                if contactScrollView.children[j].nameButton.text < contactScrollView.children[j + 1].nameButton.text:
+                    temp = contactScrollView.children[j]
+                    contactScrollView.children[j] = contactScrollView.children[j + 1]
+                    contactScrollView.children[j+1] = temp
 
+    # Move the key to front fron the list
     def move_to_front(self, key, mylist):
         mylist.remove(key)
         mylist.insert(len(mylist), key)
@@ -364,37 +372,14 @@ class MainUIScreen(Screen):
                     if task.getName() == "Update Group Members":
                         self.updateGroupMembers(task)
 
-                    if task.getName() == "StoreFile":
-                        print("StoreFile Client")
+                    if task.getName() == "FileDetail":
                         fileObj = task.getData()
-                        filename = fileObj.getFilename()
-                        filesize = fileObj.getFileSize()
-                        directory = "received/" + filename
-                        file = open(directory, "wb")
-                        data = WIApp.clientSocket.soc.recv(1024)
-                        print("Size: ", filesize)
-                        targetSize = filesize
-                        currentSize = 0
-                        if filesize <= 1024:
-                            file.write(data)
-                        elif filesize > 1024:
-                            while filesize >= 0:
-                                print(">>Client: Receiving a file : ", str(100 * currentSize // targetSize) + " % <<")
-                                file.write(data)
-                                currentSize += 1024
-                                filesize -= 1024
-                                if filesize < 0:
-                                    break
-                                data = WIApp.clientSocket.soc.recv(1024)
+                        self.filename = fileObj.getFilename()
+                        self.fileSize = fileObj.getFileSize()
+                        self.filePath = "clientFiles/" + self.filename
 
-                        data = WIApp.clientSocket.soc.recv(1024)
-                        while data:
-                            file.write(data)
-                            data = WIApp.clientSocket.soc.recv(1024)
+                        self.requestFileData
 
-                        file.close()
-                        print("Got a new file.")
-                        print("Closed file.")
 
                     WIApp.clientSocket.clearData()
 
